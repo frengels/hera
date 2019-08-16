@@ -14,13 +14,22 @@ TEST_CASE("traits")
         static_assert(hera::integral_constant<std::true_type>);
         static_assert(hera::integral_constant<std::false_type>);
 
-	static_assert(hera::integral_constant_for<std::true_type, bool>);
+        static_assert(hera::integral_constant_for<std::true_type, bool>);
     }
 
     SECTION("bool_constant")
     {
-        static_assert(!hera::bool_constant<std::integral_constant<int, 5>>);
+        // can be converted to bool
+        static_assert(hera::bool_constant<std::integral_constant<int, 5>>);
         static_assert(hera::bool_constant<std::true_type>);
         static_assert(hera::bool_constant<std::false_type>);
+    }
+
+    SECTION("integral_constant_for")
+    {
+        static_assert(hera::integral_constant_for<std::true_type, int>);
+        static_assert(hera::integral_constant_for<
+                      std::integral_constant<std::ptrdiff_t, 0>,
+                      std::size_t>);
     }
 }

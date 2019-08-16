@@ -2,6 +2,7 @@
 
 #include <type_traits>
 
+#include "hera/at.hpp"
 #include "hera/integral_constant.hpp"
 #include "hera/same_as.hpp"
 #include "hera/size.hpp"
@@ -42,43 +43,43 @@ public:
     {}
 
     template<std::ptrdiff_t J>
-    constexpr auto operator==(const iterator<R, J>&) const noexcept
+    constexpr auto operator==(const normal_iterator<R, J>&) const noexcept
     {
         return std::bool_constant<I == J>{};
     }
 
     template<std::ptrdiff_t J>
-    constexpr auto operator!=(const iterator<R, J>&) const noexcept
+    constexpr auto operator!=(const normal_iterator<R, J>&) const noexcept
     {
-        return std::bool_constant<I != J>;
+        return std::bool_constant<I != J>{};
     }
 
     template<std::ptrdiff_t J>
-    constexpr auto operator<(const iterator<R, J>&) const noexcept
+    constexpr auto operator<(const normal_iterator<R, J>&) const noexcept
     {
         return std::bool_constant<(I < J)>{};
     }
 
     template<std::ptrdiff_t J>
-    constexpr auto operator>(const iterator<R, J>&) const noexcept
+    constexpr auto operator>(const normal_iterator<R, J>&) const noexcept
     {
         return std::bool_constant<(I > J)>{};
     }
 
     template<std::ptrdiff_t J>
-    constexpr auto operator<=(const iterator<R, J>&) const noexcept
+    constexpr auto operator<=(const normal_iterator<R, J>&) const noexcept
     {
         return std::bool_constant<(I <= J)>{};
     }
 
     template<std::ptrdiff_t J>
-    constexpr auto operator>=(const iterator<R, J>&) const noexcept
+    constexpr auto operator>=(const normal_iterator<R, J>&) const noexcept
     {
         return std::bool_constant<(I >= J)>{};
     }
 
     template<std::ptrdiff_t J>
-    constexpr auto operator-(const iterator<R, J>&) const noexcept
+    constexpr auto operator-(const normal_iterator<R, J>&) const noexcept
     {
         return std::integral_constant<difference_type, I - J>{};
     }
@@ -95,20 +96,30 @@ public:
         return normal_iterator<R, I - C::value>{*range_};
     }
 
+    constexpr auto operator++() const noexcept
+    {
+        return *this + std::integral_constant<difference_type, 1>{};
+    }
+
+    constexpr auto operator--() const noexcept
+    {
+        return *this - std::integral_constant<difference_type, 1>{};
+    }
+
     constexpr decltype(auto) operator*() const noexcept(noexcept(hera::at(
         *range_,
         std::integral_constant<std::ptrdiff_t,
                                I>{}))) requires(index < out_of_range_index) &&
         (index >= 0)
     {
-        return hera::at(*range_, std::integral_constant<std::ptrdiff_t, I>{});
+        return hera::at(*range_, std::integral_constant<std::size_t, I>{});
     }
 
-    constexpr decltype(auto) operator-> () const noexcept(
-        noexcept(std::addressof(**this))) requires requires( // clang-format off
-	    const normal_iterator<R, I>& i) { *i; } // clang-format on
+    constexpr decltype(auto) operator-> () const noexcept(noexcept(
+        std::addressof(**this))) requires(index < out_of_range_index) &&
+        (index >= 0)
     {
-        return **this;
+        return std::addressof(**this);
     }
 
     template<hera::integral_constant_for<std::ptrdiff_t> Integral>

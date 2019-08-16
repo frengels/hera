@@ -15,7 +15,7 @@ struct incrementable_traits<const T> : incrementable_traits<T>
 // clang-format off
 template<typename T>
     requires requires { typename T::difference_type; }
-struct incrementable_traits
+struct incrementable_traits<T>
 {
     // clang-format on
     using difference_type = typename T::difference_type;
@@ -29,9 +29,9 @@ template<typename T>
     { a - b } -> hera::integral_constant;
 }
 // clang-format on
-struct incrementable_traits
+struct incrementable_traits<T>
 {
-    using difference_type = std::make_signed_t<decltype(
+    using difference_type = std::make_signed_t<typename decltype(
         std::declval<const T&>() - std::declval<const T&>())::value_type>;
 };
 } // namespace hera

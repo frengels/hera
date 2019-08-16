@@ -2,6 +2,8 @@ set(
   TESTS
   traits
   size
+  at
+  begin_end
   )
 
 find_package(Catch2 REQUIRED)
