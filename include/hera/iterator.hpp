@@ -40,24 +40,20 @@ concept remove_cvref_different_from =
 // difference_type and the ability to preincrement the type, yielding a
 // different type as result.
 template<typename I>
-concept weakly_incrementable = // clang-format off
+concept weakly_incrementable =        // clang-format off
     requires(I i)
     {
 	typename hera::iter_difference_t<I>;
 	// requires detail::signed_integer_like<hera::iter_difference_t<I>>;
 	{ ++i } -> detail::remove_cvref_different_from<I>;
     } && std::is_default_constructible_v<I>; // && movable<I>
-// clang-format on
+                                      // clang-format on
 
-// a heterogeneous iterator requires the heterogeneous weakly_incrementable
-// concept to ensure each following iterator has a different type and the
-// ability to be dereferenced.
+// A heterogeneous iterator requires the heterogeneous weakly_incrementable
+// concept to ensure each following iterator has a different type.
+// it does not need to be dereferenceable as it's able to
+// detect at compile time whether the dereferencing is valid and disable the
+// member function.
 template<typename I>
-concept heterogeneous_iterator = // clang-format off
-    requires(I i)
-    {
-	{ *i } -> detail::can_reference;
-    } &&
-    weakly_incrementable<I>;
-// clang-format on
+concept heterogeneous_iterator = weakly_incrementable<I>;
 } // namespace hera

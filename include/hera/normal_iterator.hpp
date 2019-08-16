@@ -98,35 +98,35 @@ public:
 
     constexpr auto operator++() const noexcept
     {
-        return *this + std::integral_constant<difference_type, 1>{};
+        return normal_iterator<R, I + 1>{*range_};
     }
 
     constexpr auto operator--() const noexcept
     {
-        return *this - std::integral_constant<difference_type, 1>{};
+        return normal_iterator<R, I - 1>{*range_};
     }
 
     constexpr decltype(auto) operator*() const noexcept(noexcept(hera::at(
         *range_,
         std::integral_constant<std::ptrdiff_t,
-                               I>{}))) requires(index < out_of_range_index) &&
-        (index >= 0)
+                               I>{}))) requires((index < out_of_range_index) &&
+                                                (index >= 0))
     {
         return hera::at(*range_, std::integral_constant<std::size_t, I>{});
     }
 
-    constexpr decltype(auto) operator-> () const noexcept(noexcept(
-        std::addressof(**this))) requires(index < out_of_range_index) &&
-        (index >= 0)
+    constexpr decltype(auto) operator-> () const
+        noexcept(noexcept(std::addressof(**this))) requires(
+            (index < out_of_range_index) && (index >= 0))
     {
         return std::addressof(**this);
     }
 
-    template<hera::integral_constant_for<std::ptrdiff_t> Integral>
-    constexpr auto operator[](const Integral& integral) const
-        noexcept(noexcept(*(*this + integral))) -> decltype(*(*this + integral))
+    template<hera::integral_constant_for<std::ptrdiff_t> C>
+    constexpr auto operator[](const C& constant) const
+        noexcept(noexcept(*(*this + constant))) -> decltype(*(*this + constant))
     {
-        *(*this + integral);
+        *(*this + constant);
     }
 };
 } // namespace hera

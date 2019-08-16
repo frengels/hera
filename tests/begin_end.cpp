@@ -3,7 +3,37 @@
 #include "hera/begin_end.hpp"
 
 #include <cstring>
+#include <string>
 #include <utility>
+
+// not heterogeneous because the return type is the same as the called upon type
+struct not_heterogeneous_iterator
+{
+    using difference_type = std::ptrdiff_t;
+
+    auto operator*()
+    {
+        return 5;
+    }
+
+    auto& operator++()
+    {
+        return *this;
+    }
+};
+
+struct almost_heterogeneous_range
+{
+    not_heterogeneous_iterator begin()
+    {
+        return {};
+    }
+
+    std::integral_constant<std::size_t, 5> size()
+    {
+        return {};
+    }
+};
 
 TEST_CASE("begin_end")
 {
@@ -14,6 +44,10 @@ TEST_CASE("begin_end")
     auto tmid   = ++tfirst;
     auto tlast  = ++tmid;
     auto tend   = ++tlast;
+
+    auto call_end = hera::end(tup);
+
+    static_assert(tend == call_end);
 
     REQUIRE(std::strcmp("hello", *tfirst) == 0);
     REQUIRE(42 == *tmid);
@@ -28,4 +62,23 @@ TEST_CASE("begin_end")
     static_assert(std::is_invocable_v<decltype(deref), decltype(tmid)>);
     static_assert(std::is_invocable_v<decltype(deref), decltype(tlast)>);
     static_assert(!std::is_invocable_v<decltype(deref), decltype(tend)>);
+
+    SECTION("arr")
+    {
+        auto arr_first = hera::begin(arr);
+
+        REQUIRE(*arr_first == 1);
+
+        // decltype sadly required to lift this back to compile time
+        static_assert(
+            decltype((arr_first + std::integral_constant<int, 10>{}) ==
+                     hera::end(arr))::value);
+    }
+
+    SECTION("hetrogeneous")
+    {
+        auto not_het = almost_heterogeneous_range{};
+        static_assert(
+            !std::is_invocable_v<decltype(hera::begin), decltype(not_het)>);
+    }
 }

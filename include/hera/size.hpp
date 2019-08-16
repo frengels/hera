@@ -26,16 +26,13 @@ constexpr auto size(detail::priority_tag<4>,
     return std::extent<T[N]>{};
 }
 
-template<typename R> // clang-format off
-    requires requires(R&& r)
-	{
-	    { static_cast<R&&>(r).size() } ->
-		hera::integral_constant_for<std::size_t>;
-	}
-                     // clang-format on
+template<typename R>
 constexpr auto size(detail::priority_tag<3>, R&& r) noexcept(noexcept(
     std::integral_constant<std::size_t,
                            decltype(static_cast<R&&>(r).size())::value>{}))
+    -> decltype(
+        std::integral_constant<std::size_t,
+                               decltype(static_cast<R&&>(r).size())::value>{})
 {
     return std::integral_constant<std::size_t,
                                   decltype(
@@ -45,16 +42,13 @@ constexpr auto size(detail::priority_tag<3>, R&& r) noexcept(noexcept(
 template<typename T>
 void size(T&&) = delete;
 
-template<typename R> // clang-format off
-    requires requires(R&& r)
-	{
-	    { size(static_cast<R&&>(r)) } ->
-		hera::integral_constant_for<std::size_t>;
-	}
-                     // clang-format on
+template<typename R>
 constexpr auto size(detail::priority_tag<2>, R&& r) noexcept(noexcept(
     std::integral_constant<std::size_t,
                            decltype(size(static_cast<R&&>(r)))::value>{}))
+    -> decltype(
+        std::integral_constant<std::size_t,
+                               decltype(size(static_cast<R&&>(r)))::value>{})
 {
     return std::integral_constant<std::size_t,
                                   decltype(size(static_cast<R&&>(r)))::value>{};
