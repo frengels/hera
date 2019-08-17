@@ -84,13 +84,13 @@ public:
         return std::integral_constant<difference_type, I - J>{};
     }
 
-    template<hera::integral_constant_for<difference_type> C>
+    template<hera::constant_convertible_to<difference_type> C>
     constexpr auto operator+(const C&) const noexcept
     {
         return normal_iterator<R, I + C::value>{*range_};
     }
 
-    template<hera::integral_constant_for<difference_type> C>
+    template<hera::constant_convertible_to<difference_type> C>
     constexpr auto operator-(const C&) const noexcept
     {
         return normal_iterator<R, I - C::value>{*range_};
@@ -122,7 +122,7 @@ public:
         return std::addressof(**this);
     }
 
-    template<hera::integral_constant_for<std::ptrdiff_t> C>
+    template<hera::constant_convertible_to<std::ptrdiff_t> C>
     constexpr auto operator[](const C& constant) const
         noexcept(noexcept(*(*this + constant))) -> decltype(*(*this + constant))
     {

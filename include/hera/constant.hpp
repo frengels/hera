@@ -6,21 +6,29 @@
 
 namespace hera
 {
+namespace detail
+{
+template<typename T, typename U>
+concept same_as_no_const = same_as<std::remove_const_t<T>, U>;
+}
+
 // clang-format off
 template<typename C>
-concept integral_constant = 
+concept constant = 
     requires
     {
-	typename C::value_type;
-	requires std::is_integral_v<typename C::value_type>;
-	{ C::value } -> typename C::value_type;
+        typename C::value_type;
+        { C::value } -> detail::same_as_no_const<typename C::value_type>;
     } && std::is_empty_v<C> && std::is_trivial_v<C>;
 // clang-format on
 
 template<typename C, typename T>
-concept integral_constant_for = std::is_integral_v<T>&& integral_constant<C>&&
-                                                        convertible_to<typename C::value_type, T>;
+concept constant_convertible_to =
+    constant<C>&& convertible_to<typename C::value_type, T>;
+
+template<typename C, typename T>
+concept constant_same_as = constant<C>&& same_as<typename C::value_type, T>;
 
 template<typename T>
-concept bool_constant = integral_constant_for<T, bool>;
+concept boolean_constant = constant_convertible_to<T, bool>;
 } // namespace hera

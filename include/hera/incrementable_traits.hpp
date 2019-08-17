@@ -26,7 +26,7 @@ template<typename T>
     requires(!requires { typename T::difference_type; }) &&
     requires(const T& a, const T& b)
 {
-    { a - b } -> hera::integral_constant;
+    { a - b } -> hera::constant;
 }
 // clang-format on
 struct incrementable_traits<T>
