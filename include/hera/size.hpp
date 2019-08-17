@@ -2,7 +2,7 @@
 
 #include <tuple>
 
-#include "hera/integral_constant.hpp"
+#include "hera/constant.hpp"
 #include "hera/utility/detail/decay_copy.hpp"
 #include "hera/utility/detail/priority_tag.hpp"
 

@@ -20,4 +20,7 @@ concept integral_constant =
 template<typename C, typename T>
 concept integral_constant_for = std::is_integral_v<T>&& integral_constant<C>&&
                                                         convertible_to<typename C::value_type, T>;
+
+template<typename T>
+concept bool_constant = integral_constant_for<T, bool>;
 } // namespace hera

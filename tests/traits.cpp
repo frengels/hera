@@ -2,8 +2,7 @@
 
 #include <type_traits>
 
-#include "hera/bool_constant.hpp"
-#include "hera/integral_constant.hpp"
+#include "hera/constant.hpp"
 
 TEST_CASE("traits")
 {

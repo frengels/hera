@@ -1,6 +1,6 @@
 #pragma once
 
-#include "hera/integral_constant.hpp"
+#include "hera/constant.hpp"
 
 namespace hera
 {

@@ -4,7 +4,7 @@
 
 #include "hera/at.hpp"
 #include "hera/concepts.hpp"
-#include "hera/integral_constant.hpp"
+#include "hera/constant.hpp"
 #include "hera/size.hpp"
 
 namespace hera

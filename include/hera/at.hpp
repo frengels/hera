@@ -1,6 +1,7 @@
 #pragma once
 
-#include "hera/integral_constant.hpp"
+
+#include "hera/constant.hpp"
 #include "hera/utility/detail/priority_tag.hpp"
 
 namespace hera
