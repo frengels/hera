@@ -4,6 +4,7 @@ set(
   size
   at
   begin_end
+  iter_move
   )
 
 find_package(Catch2 REQUIRED)
