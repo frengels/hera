@@ -25,11 +25,9 @@ public:
     using difference_type = std::ptrdiff_t;
 
 private:
-    range_type* const range_{nullptr};
+    range_type* const range_;
 
 public:
-    normal_iterator() = default;
-
     constexpr normal_iterator(range_type& r) noexcept
         : range_{std::addressof(r)}
     {}

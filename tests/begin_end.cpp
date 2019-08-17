@@ -1,6 +1,7 @@
 #include <catch2/catch.hpp>
 
 #include "hera/begin_end.hpp"
+#include "hera/sentinel.hpp"
 
 #include <cstring>
 #include <string>
@@ -35,6 +36,14 @@ struct almost_heterogeneous_range
     }
 };
 
+template<hera::heterogeneous_iterator I, hera::sentinel_for<I> S>
+void req_it_sent_pair(I, S)
+{}
+
+template<hera::heterogeneous_iterator I, hera::sized_sentinel_for<I> S>
+void req_it_sent_sized(I, S)
+{}
+
 TEST_CASE("begin_end")
 {
     auto tup = std::make_tuple("hello", 42, 3.5f);
@@ -45,7 +54,12 @@ TEST_CASE("begin_end")
     auto tlast  = ++tmid;
     auto tend   = ++tlast;
 
+    req_it_sent_pair(tfirst, tmid);
+    req_it_sent_sized(tfirst, tmid);
+
     auto call_end = hera::end(tup);
+
+    req_it_sent_sized(tfirst, call_end);
 
     static_assert(tend == call_end);
 
