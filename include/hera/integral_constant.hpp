@@ -2,8 +2,7 @@
 
 #include <type_traits>
 
-#include "hera/convertible_to.hpp"
-#include "hera/same_as.hpp"
+#include "hera/concepts.hpp"
 
 namespace hera
 {
