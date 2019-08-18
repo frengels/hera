@@ -5,6 +5,7 @@ set(
   at
   begin_end
   iter_move
+  common_reference
   )
 
 find_package(Catch2 REQUIRED)

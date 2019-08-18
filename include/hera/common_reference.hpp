@@ -5,6 +5,7 @@
 
 namespace hera
 {
+
 template<typename T,
          typename U,
          template<typename>
@@ -14,17 +15,56 @@ template<typename T,
 struct basic_common_reference
 {};
 
-template<typename... Ts>
-struct common_reference;
-template<typename... Ts>
-using common_reference_t = typename common_reference<Ts...>::type;
-
 namespace detail
 {
 template<typename T, typename U>
 using cond_res =
     decltype(false ? std::declval<T (&)()>()() : std::declval<U (&)()>()());
+
+template<typename T, typename U, typename = void>
+struct common_type3
+{};
+
+template<typename T>
+using cref = std::add_lvalue_reference_t<const T>;
+
+template<typename T, typename U>
+struct common_type3<T, U, std::void_t<cond_res<cref<T>, cref<U>>>>
+{
+    using type = std::decay_t<cond_res<cref<T>, cref<U>>>;
+};
+
+template<typename T, typename U>
+struct common_type2 : common_type3<T, U>
+{};
 } // namespace detail
+
+template<typename... Ts>
+struct common_type;
+
+template<>
+struct common_type<>
+{};
+
+template<typename T>
+struct common_type<T> : common_type<T, T>
+{};
+
+template<typename T, typename U>
+struct common_type<T, U>
+    : std::conditional_t<std::is_same_v<T, std::decay_t<T>> &&
+                             std::is_same_v<U, std::decay_t<U>>,
+                         detail::common_type2<T, U>,
+                         common_type<std::decay_t<T>, std::decay_t<U>>>
+{};
+
+template<typename... Ts>
+using common_type_t = typename common_type<Ts...>::type;
+
+template<typename T, typename U, typename V, typename... Rest>
+struct common_type<T, U, V, Rest...>
+    : common_type<common_type_t<T, U>, V, Rest...>
+{};
 
 namespace detail
 {
@@ -103,7 +143,7 @@ struct common_reference<T>
 namespace detail
 {
 template<typename T, typename U, typename = void>
-struct common_reference4 : std::common_type<T, U>
+struct common_reference4 : hera::common_type<T, U>
 {};
 
 template<typename T, typename U>
@@ -134,7 +174,7 @@ struct common_reference2 : common_reference3<T, U>
 {};
 
 template<typename T, typename U>
-struct common_reference2<T, U, std::void_t<ll_common_ref<T, U>>>
+struct common_reference2<T&, U&, std::void_t<ll_common_ref<T, U>>>
 {
     using type = ll_common_ref<T, U>;
 };
@@ -168,6 +208,9 @@ struct common_reference2<
 };
 } // namespace detail
 
+template<typename... Ts>
+struct common_reference;
+
 template<typename T, typename U>
 struct common_reference<T, U> : detail::common_reference2<T, U>
 {};
@@ -179,8 +222,11 @@ struct fold_common_reference
 {};
 
 template<typename T, typename U, typename... Ts>
-struct fold_common_reference<std::void_t<common_reference_t<T, U>>, T, U, Ts...>
-    : common_reference<common_reference_t<T, U>, Ts...>
+struct fold_common_reference<std::void_t<typename common_reference<T, U>::type>,
+                             T,
+                             U,
+                             Ts...>
+    : common_reference<typename common_reference<T, U>::type, Ts...>
 {};
 } // namespace detail
 
@@ -188,4 +234,7 @@ template<typename T, typename U, typename V, typename... Rest>
 struct common_reference<T, U, V, Rest...>
     : detail::fold_common_reference<void, T, U, V, Rest...>
 {};
+
+template<typename... Ts>
+using common_reference_t = typename common_reference<Ts...>::type;
 } // namespace hera
