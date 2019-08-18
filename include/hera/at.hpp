@@ -3,6 +3,7 @@
 #include <utility>
 
 #include "hera/constant.hpp"
+#include "hera/size.hpp"
 #include "hera/utility/detail/priority_tag.hpp"
 
 namespace hera
@@ -12,38 +13,52 @@ namespace at_impl
 using detail::priority_tag;
 using std::get;
 
-template<typename T,
-         std::size_t                                N,
-         hera::constant_convertible_to<std::size_t> C>
-constexpr auto
-    at(priority_tag<6>, T (&arr)[N], const C&) noexcept(noexcept(arr[C::value]))
-        -> decltype(arr[C::value])
-{
-    return arr[C::value];
-}
+// will try to detect out of bounds at compile time, we need to detect out of
+// bounds rather than
+template<typename R, std::size_t I>
+concept detected_out_of_bounds = requires(R&& r)
+{ // clang-format off
+    { hera::size(std::forward<R>(r)) } -> hera::constant_greater_than<I>;
+}; // clang-format on
 
-template<typename T,
-         std::size_t                                N,
-         hera::constant_convertible_to<std::size_t> C>
-constexpr auto at(priority_tag<6>,
-                  T(&&arr)[N],
-                  const C&) noexcept(noexcept(std::move(arr[C::value])))
-    -> decltype(std::move(arr[C::value]))
+template<typename R>
+concept sized = requires(R&& r)
 {
-    return std::move(arr[C::value]);
-}
+    hera::size(std::forward<R>(r));
+};
+
+template<typename R, std::size_t I>
+concept index_in_bounds = sized<R>&& // clang-format off
+    requires(R&& r)
+    {
+        { hera::size(std::forward<R>(r)) } -> hera::constant_greater_than<I>;
+    }; // clang-format on
+
+// can detect out of bounds errors on sized ranges, if not sized simply
+// passes
+template<typename R, std::size_t I>
+concept index_probably_in_bounds = index_in_bounds<R, I> || !sized<R>;
 
 template<typename R, hera::constant_convertible_to<std::size_t> C>
-constexpr auto at(priority_tag<5>, R&& r, const C& constant) noexcept(noexcept(
-    std::forward<R>(r)[constant])) -> decltype(std::forward<R>(r)[constant])
+constexpr decltype(auto) at(priority_tag<4>, R&& r, const C& constant) noexcept(
+    noexcept(std::forward<R>(r)[constant])) // clang-format off
+        requires index_probably_in_bounds<R, C::value>&& 
+            requires
+            {
+                std::forward<R>(r)[constant];
+            } // clang-format on
 {
     return std::forward<R>(r)[constant];
 }
 
 template<typename R, hera::constant_convertible_to<std::size_t> C>
-constexpr auto at(priority_tag<4>, R&& r, const C& constant) noexcept(
-    noexcept(std::forward<R>(r).at(constant)))
-    -> decltype(std::forward<R>(r).at(constant))
+constexpr decltype(auto) at(priority_tag<3>, R&& r, const C& constant) noexcept(
+    noexcept(std::forward<R>(r).at(constant))) // clang-format off
+        requires index_probably_in_bounds<R, C::value>&& 
+            requires
+        {
+            std::forward<R>(r).at(constant);
+        } // clang-format on
 {
     return std::forward<R>(r).at(constant);
 }
@@ -52,17 +67,26 @@ template<typename R, hera::constant_convertible_to<std::size_t> C>
 void at(R&&, const C&) = delete;
 
 template<typename R, hera::constant_convertible_to<std::size_t> C>
-constexpr auto at(priority_tag<3>, R&& r, const C& constant) noexcept(
-    noexcept(at(std::forward<R>(r), constant)))
-    -> decltype(at(std::forward<R>(r), constant))
+constexpr decltype(auto) at(priority_tag<2>, R&& r, const C& constant) noexcept(
+    noexcept(at(std::forward<R>(r),
+                constant))) // clang-format off
+        requires index_probably_in_bounds<R, C::value>&& 
+            requires
+        {
+            at(std::forward<R>(r), constant);
+        } // clang-format on
 {
     return at(std::forward<R>(r), constant);
 }
 
 template<typename R, hera::constant_convertible_to<std::size_t> C>
-constexpr auto at(priority_tag<2>, R&& r, const C&) noexcept(
-    noexcept(std::forward<R>(r).template get<C::value>()))
-    -> decltype(std::forward<R>(r).template get<C::value>())
+constexpr decltype(auto) at(priority_tag<1>, R&& r, const C&) noexcept(
+    noexcept(std::forward<R>(r).template get<C::value>())) // clang-format off
+    requires index_probably_in_bounds<R, C::value>&& 
+        requires
+        {
+            std::forward<R>(r).template get<C::value>();
+        } // clang-format on
 {
     return std::forward<R>(r).template get<C::value>();
 }
@@ -71,9 +95,13 @@ template<std::size_t I, typename R>
 void get(R&&) = delete;
 
 template<typename R, hera::constant_convertible_to<std::size_t> C>
-constexpr auto at(priority_tag<1>, R&& r, const C&) noexcept(
-    noexcept(get<C::value>(std::forward<R>(r))))
-    -> decltype(get<C::value>(std::forward<R>(r)))
+constexpr decltype(auto) at(priority_tag<0>, R&& r, const C&) noexcept(
+    noexcept(get<C::value>(std::forward<R>(r)))) // clang-format off
+        requires index_probably_in_bounds<R, C::value>&& 
+            requires
+            {
+                get<C::value>(std::forward<R>(r));
+            } // clang-format on
 {
     return get<C::value>(std::forward<R>(r));
 }
@@ -84,18 +112,21 @@ inline namespace cpo
 struct at_fn
 {
     template<typename R, hera::constant_convertible_to<std::size_t> C>
-    constexpr auto operator()(R&& r, const C& constant) const
-        noexcept(noexcept(::hera::at_impl::at(detail::priority_tag<6>{},
+    constexpr decltype(auto) operator()(R&& r, const C& constant) const
+        noexcept(noexcept(::hera::at_impl::at(detail::max_priority_tag,
                                               std::forward<R>(r),
-                                              constant)))
-            -> decltype(::hera::at_impl::at(detail::priority_tag<6>{},
-                                            std::forward<R>(r),
-                                            constant))
+                                              constant))) // clang-format off
+            requires hera::at_impl::index_probably_in_bounds<R, C::value>&& 
+                requires
+                {
+                    ::hera::at_impl::at(
+                        detail::max_priority_tag, std::forward<R>(r), constant);
+                } // clang-format on
     {
         return ::hera::at_impl::at(
-            detail::priority_tag<6>{}, std::forward<R>(r), constant);
+            detail::max_priority_tag, std::forward<R>(r), constant);
     }
-};
+}; // namespace cpo
 
 constexpr auto at = at_fn{};
 } // namespace cpo

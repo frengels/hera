@@ -29,6 +29,22 @@ concept constant_convertible_to =
 template<typename C, typename T>
 concept constant_same_as = constant<C>&& same_as<typename C::value_type, T>;
 
+template<typename C, auto I>
+concept constant_less_than =
+    constant_convertible_to<C, decltype(I)>&& C::value < I;
+
+template<typename C, auto I>
+concept constant_less_than_equal =
+    constant_convertible_to<C, decltype(I)>&& C::value <= I;
+
+template<typename C, auto I>
+concept constant_greater_than =
+    constant_convertible_to<C, decltype(I)>&& C::value > I;
+
+template<typename C, auto I>
+concept constant_greater_than_equal =
+    constant_convertible_to<C, decltype(I)>&& C::value >= I;
+
 template<typename T>
 concept boolean_constant = constant_convertible_to<T, bool>;
 } // namespace hera
