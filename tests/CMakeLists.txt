@@ -6,6 +6,7 @@ set(
   begin_end
   iter_move
   common_reference
+  ranges
   )
 
 find_package(Catch2 REQUIRED)
