@@ -75,4 +75,14 @@ concept range_impl = requires(R&& r)
 
 template<typename R>
 concept range = detail::range_impl<R&>;
+
+template<typename R>
+concept forwarding_range = range<R>&& detail::range_impl<R>;
+
+template<typename R>
+concept sized_range = range<R>&& // clang-format off
+    requires(R& r)
+    {
+        hera::size(r);
+    }; // clang-format on
 } // namespace hera
