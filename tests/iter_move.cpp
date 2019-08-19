@@ -1,5 +1,6 @@
 #include <catch2/catch.hpp>
 
+#include "hera/begin_end.hpp"
 #include "hera/concepts.hpp"
 #include "hera/iter_move.hpp"
 
@@ -31,5 +32,12 @@ TEST_CASE("iter_move")
         static_assert(hera::same_as<void,
                                     decltype(hera::iter_move(
                                         std::declval<void_derefable&>()))>);
+    }
+
+    SECTION("heterogeneous")
+    {
+        auto it = hera::begin(arr);
+
+        static_assert(hera::same_as<int&&, decltype(hera::iter_move(it))>);
     }
 }
