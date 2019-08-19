@@ -8,6 +8,27 @@
 
 namespace hera
 {
+namespace detail
+{
+template<typename T>
+using with_reference = T&;
+}
+template<typename T>
+concept can_reference = // clang-format off
+    requires
+    {
+	    typename detail::with_reference<T>;
+    };
+
+// clang-format on
+
+template<typename T>
+concept dereferenceable = // clang-format off
+    requires(T& t)
+    {
+        { *t } -> can_reference;
+    };
+
 template<typename T, typename U>
 concept same_as = std::is_same_v<T, U>&& std::is_same_v<U, T>;
 

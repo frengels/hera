@@ -62,4 +62,17 @@ concept normal_range = // clang-format off
         hera::size(r);
         detail::at_exists_until(r, hera::size(r));
     }; // clang-format on
+
+namespace detail
+{
+template<typename R>
+concept range_impl = requires(R&& r)
+{
+    hera::begin(std::forward<R>(r));
+    hera::end(std::forward<R>(r));
+};
+} // namespace detail
+
+template<typename R>
+concept range = detail::range_impl<R&>;
 } // namespace hera

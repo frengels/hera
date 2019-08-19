@@ -10,29 +10,26 @@
 
 namespace hera
 {
-namespace detail
+namespace begin_impl
 {
+using hera::detail::decay_copy;
+using hera::detail::priority_tag;
+
+// constraint is satisfied if the passed type is a heterogeneous iterator
 template<typename I> // clang-format off
     requires hera::heterogeneous_iterator<std::remove_cvref_t<I>>
 constexpr decltype(auto) // clang-format on
-cond_het(I&& i) noexcept(noexcept(std::forward<I>(i)))
+cond_het(I&& i) noexcept(noexcept(decay_copy(std::forward<I>(i))))
 {
     return decay_copy(std::forward<I>(i));
 }
-} // namespace detail
-
-namespace begin_impl
-{
-using hera::detail::cond_het;
-using hera::detail::priority_tag;
 
 template<typename R>
-constexpr auto
-    begin(priority_tag<4>,
-          R&& r) noexcept(noexcept(cond_het(std::forward<R>(r).begin())))
-        -> decltype(cond_het(std::forward<R>(r).begin()))
+constexpr auto begin(priority_tag<4>,
+                     R& r) noexcept(noexcept(cond_het(r.begin())))
+    -> decltype(cond_het(r.begin()))
 {
-    return cond_het(std::forward<R>(r).begin());
+    return cond_het(r.begin());
 }
 
 template<typename R>
@@ -59,6 +56,8 @@ constexpr auto
 
 inline namespace cpo
 {
+// begin on a zero sized range will not be valid for the heterogeneous iterator,
+// find a solution for that.
 struct begin_fn
 {
     template<typename R>
@@ -78,35 +77,37 @@ constexpr auto begin = begin_fn{};
 
 namespace end_impl
 {
-using hera::detail::cond_het;
+using hera::detail::decay_copy;
 using hera::detail::priority_tag;
 
 template<typename R>
-constexpr auto end(priority_tag<4>,
-                   R&& r) noexcept(noexcept(cond_het(std::forward<R>(r).end())))
-    -> decltype(cond_het(std::forward<R>(r).end()))
+constexpr auto
+    end(priority_tag<4>,
+        R& r) noexcept(noexcept(decay_copy(std::forward<R>(r).end())))
+        -> decltype(decay_copy(std::forward<R>(r).end()))
 {
-    return cond_het(std::forward<R>(r).end());
+    return decay_copy(std::forward<R>(r).end());
 }
 
 template<typename R>
 void end(R&&) = delete;
 
 template<typename R>
-constexpr auto end(priority_tag<3>,
-                   R&& r) noexcept(noexcept(cond_het(end(std::forward<R>(r)))))
-    -> decltype(cond_het(end(std::forward<R>(r))))
+constexpr auto
+    end(priority_tag<3>,
+        R&& r) noexcept(noexcept(decay_copy(end(std::forward<R>(r)))))
+        -> decltype(decay_copy(end(std::forward<R>(r))))
 {
-    return cond_het(end(std::forward<R>(r)));
+    return decay_copy(end(std::forward<R>(r)));
 }
 
 template<typename R>
 constexpr auto end(priority_tag<2>, R& r) noexcept(noexcept(
-    cond_het(hera::normal_iterator<R, decltype(hera::size(r))::value>{r})))
+    decay_copy(hera::normal_iterator<R, decltype(hera::size(r))::value>{r})))
     -> decltype(
-        cond_het(hera::normal_iterator<R, decltype(hera::size(r))::value>{r}))
+        decay_copy(hera::normal_iterator<R, decltype(hera::size(r))::value>{r}))
 {
-    return cond_het(
+    return decay_copy(
         hera::normal_iterator<R, decltype(hera::size(r))::value>{r});
 }
 } // namespace end_impl
@@ -115,6 +116,8 @@ inline namespace cpo
 {
 struct end_fn
 {
+    // past the end iterators have other requirements than regular iterators,
+    // therefore they don't need to be a heterogeneous iterator.
     template<typename R>
     constexpr auto operator()(R&& r) const
         noexcept(noexcept(::hera::end_impl::end(hera::detail::max_priority_tag,

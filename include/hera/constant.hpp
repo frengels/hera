@@ -47,4 +47,35 @@ concept constant_greater_than_equal =
 
 template<typename T>
 concept boolean_constant = constant_convertible_to<T, bool>;
+
+namespace detail
+{
+template<typename T, typename U>
+concept constant_weakly_equality_comparable_with =
+    requires(const std::remove_reference_t<T>& t,
+             const std::remove_reference_t<U>& u) // clang-format off
+    {
+        { t == u } -> constant_same_as<bool>;
+        { t != u } -> constant_same_as<bool>;
+        { u == t } -> constant_same_as<bool>;
+        { u != t } -> constant_same_as<bool>;
+    }; // clang-format on
+} // namespace detail
+
+template<typename T>
+concept constant_equality_comparable =
+    detail::constant_weakly_equality_comparable_with<T, T>;
+
+template<typename T>
+concept constant_totally_ordered =
+    constant_equality_comparable<T>&& // clang-format off
+    requires(
+        const std::remove_reference_t<T>& a,
+        const std::remove_reference_t<T>& b)
+    {
+        { a < b } -> constant_same_as<bool>;
+        { a > b } -> constant_same_as<bool>;
+        { a <= b } -> constant_same_as<bool>;
+        { a >= b } -> constant_same_as<bool>;
+    }; // clang-format on
 } // namespace hera

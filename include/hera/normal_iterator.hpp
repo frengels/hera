@@ -9,8 +9,34 @@
 
 namespace hera
 {
+namespace detail
+{
 template<typename R, std::ptrdiff_t I>
-class normal_iterator {
+struct normal_iterator_value_type
+{};
+
+template<typename R, std::ptrdiff_t I> // clang-format off
+    requires I < 0 
+struct normal_iterator_value_type<R, I>
+{}; // clang-format on
+
+template<typename R, std::ptrdiff_t I> // clang-format off
+    requires (I >= 0) &&
+        requires(R& r)
+        {
+            hera::at(r, std::integral_constant<std::size_t, I>{});
+        }
+struct normal_iterator_value_type<R, I> // clang-format on
+{
+    using value_type = std::remove_cvref_t<
+        std::invoke_result_t<decltype(hera::at),
+                             R&,
+                             std::integral_constant<std::size_t, I>>>;
+};
+} // namespace detail
+
+template<typename R, std::ptrdiff_t I>
+class normal_iterator : public detail::normal_iterator_value_type<R, I> {
 private:
     template<typename R_, std::ptrdiff_t I_>
     friend class normal_iterator;
@@ -18,18 +44,18 @@ private:
     using range_type = R;
 
     static constexpr std::ptrdiff_t index = I;
-    static constexpr std::ptrdiff_t out_of_range_index =
+    static constexpr std::ptrdiff_t end_index =
         decltype(hera::size(std::declval<range_type&>()))::value;
+    static constexpr bool out_of_bounds = (index < 0) || (index >= end_index);
 
 public:
     using difference_type = std::ptrdiff_t;
 
 private:
-    range_type* const range_;
+    range_type& range_;
 
 public:
-    constexpr normal_iterator(range_type& r) noexcept
-        : range_{std::addressof(r)}
+    constexpr normal_iterator(range_type& r) noexcept : range_{r}
     {}
 
     // construct from non const range_type
@@ -85,39 +111,43 @@ public:
     template<hera::constant_convertible_to<difference_type> C>
     constexpr auto operator+(const C&) const noexcept
     {
-        return normal_iterator<R, I + C::value>{*range_};
+        return normal_iterator<R, I + C::value>{range_};
+    }
+
+    template<hera::constant_convertible_to<difference_type> C>
+    friend constexpr auto operator+(const C&,
+                                    const normal_iterator& it) noexcept
+    {
+        return normal_iterator<R, I + C::value>{it.range_};
     }
 
     template<hera::constant_convertible_to<difference_type> C>
     constexpr auto operator-(const C&) const noexcept
     {
-        return normal_iterator<R, I - C::value>{*range_};
+        return normal_iterator<R, I - C::value>{range_};
     }
 
     constexpr auto operator++() const noexcept
     {
-        return normal_iterator<R, I + 1>{*range_};
+        return normal_iterator<R, I + 1>{range_};
     }
 
     constexpr auto operator--() const noexcept
     {
-        return normal_iterator<R, I - 1>{*range_};
+        return normal_iterator<R, I - 1>{range_};
     }
 
-    constexpr decltype(auto) operator*() const noexcept(noexcept(hera::at(
-        *range_,
-        std::integral_constant<std::ptrdiff_t,
-                               I>{}))) requires((index < out_of_range_index) &&
-                                                (index >= 0))
+    template<typename D = R> // clang-format off
+        requires 
+            requires(D& r)
+            {
+                hera::at(r, std::integral_constant<std::size_t, I>{});
+            } // clang-format on
+    constexpr decltype(auto) operator*() const
+        noexcept(noexcept(hera::at(range_,
+                                   std::integral_constant<std::size_t, I>{})))
     {
-        return hera::at(*range_, std::integral_constant<std::size_t, I>{});
-    }
-
-    constexpr decltype(auto) operator-> () const
-        noexcept(noexcept(std::addressof(**this))) requires(
-            (index < out_of_range_index) && (index >= 0))
-    {
-        return std::addressof(**this);
+        return hera::at(range_, std::integral_constant<std::size_t, I>{});
     }
 
     template<hera::constant_convertible_to<std::ptrdiff_t> C>

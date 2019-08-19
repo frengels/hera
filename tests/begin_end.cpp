@@ -1,7 +1,6 @@
 #include <catch2/catch.hpp>
 
 #include "hera/begin_end.hpp"
-#include "hera/sentinel.hpp"
 
 #include <cstring>
 #include <string>
@@ -44,6 +43,14 @@ template<hera::heterogeneous_iterator I, hera::sized_sentinel_for<I> S>
 void req_it_sent_sized(I, S)
 {}
 
+template<hera::forward_iterator I>
+void req_fwd_it(I)
+{}
+
+template<hera::random_access_iterator I>
+void req_random_it(I)
+{}
+
 TEST_CASE("begin_end")
 {
     auto tup = std::make_tuple("hello", 42, 3.5f);
@@ -54,8 +61,17 @@ TEST_CASE("begin_end")
     auto tlast  = ++tmid;
     auto tend   = ++tlast;
 
+    static_assert(hera::bidirectional_iterator<decltype(tfirst)>);
+    req_random_it(tfirst);
+
     req_it_sent_pair(tfirst, tmid);
     req_it_sent_sized(tfirst, tmid);
+
+    static_assert(
+        hera::same_as<const char*,
+                      hera::readable_traits<decltype(tfirst)>::value_type>);
+
+    req_fwd_it(tfirst);
 
     auto call_end = hera::end(tup);
 
@@ -89,7 +105,15 @@ TEST_CASE("begin_end")
                      hera::end(arr))::value);
     }
 
-    SECTION("hetrogeneous")
+    SECTION("empty_range")
+    {
+        auto empty_tup = std::make_tuple();
+
+        // should be valid to call
+        auto empty_beg = hera::begin(empty_tup);
+    }
+
+    SECTION("heterogeneous")
     {
         auto not_het = almost_heterogeneous_range{};
         static_assert(
