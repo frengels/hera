@@ -70,10 +70,10 @@ concept constant_incrementable = // clang-format off
     requires(const I& i)
     {
         typename hera::iter_difference_t<I>;
-        // requires detail::signed_integer_like<hera::iter_difference_t<I>>;
+        requires std::is_signed_v<hera::iter_difference_t<I>>;
         { ++i } -> detail::remove_cvref_different_from<I>;
     };
-                                 // clang-format on
+// clang-format on
 
 // A heterogeneous iterator requires the heterogeneous weakly_incrementable
 // concept to ensure each following iterator has a different type.

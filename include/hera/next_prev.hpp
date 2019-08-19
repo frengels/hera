@@ -116,4 +116,46 @@ struct next_fn
 };
 
 constexpr auto next = next_fn{};
+
+struct prev_fn
+{
+    using hera::detail::decay_copy;
+
+    template<hera::bidirectional_iterator I>
+    [[nodiscard]] constexpr decltype(auto) operator()(const I& i) const
+        noexcept(noexcept(decay_copy(--i))) -> decltype(decay_copy(--i))
+    {
+        return decay_copy(--i);
+    }
+
+    template<hera::bidirectional_iterator                              I,
+             hera::constant_convertible_to<hera::iter_difference_t<I>> C>
+    [[nodiscard]] constexpr decltype(auto) operator()(const I& i,
+                                                      const C& n) const
+    {
+        return hera::next(
+            i,
+            std::integral_constant<hera::iter_difference_t<I>,
+                                   -static_cast<hera::iter_difference_t<I>>(
+                                       C::value)>{});
+    }
+
+    template<hera::bidirectional_iterator                              I1,
+             hera::constant_convertible_to<hera::iter_difference_t<I>> C,
+             hera::bidirectional_iterator                              I2>
+    [[nodiscard]] constexpr decltype(auto)
+    operator()(const I1& i, const C& n, const I2& bound) const
+    {
+        // if one has to be bidirectional, both should be.
+        // sentinel_for is required in the following call to next.
+        return hera::next(
+            i,
+            std::integral_constant<hera::iter_difference_t<C::value_type>,
+                                   -static_cast<hera::iter_difference_t<I>>(
+                                       C::value)>{},
+            bound);
+    }
+};
+
+constexpr auto prev = prev_fn{};
 } // namespace hera
