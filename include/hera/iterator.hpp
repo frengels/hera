@@ -56,16 +56,15 @@ concept writable = // clang-format off
         *std::forward<Out>(o) = std::forward<T>(t);
         const_cast<const iter_reference_t<Out>&&>(*o) =
             std::forward<T>(t);
-        const_cast<const iter_reference_t<Out>&&>(*std::forward<T>(t)) =
+        const_cast<const iter_reference_t<Out>&&>(*std::forward<Out>(o)) =
             std::forward<T>(t);
-    };
+    }; // clang-format on
 
-// for heterogeneous iterators the weakly_incrementable trait requires a signed
-// difference_type and the ability to preincrement the type, yielding a
-// different type as result. Different from the std weakly_incrementable is that
-// it doesn't require default_constructible, this is because heterogeneous
-// iterators can be seen as quasi constant expression. This makes them mostly
-// immutable and therefore assigning to would not be possible.
+// the constant incrementable requires that the following type is different from
+// the current. This is a key property of heterogeneous iteration as the current
+// position and type has to be encoded in the iterator's type. Post
+// incrementation is never used because the implied semantics are very different
+// from what we can offer.
 template<typename I>
 concept constant_incrementable = // clang-format off
     requires(const I& i)
@@ -74,7 +73,7 @@ concept constant_incrementable = // clang-format off
         // requires detail::signed_integer_like<hera::iter_difference_t<I>>;
         { ++i } -> detail::remove_cvref_different_from<I>;
     };
-                   // clang-format on
+                                 // clang-format on
 
 // A heterogeneous iterator requires the heterogeneous weakly_incrementable
 // concept to ensure each following iterator has a different type.

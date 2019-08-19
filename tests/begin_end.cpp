@@ -51,6 +51,10 @@ template<hera::random_access_iterator I>
 void req_random_it(I)
 {}
 
+template<typename T, hera::writable<T> I>
+void req_writable(I)
+{}
+
 TEST_CASE("begin_end")
 {
     auto tup = std::make_tuple("hello", 42, 3.5f);
@@ -63,6 +67,8 @@ TEST_CASE("begin_end")
 
     static_assert(hera::bidirectional_iterator<decltype(tfirst)>);
     req_random_it(tfirst);
+    static_assert(hera::readable<decltype(tfirst)>);
+    req_writable<int&>(tmid);
 
     req_it_sent_pair(tfirst, tmid);
     req_it_sent_sized(tfirst, tmid);
