@@ -93,6 +93,11 @@ TEST_CASE("begin_end")
         return *std::forward<decltype(val)>(val);
     };
 
+    // begin and end shouldn't be callable for an rvalue
+    static_assert(
+        !std::is_invocable_v<decltype(hera::begin), std::tuple<int>&&>);
+    static_assert(!std::is_invocable_v<decltype(hera::end), std::tuple<int>&&>);
+
     // all dereferenceable except past the end
     static_assert(std::is_invocable_v<decltype(deref), decltype(tfirst)>);
     static_assert(std::is_invocable_v<decltype(deref), decltype(tmid)>);
