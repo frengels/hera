@@ -103,36 +103,37 @@ public:
     }
 
     template<std::ptrdiff_t J>
-    constexpr auto operator-(const normal_iterator<R, J>&) const noexcept
+    [[nodiscard]] constexpr auto operator-(const normal_iterator<R, J>&) const
+        noexcept
     {
         return std::integral_constant<difference_type, I - J>{};
     }
 
     template<hera::constant_convertible_to<difference_type> C>
-    constexpr auto operator+(const C&) const noexcept
+    [[nodiscard]] constexpr auto operator+(const C&) const noexcept
     {
         return normal_iterator<R, I + C::value>{range_};
     }
 
     template<hera::constant_convertible_to<difference_type> C>
-    friend constexpr auto operator+(const C&,
-                                    const normal_iterator& it) noexcept
+    [[nodiscard]] friend constexpr auto
+    operator+(const C&, const normal_iterator& it) noexcept
     {
         return normal_iterator<R, I + C::value>{it.range_};
     }
 
     template<hera::constant_convertible_to<difference_type> C>
-    constexpr auto operator-(const C&) const noexcept
+    [[nodiscard]] constexpr auto operator-(const C&) const noexcept
     {
         return normal_iterator<R, I - C::value>{range_};
     }
 
-    constexpr auto operator++() const noexcept
+    [[nodiscard]] constexpr auto operator++() const noexcept
     {
         return normal_iterator<R, I + 1>{range_};
     }
 
-    constexpr auto operator--() const noexcept
+    [[nodiscard]] constexpr auto operator--() const noexcept
     {
         return normal_iterator<R, I - 1>{range_};
     }
