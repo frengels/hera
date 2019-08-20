@@ -4,43 +4,17 @@
 #include <utility>
 
 #include "hera/iterator.hpp"
-#include "hera/sentinel.hpp"
 #include "hera/view_interface.hpp"
 
 namespace hera
 {
-namespace detail
-{
-struct no_size
-{};
-} // namespace detail
-
-enum class subrange_kind : bool
-{
-    unsized,
-    sized
-};
-
-template<hera::heterogeneous_iterator I,
-         typename S,
-         subrange_kind K> // TODO constraints
-class subrange {
+template<hera::heterogeneous_iterator I, hera::sentinel_for<I> S>
+class subrange : public view_interface<subrange<I, S>> {
 private:
-    static constexpr bool store_size =
-        K == subrange_kind::sized && !sized_sentinel_for<S, I>;
-
-private:
-    [[no_unique_address]] I begin_{};
-    [[no_unique_address]] S end_{};
-    [[no_unique_address]] std::conditional_t<
-        store_size,
-        std::make_unsigned_t<iter_difference_t<I>>,
-        detail::no_size>
-        size_;
+    [[no_unique_address]] I begin_;
+    [[no_unique_address]] S end_;
 
 public:
-    subrange() = default;
-
     constexpr subrange(I i, S s) noexcept(
         std::is_nothrow_move_constructible_v<I>&&
             std::is_nothrow_move_constructible_v<S>)
@@ -49,43 +23,42 @@ public:
 
     // TODO pair constructor
 
-    constexpr I begin() const
+    constexpr I begin() const noexcept(std::is_nothrow_copy_constructible_v<I>)
     {
         return begin_;
     }
 
-    constexpr S end() const
+    constexpr S end() const noexcept(std::is_nothrow_copy_constructible_v<I>)
     {
         return end_;
     }
 
-    friend constexpr begin(subrange&& sr) noexcept
+    friend constexpr I begin(subrange&& sr) noexcept(noexcept(sr.begin()))
     {
-        return r.begin();
+        return sr.begin();
     }
 
-    friend constexpr end(subrange&& sr) noexcept
+    friend constexpr S end(subrange&& sr) noexcept(noexcept(sr.end()))
     {
-        return r.end();
+        return sr.end();
     }
 };
 } // namespace hera
 
 namespace std
 {
-template<typename I, typename S, hera::subrange_kind K>
-struct tuple_size<hera::subrange<I, S, K>>
-    std::integral_constant<std::size_t, 2>
+template<typename I, typename S>
+struct tuple_size<hera::subrange<I, S>> : std::integral_constant<std::size_t, 2>
 {};
 
-template<typename I, typename S, hera::subrange_kind K>
-struct tuple_element<0, hera::subrange<I, S, K>>
+template<typename I, typename S>
+struct tuple_element<0, hera::subrange<I, S>>
 {
     using type = I;
 };
 
-template<typename I, typename S, hera::subrange_kind K>
-struct tuple_element<1, hera::subrange<I, S, K>>
+template<typename I, typename S>
+struct tuple_element<1, hera::subrange<I, S>>
 {
     using type = S;
 };

@@ -43,15 +43,6 @@ constexpr auto
 {
     return cond_het(begin(std::forward<R>(r)));
 }
-
-template<typename R>
-constexpr auto
-    begin(priority_tag<2>,
-          R& r) noexcept(noexcept(cond_het(hera::normal_iterator<R, 0>{r})))
-        -> decltype(cond_het(hera::normal_iterator<R, 0>{r}))
-{
-    return cond_het(hera::normal_iterator<R, 0>{r});
-}
 } // namespace begin_impl
 
 inline namespace cpo
@@ -99,16 +90,6 @@ constexpr auto
         -> decltype(decay_copy(end(std::forward<R>(r))))
 {
     return decay_copy(end(std::forward<R>(r)));
-}
-
-template<typename R>
-constexpr auto end(priority_tag<2>, R& r) noexcept(noexcept(
-    decay_copy(hera::normal_iterator<R, decltype(hera::size(r))::value>{r})))
-    -> decltype(
-        decay_copy(hera::normal_iterator<R, decltype(hera::size(r))::value>{r}))
-{
-    return decay_copy(
-        hera::normal_iterator<R, decltype(hera::size(r))::value>{r});
 }
 } // namespace end_impl
 

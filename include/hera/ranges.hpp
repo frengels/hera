@@ -3,16 +3,11 @@
 #include "hera/at.hpp"
 #include "hera/begin_end.hpp"
 #include "hera/constant.hpp"
+#include "hera/iterator.hpp"
 #include "hera/size.hpp"
 
 namespace hera
 {
-template<typename R>
-using iterator_t = decltype(hera::begin(std::declval<R&>()));
-
-template<typename R>
-using sentinel_t = decltype(hera::end(std::declval<R&>()));
-
 namespace detail
 {
 template<typename R, std::size_t I>
@@ -76,6 +71,24 @@ concept range_impl = requires(R&& r)
 template<typename R>
 concept range = detail::range_impl<R&>;
 
+template<range R>
+using iterator_t = decltype(hera::begin(std::declval<R&>()));
+
+template<range R>
+using sentinel_t = decltype(hera::end(std::declval<R&>()));
+
+template<range R>
+using range_difference_t = iter_difference_t<iterator_t<R>>;
+
+template<range R>
+using range_value_t = iter_value_t<iterator_t<R>>;
+
+template<range R>
+using range_reference_t = iter_reference_t<iterator_t<R>>;
+
+template<range R>
+using range_rvalue_reference_t = iter_rvalue_reference_t<iterator_t<R>>;
+
 template<typename R>
 concept forwarding_range = range<R>&& detail::range_impl<R>;
 
@@ -95,4 +108,15 @@ concept sized_range = range<R>&& // clang-format off
     {
         hera::size(r);
     }; // clang-format on
+
+template<typename R>
+concept forward_range = range<R>&& forward_iterator<iterator_t<R>>;
+
+template<typename R>
+concept bidirectional_range =
+    forward_range<R>&& bidirectional_iterator<iterator_t<R>>;
+
+template<typename R>
+concept random_access_range =
+    bidirectional_range<R>&& random_access_iterator<iterator_t<R>>;
 } // namespace hera

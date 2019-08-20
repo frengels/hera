@@ -30,24 +30,37 @@ constexpr auto get(priority_tag<3>,
 
 inline namespace cpo
 {
+namespace impl
+{
+// we need to move this into its own concept because gcc doesn't play well with
+// short circuiting logical or and and in concepts. For whatever reason in this
+// form it's correctly short circuiting and doesn't evaluate this requirement.
+template<typename T, std::size_t I>
+concept has_get_impl = requires(T&& t)
+{
+    hera::get_impl::get<I>(hera::detail::max_priority_tag, std::forward<T>(t));
+};
+} // namespace impl
+
 template<std::size_t I>
 struct get_fn
 {
     template<typename T> // clang-format off
         requires 
-            (I < std::tuple_size_v<std::remove_cvref_t<T>>) 
-    constexpr auto // clang-format on
-    operator()(T&& t) const
+            (I < std::tuple_size_v<std::remove_cvref_t<T>>) &&
+            impl::has_get_impl<T, I>
+    constexpr decltype(auto) // clang-format on
+        operator()(T&& t) const
         noexcept(noexcept(hera::get_impl::get<I>(detail::max_priority_tag,
                                                  std::forward<T>(t))))
-            -> decltype(hera::get_impl::get<I>(detail::max_priority_tag,
-                                               std::forward<T>(t)))
     {
         return hera::get_impl::get<I>(detail::max_priority_tag,
                                       std::forward<T>(t));
     }
 };
 
+// provides sfinae compatible get access to tuple like containers, compared to
+// std::get which does not provide sfinae
 template<std::size_t I>
 constexpr auto get = get_fn<I>{};
 } // namespace cpo

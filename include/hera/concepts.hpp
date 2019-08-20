@@ -27,16 +27,21 @@ concept dereferenceable = // clang-format off
     requires(T& t)
     {
         { *t } -> can_reference;
-    };
+    }; // clang-format on
 
 template<typename T, typename U>
 concept same_as = std::is_same_v<T, U>&& std::is_same_v<U, T>;
 
 template<typename From, typename To>
-concept convertible_to = std::is_convertible_v<From, To>&& requires(From (&f)())
-{
-    static_cast<To>(f());
-};
+concept convertible_to = std::is_convertible_v<From, To>&& // clang-format off
+    requires(From (&f)())
+    {
+        static_cast<To>(f());
+    }; // clang-format on
+
+template<typename Derived, typename Base>
+concept derived_from = std::is_base_of_v<Base, Derived>&&
+    std::is_convertible_v<const volatile Derived*, const volatile Base*>;
 
 template<typename T>
 concept destructible = std::is_nothrow_destructible_v<T>;
