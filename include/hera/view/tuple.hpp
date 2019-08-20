@@ -5,7 +5,7 @@
 #include "hera/constant.hpp"
 #include "hera/get.hpp"
 #include "hera/sentinel.hpp"
-#include "hera/view_interface.hpp"
+#include "hera/view/interface.hpp"
 
 namespace hera
 {
