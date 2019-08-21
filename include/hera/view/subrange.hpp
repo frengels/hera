@@ -4,7 +4,7 @@
 #include <utility>
 
 #include "hera/iterator.hpp"
-#include "hera/view_interface.hpp"
+#include "hera/view/interface.hpp"
 
 namespace hera
 {
