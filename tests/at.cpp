@@ -3,6 +3,7 @@
 #include <cstring>
 
 #include "hera/at.hpp"
+#include "hera/view/array.hpp"
 #include "hera/view/tuple.hpp"
 
 template<std::size_t I>
@@ -13,6 +14,7 @@ TEST_CASE("at")
     auto tup      = std::make_tuple("hello", 42, 53);
     auto tup_view = hera::tuple_view{tup};
     int  arr[]{0, 1, 2, 3, 4, 5};
+    auto arr_view = hera::array_view{arr};
 
     SECTION("tuple")
     {
@@ -27,15 +29,14 @@ TEST_CASE("at")
                                            decltype(tup_view),
                                            decltype(size_t_<50>)>);
     }
-    /*
-        SECTION("array")
-        {
-            REQUIRE(hera::at(arr, size_t_<0>) == 0);
-            REQUIRE(hera::at(arr, size_t_<5>) == 5);
 
-            static_assert(!std::is_invocable_v<decltype(hera::at),
-                                               decltype(arr),
-                                               decltype(size_t_<100>)>);
-        }
-        */
+    SECTION("array")
+    {
+        REQUIRE(hera::at(arr_view, size_t_<0>) == 0);
+        REQUIRE(hera::at(arr_view, size_t_<5>) == 5);
+
+        static_assert(!std::is_invocable_v<decltype(hera::at),
+                                           decltype(arr_view),
+                                           decltype(size_t_<100>)>);
+    }
 }
