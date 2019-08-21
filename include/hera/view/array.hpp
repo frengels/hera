@@ -187,6 +187,11 @@ public:
     {
         return *((*this) + n);
     }
+
+    constexpr decltype(auto) operator[](difference_type idx) const noexcept
+    {
+        return ptr_[I + idx];
+    }
 };
 
 template<typename T, std::size_t Extent>
@@ -239,6 +244,11 @@ public:
         operator[](Idx) const noexcept -> decltype(ptr_[Idx::value])
     {
         return ptr_[Idx::value];
+    }
+
+    constexpr decltype(auto) operator[](size_type idx) const noexcept
+    {
+        return ptr_[idx];
     }
 };
 

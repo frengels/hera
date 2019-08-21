@@ -3,6 +3,11 @@
 #include <type_traits>
 
 #include "hera/constant.hpp"
+#include "hera/iterator.hpp"
+
+template<hera::constant_incrementable I>
+void verify_const_incrementable(I)
+{}
 
 TEST_CASE("traits")
 {

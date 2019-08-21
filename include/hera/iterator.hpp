@@ -3,6 +3,7 @@
 #include <type_traits>
 
 #include "hera/concepts.hpp"
+#include "hera/constant.hpp"
 #include "hera/incrementable_traits.hpp"
 #include "hera/iter_move.hpp"
 #include "hera/readable_traits.hpp"
@@ -48,6 +49,10 @@ concept readable = // clang-format off
                           iter_rvalue_reference_t<In>&&>&&
         common_reference_with<iter_rvalue_reference_t<In>&&,
                               const iter_value_t<In>&>;
+
+template<readable T>
+using iter_common_reference_t =
+    common_reference_t<iter_reference_t<T>, iter_value_t<T>&>;
 
 template<typename Out, typename T>
 concept writable = // clang-format off

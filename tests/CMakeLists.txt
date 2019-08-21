@@ -9,6 +9,7 @@ set(
   common_reference
   ranges
   subrange
+  iota_view
   )
 
 find_package(Catch2 REQUIRED)
