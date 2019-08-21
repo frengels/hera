@@ -1,6 +1,8 @@
 #include <catch2/catch.hpp>
 
 #include "hera/begin_end.hpp"
+#include "hera/view/array.hpp"
+#include "hera/view/tuple.hpp"
 
 #include <cstring>
 #include <string>
@@ -57,13 +59,15 @@ void req_writable(I)
 
 TEST_CASE("begin_end")
 {
-    auto tup = std::make_tuple("hello", 42, 3.5f);
-    int  arr[]{1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+    auto tup_ = std::make_tuple("hello", 42, 3.5f);
+    auto tup  = hera::tuple_view{tup_};
+    int  arr_[]{1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+    auto arr = hera::array_view{arr_};
 
     auto tfirst = hera::begin(tup);
     auto tmid   = ++tfirst;
     auto tlast  = ++tmid;
-    auto tend   = ++tlast;
+    auto tend   = ++tlast; // should be able to go past last
 
     static_assert(hera::bidirectional_iterator<decltype(tfirst)>);
     req_random_it(tfirst);
@@ -118,7 +122,8 @@ TEST_CASE("begin_end")
 
     SECTION("empty_range")
     {
-        auto empty_tup = std::make_tuple();
+        auto empty_tup_ = std::make_tuple();
+        auto empty_tup  = hera::tuple_view{empty_tup_};
 
         // should be valid to call
         auto empty_beg = hera::begin(empty_tup);

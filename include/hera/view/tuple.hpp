@@ -11,19 +11,24 @@ namespace hera
 {
 namespace detail
 {
+// required to be defined like this because gcc doesn't respect the callees
+// constraints when evaluating.
+template<typename Tuple, std::ptrdiff_t I>
+concept tuple_has_get_for = (I >= 0) && requires(Tuple& tup)
+{
+    hera::get<static_cast<std::size_t>(I)>(tup);
+};
+
 template<typename Tuple, std::ptrdiff_t I>
 struct tuple_iterator_value_type
 {};
 
 template<typename Tuple, std::ptrdiff_t I> // clang-format off
-    requires I >= 0 &&
-        requires
-        {
-            typename std::tuple_element_t<I, Tuple>;
-        } // clang-format on
-struct tuple_iterator_value_type<Tuple, I>
+    requires (I >= 0) && (I < std::tuple_size_v<std::remove_cvref_t<Tuple>>)
+struct tuple_iterator_value_type<Tuple, I> // clang-format on
 {
-    using value_type = std::tuple_element_t<I, Tuple>;
+    using value_type =
+        std::remove_cvref_t<decltype(hera::get<I>(std::declval<Tuple&>()))>;
 };
 } // namespace detail
 
@@ -87,6 +92,12 @@ public:
         return std::bool_constant<bound != I>{};
     }
 
+    template<difference_type J>
+    constexpr auto operator<(const tuple_iterator<Tuple, J>&) const noexcept
+    {
+        return std::bool_constant<(I < J)>{};
+    }
+
     constexpr auto operator<(const hera::bounded_sentinel&) const noexcept
     {
         return std::bool_constant<(I < bound)>{};
@@ -96,6 +107,12 @@ public:
                                     const tuple_iterator&) noexcept
     {
         return std::bool_constant<(bound < I)>{};
+    }
+
+    template<difference_type J>
+    constexpr auto operator>(const tuple_iterator<Tuple, J>&) const noexcept
+    {
+        return std::bool_constant<(I > J)>{};
     }
 
     constexpr auto operator>(const hera::bounded_sentinel&) const noexcept
@@ -109,6 +126,12 @@ public:
         return std::bool_constant<(bound > I)>{};
     }
 
+    template<difference_type J>
+    constexpr auto operator<=(const tuple_iterator<Tuple, J>&) const noexcept
+    {
+        return std::bool_constant<(I <= J)>{};
+    }
+
     constexpr auto operator<=(const hera::bounded_sentinel&) const noexcept
     {
         return std::bool_constant<(I <= bound)>{};
@@ -118,6 +141,12 @@ public:
                                      const tuple_iterator&) noexcept
     {
         return std::bool_constant<(bound <= I)>{};
+    }
+
+    template<difference_type J>
+    constexpr auto operator>=(const tuple_iterator<Tuple, J>&) const noexcept
+    {
+        return std::bool_constant<(I >= J)>{};
     }
 
     constexpr auto operator>=(const hera::bounded_sentinel&) const noexcept
@@ -176,13 +205,7 @@ public:
         return std::integral_constant<difference_type, bound - I>{};
     }
 
-    template<typename D       = Tuple,
-             std::ptrdiff_t N = I> // clang-format off
-        requires (N >= 0) &&
-            requires(D& d)
-            {
-                hera::get<N>(d); // will sfinae if out of range
-            } // clang-format on
+    template<detail::tuple_has_get_for<I> D = Tuple>
     constexpr decltype(auto) operator*() const
         noexcept(noexcept(hera::get<I>(tuple_)))
     {
@@ -190,11 +213,10 @@ public:
     }
 
     template<hera::constant_convertible_to<difference_type> C>
-    constexpr auto operator[](C) const
-        noexcept(noexcept(hera::get<I + C::value>(tuple_)))
-            -> decltype(hera::get<I + C::value>(tuple_))
+    constexpr auto operator[](C n) const noexcept(noexcept(*((*this) + n)))
+        -> decltype(*((*this) + n))
     {
-        return hera::get<I + C::value>(tuple_);
+        return *((*this) + n);
     }
 };
 

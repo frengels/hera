@@ -1,23 +1,16 @@
 #include <catch2/catch.hpp>
 
 #include "hera/ranges.hpp"
+#include "hera/view/tuple.hpp"
 
-template<hera::normal_range R>
-void verify_normal_range(R)
+template<hera::random_access_range R>
+void verify_random_access_range(const R&)
 {}
 
 TEST_CASE("ranges")
 {
-    auto tup = std::make_tuple(50, "hi", "bye");
-
-    SECTION("normal_range")
-    {
-        verify_normal_range(tup);
-
-        std::array<int, 1000000> arr;
-
-        verify_normal_range(arr);
-    }
+    auto tup_ = std::make_tuple(50, "hi", "bye");
+    auto tup  = hera::tuple_view{tup_};
 
     SECTION("sized_range")
     {
@@ -26,7 +19,7 @@ TEST_CASE("ranges")
 
     SECTION("forwarding_range")
     {
-        static_assert(!hera::forwarding_range<decltype(tup)>);
+        static_assert(hera::forwarding_range<decltype(tup)>);
     }
 
     SECTION("forward_range")
@@ -41,6 +34,6 @@ TEST_CASE("ranges")
 
     SECTION("random_access_range")
     {
-        static_assert(hera::random_access_range<decltype(tup)>);
+        verify_random_access_range(tup);
     }
 }

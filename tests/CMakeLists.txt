@@ -7,7 +7,6 @@ set(
   begin_end
   iter_move
   common_reference
-  get_range
   ranges
   subrange
   )

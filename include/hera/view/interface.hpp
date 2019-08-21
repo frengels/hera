@@ -111,20 +111,57 @@ public:
             std::invoke_result_t<decltype(hera::prev),
                                  sentinel_t<R>>> // clang-format on 
     constexpr decltype(auto) back() 
-        noexcept(noexcept(*(--hera::end(derived()))))
+        noexcept(noexcept(*(hera::prev(hera::end(derived())))))
     {
-        return *(--hera::end(derived()));
+        return *(hera::prev(hera::end(derived())));
     }
     
 
     template<bidirectional_range R = const D> // clang-format off
-    requires bidirectional_iterator<sentinel_t<R>>&& readable<
+        requires bidirectional_iterator<sentinel_t<R>>&& readable<
             std::invoke_result_t<decltype(hera::prev),
                                  sentinel_t<R>>> // clang-format on 
     constexpr decltype(auto) back() const
-        noexcept(noexcept(*(--hera::end(derived()))))
+        noexcept(noexcept(*(hera::prev(hera::end(derived())))))
     {
-        return *(--hera::end(derived()));
+        return *(hera::prev(hera::end(derived())));
+    }
+
+    template<forward_range R = D> // clang-format off
+        requires !bidirectional_iterator<sentinel_t<R>> &&
+            bidirectional_iterator<iterator_t<R>> &&
+            sized_range<R> &&
+            requires(R& r)
+            {
+                requires 
+                    readable<decltype(hera::prev(
+                        hera::next(hera::begin(r),
+                                   hera::end(r))))>;
+            } // clang-format on
+    constexpr decltype(auto) back() noexcept(noexcept(
+        *hera::prev(hera::next(hera::begin(derived()), hera::end(derived())))))
+    {
+        return *hera::prev(
+            hera::next(hera::begin(derived()), hera::end(derived())));
+    }
+
+    template<forward_range R = const D> // clang-format off
+        requires !bidirectional_iterator<sentinel_t<R>> &&
+            bidirectional_iterator<iterator_t<R>> &&
+            sized_range<R> &&
+            requires(R& r)
+            {
+                requires
+                    readable<decltype(hera::prev(
+                        hera::next(hera::begin(r), 
+                                   hera::end(r))))>;
+            } // clang-format on
+    constexpr decltype(auto) back() const
+        noexcept(noexcept(*hera::prev(hera::next(hera::begin(derived()),
+                                                 hera::end(derived())))))
+    {
+        return *hera::prev(
+            hera::next(hera::begin(derived()), hera::end(derived())));
     }
 
     /*
@@ -151,6 +188,5 @@ C, typename R = D> // clang-format off requires requires(R& r, C idx)
             return hera::begin(derived())[idx];
         }
         */
-        
 };
 } // namespace hera

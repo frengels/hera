@@ -47,18 +47,6 @@ constexpr auto at_exists_until(R&& r, const C& end) noexcept -> decltype(
 {}
 } // namespace detail
 
-// this is for ranges which can be adapted to work with normal_iterator. Primary
-// candidates for this are fixed size std structures such as std::tuple<> and
-// std::array, as they implement std::get<I> and std::tuple_size.
-// anything that can be decomposed as a structured binding will also work.
-template<typename R>
-concept normal_range = // clang-format off
-    requires(R& r)
-    {
-        hera::size(r);
-        detail::at_exists_until(r, hera::size(r));
-    }; // clang-format on
-
 namespace detail
 {
 template<typename R>

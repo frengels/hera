@@ -3,6 +3,7 @@
 #include "hera/begin_end.hpp"
 #include "hera/concepts.hpp"
 #include "hera/iter_move.hpp"
+#include "hera/view/array.hpp"
 
 struct void_derefable
 {
@@ -36,7 +37,7 @@ TEST_CASE("iter_move")
 
     SECTION("heterogeneous")
     {
-        auto it = hera::begin(arr);
+        auto it = hera::begin(hera::array_view{arr});
 
         static_assert(hera::same_as<int&&, decltype(hera::iter_move(it))>);
     }

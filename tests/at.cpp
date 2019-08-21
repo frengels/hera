@@ -34,6 +34,7 @@ TEST_CASE("at")
     {
         REQUIRE(hera::at(arr_view, size_t_<0>) == 0);
         REQUIRE(hera::at(arr_view, size_t_<5>) == 5);
+        REQUIRE(arr_view.back() == 5);
 
         static_assert(!std::is_invocable_v<decltype(hera::at),
                                            decltype(arr_view),
