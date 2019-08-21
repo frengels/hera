@@ -64,9 +64,6 @@ constexpr decltype(auto) at(priority_tag<3>, R&& r, const C& constant) noexcept(
 }
 
 template<typename R, hera::constant_convertible_to<std::size_t> C>
-void at(R&&, const C&) = delete;
-
-template<typename R, hera::constant_convertible_to<std::size_t> C>
 constexpr decltype(auto) at(priority_tag<2>, R&& r, const C& constant) noexcept(
     noexcept(at(std::forward<R>(r),
                 constant))) // clang-format off
@@ -77,33 +74,6 @@ constexpr decltype(auto) at(priority_tag<2>, R&& r, const C& constant) noexcept(
         } // clang-format on
 {
     return at(std::forward<R>(r), constant);
-}
-
-template<typename R, hera::constant_convertible_to<std::size_t> C>
-constexpr decltype(auto) at(priority_tag<1>, R&& r, const C&) noexcept(
-    noexcept(std::forward<R>(r).template get<C::value>())) // clang-format off
-    requires index_probably_in_bounds<R, C::value>&& 
-        requires
-        {
-            std::forward<R>(r).template get<C::value>();
-        } // clang-format on
-{
-    return std::forward<R>(r).template get<C::value>();
-}
-
-template<std::size_t I, typename R>
-void get(R&&) = delete;
-
-template<typename R, hera::constant_convertible_to<std::size_t> C>
-constexpr decltype(auto) at(priority_tag<0>, R&& r, const C&) noexcept(
-    noexcept(get<C::value>(std::forward<R>(r)))) // clang-format off
-        requires index_probably_in_bounds<R, C::value>&& 
-            requires
-            {
-                get<C::value>(std::forward<R>(r));
-            } // clang-format on
-{
-    return get<C::value>(std::forward<R>(r));
 }
 } // namespace at_impl
 
