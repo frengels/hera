@@ -190,7 +190,9 @@ public:
     }
 
     template<hera::constant_convertible_to<difference_type> C>
-    constexpr decltype(auto) operator[](C) const noexcept
+    constexpr auto operator[](C) const
+        noexcept(noexcept(hera::get<I + C::value>(tuple_)))
+            -> decltype(hera::get<I + C::value>(tuple_))
     {
         return hera::get<I + C::value>(tuple_);
     }
