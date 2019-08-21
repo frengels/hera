@@ -3,6 +3,7 @@ set(
   traits
   size
   at
+  get
   begin_end
   iter_move
   common_reference
