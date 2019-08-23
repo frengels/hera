@@ -75,4 +75,8 @@ concept constant_totally_ordered =
         { a <= b } -> constant_same_as<bool>;
         { a >= b } -> constant_same_as<bool>;
     }; // clang-format on
+
+template<typename F, typename... Args>
+concept constant_predicate = regular_invocable<F, Args...>&&
+    constant_same_as<std::invoke_result_t<F, Args...>, bool>;
 } // namespace hera

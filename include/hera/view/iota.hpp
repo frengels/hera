@@ -16,7 +16,7 @@ private:
     template<decltype(W) I>
     class iterator {
     public:
-        using value_type = std::remove_const_t<decltype(I)>;
+        using value_type = std::integral_constant<decltype(I), I>;
         using difference_type =
             std::ptrdiff_t; // TODO: make this comply to the standard
 
@@ -75,9 +75,9 @@ private:
         }
 
         template<hera::constant_convertible_to<difference_type> C>
-        constexpr decltype(auto) operator[](C) const noexcept
+        constexpr decltype(auto) operator[](C n) const noexcept
         {
-            return std::integral_constant<value_type, I + C::value>{};
+            return *((*this) + n);
         }
     };
 

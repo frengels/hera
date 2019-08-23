@@ -11,6 +11,7 @@ set(
   subrange
   iota_view
   all_view
+  filter_view
   )
 
 find_package(Catch2 REQUIRED)

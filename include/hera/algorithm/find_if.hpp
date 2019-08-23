@@ -2,32 +2,48 @@
 
 #include <functional>
 
+#include "hera/indirect_unary_predicate.hpp"
 #include "hera/iterator.hpp"
+#include "hera/metafunction.hpp"
 #include "hera/next_prev.hpp"
+#include "hera/type_identity.hpp"
 
 namespace hera
 {
 struct find_if_fn
 {
-    template<hera::forward_iterator I, hera::sentinel_for<I> S, typename Pred>
-    constexpr decltype(auto) operator()(I first, S last, Pred&& pred) const
-        noexcept
+    template<hera::forward_iterator I,
+             hera::sentinel_for<I>  S,
+             hera::metafunction     Pred> // clang-format off
+        requires hera::constant_indirect_unary_predicate<typename Pred::type, I>
+    constexpr decltype(auto) operator()(I first, S last, Pred) const noexcept // clang-format on
     {
-        // when we've reached the end
+        using predicate_type = typename Pred::type;
+
         if constexpr (decltype(first == last)::value)
         {
             return first;
         }
-        // or when we hit a valid result
-        else if constexpr (decltype(std::invoke(pred, *first))::value)
+        else if constexpr (decltype(std::invoke(std::declval<predicate_type&>(),
+                                                *first))::value)
         {
             return first;
         }
-        else // otherwise keep on iterating
+        else
         {
-            return (*this)(
-                hera::next(first), std::move(last), std::forward<Pred>(pred));
+            return (*this)(hera::next(first),
+                           std::move(last),
+                           hera::type_identity<predicate_type>{});
         }
+    }
+
+    template<hera::forward_iterator                     I,
+             hera::sentinel_for<I>                      S,
+             hera::constant_indirect_unary_predicate<I> Pred>
+    constexpr decltype(auto) operator()(I first, S last, Pred) const noexcept
+    {
+        return (*this)(
+            std::move(first), std::move(last), hera::type_identity<Pred>{});
     }
 };
 
