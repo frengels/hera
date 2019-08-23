@@ -16,10 +16,16 @@ TEST_CASE("filter_view")
 
     REQUIRE(*first_i == 2.0f);
 
-    auto filt = hera::filter_view{
-        tup_view, [](auto x) {
-            return std::bool_constant<hera::same_as<decltype(x), int>>{};
-        }};
+    auto int_predicate = [](auto x) {
+        return std::bool_constant<hera::same_as<decltype(x), int>>{};
+    };
+
+    auto filt  = hera::filter_view{tup_view, int_predicate};
+    auto filt2 = hera::filter_view{
+        tup_view, hera::type_identity<decltype(int_predicate)>{}};
+
+    // if int_predicate were declared constexpr this wouldn't pass
+    static_assert(hera::same_as<decltype(filt), decltype(filt2)>);
 
     static_assert(hera::forwarding_range<decltype(filt)>);
 
@@ -46,6 +52,7 @@ TEST_CASE("filter_view")
 
         static_assert(hera::unbounded_range<decltype(iota_filt)>);
         static_assert(hera::forwarding_range<decltype(iota_filt)>);
+        static_assert(std::is_empty_v<decltype(iota_filt)>);
 
         auto first = hera::begin(iota_filt);
         static_assert(decltype(*first)::value == 0);

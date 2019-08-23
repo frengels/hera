@@ -142,6 +142,22 @@ public:
         : base_{hera::views::all(std::forward<R>(r))}
     {}
 
+    template<hera::metafunction F> // clang-format off
+        requires hera::constant_indirect_unary_predicate<
+            typename F::type, iterator_t<V>> // clang-format on
+        constexpr filter_view(V base, F) noexcept(
+            std::is_nothrow_move_constructible_v<V>)
+        : base_{std::move(base)}
+    {}
+
+    template<forward_range R, hera::metafunction F> // clang-format off
+        requires hera::constant_indirect_unary_predicate<
+            typename F::type, iterator_t<V>> // clang-format on
+        constexpr filter_view(R&& r, F) noexcept(
+            noexcept(hera::views::all(std::forward<R>(r))))
+        : base_{hera::views::all(std::forward<R>(r))}
+    {}
+
     constexpr V base() const noexcept(std::is_nothrow_copy_constructible_v<V>)
     {
         return base_;
