@@ -16,31 +16,31 @@ template<forward_range V,
     requires view<V> && std::is_object_v<Pred>
 class filter_view : public view_interface<filter_view<V, Pred>> { // clang-format on
 private:
-    template<typename I>
+    template<hera::heterogeneous_iterator I, hera::sentinel_for<I> S>
     class iterator {
     public:
         using difference_type = iter_difference_t<I>;
         using value_type      = iter_value_t<I>;
 
     private:
-        const filter_view& parent_;
-        const I            current_;
+        [[no_unique_address]] const I current_;
+        [[no_unique_address]] const S end_;
 
     public:
-        constexpr iterator(const filter_view& parent, I current) noexcept(
+        constexpr iterator(I current, S end) noexcept(
             std::is_nothrow_move_constructible_v<I>)
-            : parent_{parent}, current_{std::move(current)}
+            : current_{std::move(current)}, end_{std::move(end)}
         {
             static_assert(
                 decltype(
                     std::invoke(std::declval<Pred&>(), *current_))::value ||
-                    decltype(current_ == hera::end(parent_.base_))::value,
+                    decltype(current_ == end_)::value,
                 "Passed element is not valid according to the filter and is "
                 "not equal to the sentinel");
         }
 
         template<typename J>
-        constexpr auto operator==(const iterator<J>& other) const
+        constexpr auto operator==(const iterator<J, S>& other) const
             noexcept(noexcept(current_ == other.current_))
                 -> decltype(current_ == other.current_)
         {
@@ -50,9 +50,9 @@ private:
         // only implement these comparisons for bounded ranges
         template<bounded_range W = const V>
         constexpr auto operator==(const hera::bounded_sentinel&) const
-            noexcept(noexcept(current_ == hera::end(parent_.base_)))
+            noexcept(noexcept(current_ == end_))
         {
-            return current_ == hera::end(parent_.base_);
+            return current_ == end_;
         }
 
         template<bounded_range W = const V>
@@ -65,9 +65,9 @@ private:
 
         template<bounded_range W = const V>
         constexpr auto operator!=(const hera::bounded_sentinel&) const
-            noexcept(noexcept(current_ == hera::end(parent_.base_)))
+            noexcept(noexcept(current_ == end_))
         {
-            return current_ != hera::end(parent_.base_);
+            return current_ != end_;
         }
 
         template<bounded_range W = const V>
@@ -79,30 +79,27 @@ private:
         }
 
         template<typename J>
-        constexpr auto operator!=(const iterator<J>& other) const
+        constexpr auto operator!=(const iterator<J, S>& other) const
             noexcept(noexcept(current_ != other.current_))
                 -> decltype(current_ == other.current_)
         {
             return current_ == other.current_;
         }
 
-        template<typename D = const I> // clang-format off
-            requires requires(D d) {
+        template<typename D = const I, typename E = const S> // clang-format off
+            requires requires(D d, E e) {
                 // require that we're not at the end for ++ to exist
-                requires decltype(d!= hera::end(parent_.base_))::value;
+                requires decltype(d!= e)::value;
             } // clang-format on
         constexpr auto operator++() const
         {
-            using next_type =
-                decltype(hera::find_if(hera::next(current_),
-                                       hera::end(parent_.base_),
-                                       hera::type_identity<Pred>{}));
+            using next_type = decltype(hera::find_if(
+                hera::next(current_), end_, hera::type_identity<Pred>{}));
 
-            return iterator<next_type>{
-                parent_,
-                hera::find_if(hera::next(current_),
-                              hera::end(parent_.base_),
-                              hera::type_identity<Pred>{})};
+            return iterator<next_type, S>{
+                hera::find_if(
+                    hera::next(current_), end_, hera::type_identity<Pred>{}),
+                end_};
         }
 
         template<typename D = const I> // clang-format off
@@ -128,7 +125,7 @@ private:
     };
 
 private:
-    V base_;
+    [[no_unique_address]] V base_;
     // we don't actually need to store the function, we only need its type to
     // deduce the return types of invoking the predicate. Pred pred_;
 
@@ -152,10 +149,10 @@ public:
 
     constexpr auto begin() const noexcept
     {
-        return iterator{*this,
-                        hera::find_if(hera::begin(base_),
+        return iterator{hera::find_if(hera::begin(base_),
                                       hera::end(base_),
-                                      hera::type_identity<Pred>{})};
+                                      hera::type_identity<Pred>{}),
+                        hera::end(base_)};
     }
 
     constexpr auto end() const noexcept
@@ -168,6 +165,16 @@ public:
         {
             return hera::unbounded_sentinel{};
         }
+    }
+
+    friend constexpr auto begin(filter_view&& v) noexcept(noexcept(v.begin()))
+    {
+        return v.begin();
+    }
+
+    friend constexpr auto end(filter_view&& v) noexcept(noexcept(v.end()))
+    {
+        return v.end();
     }
 };
 

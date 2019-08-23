@@ -21,6 +21,8 @@ TEST_CASE("filter_view")
             return std::bool_constant<hera::same_as<decltype(x), int>>{};
         }};
 
+    static_assert(hera::forwarding_range<decltype(filt)>);
+
     auto filt_beg = hera::begin(filt);
     REQUIRE(*filt_beg == 1);
 
@@ -43,6 +45,7 @@ TEST_CASE("filter_view")
             }};
 
         static_assert(hera::unbounded_range<decltype(iota_filt)>);
+        static_assert(hera::forwarding_range<decltype(iota_filt)>);
 
         auto first = hera::begin(iota_filt);
         static_assert(decltype(*first)::value == 0);
