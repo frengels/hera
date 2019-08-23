@@ -2,7 +2,7 @@
 
 #include "hera/concepts.hpp"
 #include "hera/ranges.hpp"
-#include "hera/view_interface.hpp"
+#include "hera/view/interface.hpp"
 
 namespace hera
 {

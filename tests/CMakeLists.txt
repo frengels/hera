@@ -10,6 +10,7 @@ set(
   ranges
   subrange
   iota_view
+  all_view
   )
 
 find_package(Catch2 REQUIRED)
