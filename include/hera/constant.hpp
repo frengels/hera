@@ -45,9 +45,6 @@ template<typename C, auto I>
 concept constant_greater_than_equal =
     constant_convertible_to<C, decltype(I)>&& C::value >= I;
 
-template<typename T>
-concept boolean_constant = constant_convertible_to<T, bool>;
-
 namespace detail
 {
 template<typename T, typename U>

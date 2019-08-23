@@ -20,14 +20,6 @@ TEST_CASE("traits")
         static_assert(hera::constant_same_as<std::true_type, bool>);
     }
 
-    SECTION("bool_constant")
-    {
-        // can be converted to bool
-        static_assert(hera::boolean_constant<std::integral_constant<int, 5>>);
-        static_assert(hera::boolean_constant<std::true_type>);
-        static_assert(hera::boolean_constant<std::false_type>);
-    }
-
     SECTION("constant_convertible_to")
     {
         static_assert(hera::constant_convertible_to<std::true_type, int>);
