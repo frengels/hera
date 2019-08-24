@@ -1,0 +1,13 @@
+set(EXAMPLES
+  filter_ints)
+
+  function(make_example target)
+  string(CONCAT target_src ${target} ".cpp")
+  add_executable(${target} ${target_src})
+  target_link_libraries(${target} PRIVATE ${CMAKE_PROJECT_NAME} catch)
+endfunction()
+
+
+foreach(e ${EXAMPLES})
+  make_example(${e})
+endforeach()

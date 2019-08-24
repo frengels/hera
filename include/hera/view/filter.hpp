@@ -6,13 +6,13 @@
 #include "hera/sentinel.hpp"
 #include "hera/type_identity.hpp"
 #include "hera/view/all.hpp"
+#include "hera/view/detail/closure.hpp"
 #include "hera/view/interface.hpp"
 
 namespace hera
 {
 template<forward_range V,
-         hera::constant_indirect_unary_predicate<iterator_t<V>>
-             Pred> // clang-format off
+         typename Pred> // clang-format off
     requires view<V> && std::is_object_v<Pred>
 class filter_view : public view_interface<filter_view<V, Pred>> { // clang-format on
 private:
@@ -30,14 +30,7 @@ private:
         constexpr iterator(I current, S end) noexcept(
             std::is_nothrow_move_constructible_v<I>)
             : current_{std::move(current)}, end_{std::move(end)}
-        {
-            static_assert(
-                decltype(
-                    std::invoke(std::declval<Pred&>(), *current_))::value ||
-                    decltype(current_ == end_)::value,
-                "Passed element is not valid according to the filter and is "
-                "not equal to the sentinel");
-        }
+        {}
 
         template<typename J>
         constexpr auto operator==(const iterator<J, S>& other) const
@@ -86,20 +79,24 @@ private:
             return current_ == other.current_;
         }
 
-        template<typename D = const I, typename E = const S> // clang-format off
-            requires requires(D d, E e) {
-                // require that we're not at the end for ++ to exist
-                requires decltype(d!= e)::value;
-            } // clang-format on
         constexpr auto operator++() const
         {
-            using next_type = decltype(hera::find_if(
-                hera::next(current_), end_, hera::type_identity<Pred>{}));
+            if constexpr (dereferenceable<decltype(hera::next(current_))>)
+            {
+                using next_type = decltype(hera::find_if(
+                    hera::next(current_), end_, hera::type_identity<Pred>{}));
 
-            return iterator<next_type, S>{
-                hera::find_if(
-                    hera::next(current_), end_, hera::type_identity<Pred>{}),
-                end_};
+                return iterator<next_type, S>{
+                    hera::find_if(hera::next(current_),
+                                  end_,
+                                  hera::type_identity<Pred>{}),
+                    end_};
+            }
+            else
+            {
+                using next_type = decltype(hera::next(current_));
+                return iterator<next_type, S>{hera::next(current_), end_};
+            }
         }
 
         template<typename D = const I> // clang-format off
@@ -142,19 +139,15 @@ public:
         : base_{hera::views::all(std::forward<R>(r))}
     {}
 
-    template<hera::metafunction F> // clang-format off
-        requires hera::constant_indirect_unary_predicate<
-            typename F::type, iterator_t<V>> // clang-format on
-        constexpr filter_view(V base, F) noexcept(
-            std::is_nothrow_move_constructible_v<V>)
+    template<hera::metafunction F>
+    constexpr filter_view(V base,
+                          F) noexcept(std::is_nothrow_move_constructible_v<V>)
         : base_{std::move(base)}
     {}
 
-    template<forward_range R, hera::metafunction F> // clang-format off
-        requires hera::constant_indirect_unary_predicate<
-            typename F::type, iterator_t<V>> // clang-format on
-        constexpr filter_view(R&& r, F) noexcept(
-            noexcept(hera::views::all(std::forward<R>(r))))
+    template<forward_range R, hera::metafunction F>
+    constexpr filter_view(R&& r, F) noexcept(
+        noexcept(hera::views::all(std::forward<R>(r))))
         : base_{hera::views::all(std::forward<R>(r))}
     {}
 
@@ -194,6 +187,46 @@ public:
     }
 };
 
-template<typename R, typename Pred>
+template<forward_range R, typename Pred>
 filter_view(R&&, Pred)->filter_view<hera::all_view<R>, Pred>;
+
+template<forward_range R, metafunction F>
+filter_view(R&&, F)->filter_view<hera::all_view<R>, typename F::type>;
+
+namespace views
+{
+struct filter_fn
+{
+    template<forward_range R,
+             typename Pred> // clang-format off
+        requires viewable_range<R> // clang-format on
+        constexpr auto operator()(R&& r, Pred p) const
+        noexcept(noexcept(hera::filter_view<hera::all_view<R>, Pred>{
+            std::forward<R>(r),
+            hera::type_identity<Pred>{}}))
+            -> decltype(hera::filter_view<hera::all_view<R>, Pred>{
+                std::forward<R>(r),
+                hera::type_identity<Pred>{}})
+    {
+        return hera::filter_view<hera::all_view<R>, Pred>{
+            std::forward<R>(r), hera::type_identity<Pred>{}};
+    }
+
+    template<forward_range R, metafunction PredMeta> // clang-format off
+        requires viewable_range<R> // clang-format on
+        constexpr auto operator()(R&& r, PredMeta pm) const
+    {
+        return hera::filter_view<hera::all_view<R>, typename PredMeta::type>{
+            std::forward<R>(r), pm};
+    }
+
+    template<typename Pred>
+    constexpr auto operator()(Pred p) const
+    {
+        return detail::view_closure{*this, hera::type_identity<Pred>{}};
+    }
+};
+
+constexpr auto filter = filter_fn{};
+} // namespace views
 } // namespace hera

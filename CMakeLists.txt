@@ -3,10 +3,15 @@ cmake_minimum_required(VERSION 3.8)
 project(hera VERSION "0.0.1" LANGUAGES CXX)
 
 option(HERA_BUILD_TESTS "Build hera's unit tests" ON)
+option(HERA_BUILD_EXAMPLES "Build hera's examples" ON)
 
 if (HERA_BUILD_TESTS)
   enable_testing()
   add_subdirectory(tests)
+endif()
+
+if (HERA_BUILD_EXAMPLES)
+  add_subdirectory(examples)
 endif()
 
 include(CMakePackageConfigHelpers)

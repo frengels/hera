@@ -1,5 +1,6 @@
 #include <catch2/catch.hpp>
 
+#include "hera/view/array.hpp"
 #include "hera/view/filter.hpp"
 #include "hera/view/iota.hpp"
 #include "hera/view/tuple.hpp"
@@ -9,10 +10,9 @@ TEST_CASE("filter_view")
     auto tup      = std::make_tuple(1, 2.0f, 3, 4.0f, 5);
     auto tup_view = hera::tuple_view{tup};
 
-    auto first_i =
-        hera::find_if(hera::begin(tup_view), hera::end(tup_view), [](auto x) {
-            return std::bool_constant<hera::same_as<float, decltype(x)>>{};
-        });
+    auto first_i = hera::find_if(tup_view, [](auto x) {
+        return std::bool_constant<hera::same_as<float, decltype(x)>>{};
+    });
 
     REQUIRE(*first_i == 2.0f);
 
@@ -58,5 +58,21 @@ TEST_CASE("filter_view")
         static_assert(decltype(*first)::value == 0);
         auto it_2 = hera::next(first);
         static_assert(decltype(*it_2)::value == 2);
+    }
+
+    SECTION("pipe")
+    {
+        int arr[]{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+
+        auto arr_view = hera::array_view{arr};
+
+        // nothing is float so empty filter_view as a result
+        auto filt_arr =
+            arr_view | hera::views::filter([](auto x) {
+                return std::bool_constant<hera::same_as<float, decltype(x)>>{};
+            });
+
+        static_assert(
+            decltype(hera::begin(filt_arr) == hera::end(filt_arr))::value);
     }
 }
