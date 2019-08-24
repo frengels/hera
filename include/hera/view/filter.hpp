@@ -222,8 +222,17 @@ struct filter_fn
 
     template<typename Pred>
     constexpr auto operator()(Pred p) const
+        noexcept(noexcept(detail::view_closure{*this,
+                                               hera::type_identity<Pred>{}}))
     {
         return detail::view_closure{*this, hera::type_identity<Pred>{}};
+    }
+
+    template<metafunction PredMeta>
+    constexpr auto operator()(PredMeta pm) const
+        noexcept(noexcept(detail::view_closure{*this, std::move(pm)}))
+    {
+        return detail::view_closure{*this, std::move(pm)};
     }
 };
 
