@@ -3,6 +3,8 @@
 #include <functional>
 
 #include "hera/concepts.hpp"
+#include "hera/ranges.hpp"
+#include "hera/view.hpp"
 
 namespace hera
 {

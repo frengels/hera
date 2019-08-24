@@ -5,6 +5,7 @@
 #include "hera/constant.hpp"
 #include "hera/get.hpp"
 #include "hera/sentinel.hpp"
+#include "hera/view/detail/closure.hpp"
 #include "hera/view/interface.hpp"
 
 namespace hera
@@ -264,4 +265,30 @@ public:
         return hera::get<C::value>(tuple_);
     }
 };
+
+namespace views
+{
+struct tuple_fn : public hera::detail::pipeable_interface<tuple_fn>
+{
+    template<typename Tuple>
+    constexpr auto operator()(Tuple& tup) const
+        noexcept(noexcept(hera::tuple_view{tup}))
+            -> decltype(hera::tuple_view{tup})
+    {
+        return hera::tuple_view{tup};
+    }
+
+    template<typename D = const tuple_fn>
+    requires requires(D* self)
+    {
+        detail::view_closure{*self};
+    }
+    constexpr auto operator()() const noexcept(noexcept(*this))
+    {
+        return *this;
+    }
+};
+
+constexpr auto tuple = tuple_fn{};
+} // namespace views
 } // namespace hera

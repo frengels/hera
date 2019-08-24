@@ -7,6 +7,7 @@ set(
   begin_end
   iter_move
   common_reference
+  tuple
   ranges
   subrange
   iota_view
