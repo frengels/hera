@@ -9,27 +9,17 @@ namespace hera
 namespace detail
 {
 template<typename T>
-constexpr bool deduce_enable_view() noexcept
-{
-    if constexpr (hera::derived_from<T, hera::view_base>)
-    {
-        return true;
-    }
-    else if constexpr (hera::range<T> && hera::range<const T> &&
-                       !same_as<range_reference_t<T>,
-                                range_reference_t<const T>>)
-    {
-        return false;
-    }
-    else
-    {
-        return true;
-    }
-}
+concept container_like =
+    hera::range<T>&& hera::range<const T> &&
+    !same_as<range_reference_t<T>, range_reference_t<const T>>;
+
+template<typename T>
+concept enable_view_default =
+    derived_from<T, hera::view_base> || !container_like<T>;
 } // namespace detail
 
 template<typename T>
-inline constexpr bool enable_view = detail::deduce_enable_view<T>();
+inline constexpr bool enable_view = detail::enable_view_default<T>;
 
 template<typename T>
 concept view = range<T>&& enable_view<T>;
