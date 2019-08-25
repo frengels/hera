@@ -95,11 +95,43 @@ struct unbounded_sentinel
     }
 };
 
+namespace detail
+{
+template<typename T>
+struct most_base_type
+{
+    using type = T;
+};
+
+template<typename T> // clang-format off
+    requires 
+        requires (const T& t) 
+        {
+            t.base();
+        } // clang-format on
+struct most_base_type<T>
+{
+    using type = typename most_base_type<
+        std::remove_cvref_t<decltype(std::declval<const T&>().base())>>::type;
+};
+
+template<typename T>
+concept default_enable_unbounded_sentinel =
+    same_as<hera::unbounded_sentinel, T> ||
+    derived_from<T, hera::unbounded_sentinel> ||
+    same_as<hera::unbounded_sentinel, typename most_base_type<T>::type> ||
+    derived_from<typename most_base_type<T>::type, hera::unbounded_sentinel>;
+} // namespace detail
+
+// checks for any of the following conditions:
+// - the type S is hera::unbounded_sentinel
+// - the type S is derived from hera::unbounded_sentinel
+// - the type called by recursively calling .base() is hera::unbounded_sentinel
+// - the type called by recrusively calling .base() is derived from
+//   hera::unbounded_sentinel
 template<typename S>
-static constexpr bool enable_unbounded_sentinel = std::conditional_t<
-    hera::same_as<hera::unbounded_sentinel, std::remove_cvref_t<S>>,
-    std::true_type,
-    std::false_type>::value;
+static constexpr bool enable_unbounded_sentinel =
+    detail::default_enable_unbounded_sentinel<S>;
 
 template<typename S, typename I>
 concept unbounded_sentinel_for =
