@@ -17,9 +17,9 @@ private:
     enum : unsigned
     {
         throws   = 1,
-        decay    = 2,
-        ref      = 4,
-        subrange = 6
+        decay    = 1 << 1,
+        ref      = 2 << 1,
+        subrange = 3 << 1
     };
 
     template<hera::viewable_range R>

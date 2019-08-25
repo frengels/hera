@@ -13,6 +13,7 @@ set(
   iota_view
   all_view
   filter_view
+  for_each
   )
 
 find_package(Catch2 REQUIRED)

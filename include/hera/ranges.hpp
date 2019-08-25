@@ -82,15 +82,12 @@ template<typename R>
 concept forwarding_range = range<R>&& detail::range_impl<R>;
 
 template<typename R>
-concept unbounded_range = range<R>&& // clang-format off
-    requires(R& r)
-    {
-        { hera::end(r) } -> same_as<hera::unbounded_sentinel>;
-    }; // clang-format on
+concept unbounded_range =
+    range<R>&& unbounded_sentinel_for<sentinel_t<R>, iterator_t<R>>;
 
 template<typename R>
-concept bounded_range = range<R> && !unbounded_range<R>;
-
+concept bounded_range =
+    range<R>&& bounded_sentinel_for<sentinel_t<R>, iterator_t<R>>;
 template<typename R>
 concept sized_range = range<R>&& // clang-format off
     requires(R& r)

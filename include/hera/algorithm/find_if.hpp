@@ -3,11 +3,11 @@
 #include <functional>
 
 #include "hera/constant.hpp"
+#include "hera/indirect_unary.hpp"
 #include "hera/iterator.hpp"
 #include "hera/metafunction.hpp"
 #include "hera/next_prev.hpp"
 #include "hera/type_identity.hpp"
-#include "hera/unary_predicate.hpp"
 
 namespace hera
 {
