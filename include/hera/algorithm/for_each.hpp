@@ -60,8 +60,9 @@ public:
         return invoke_recursively(std::move(i), std::move(s), std::move(f));
     }
 
-    template<hera::bounded_range R, typename F>
-    constexpr F operator()(R&& r, F f) const
+    template<hera::bounded_range R, typename F> // clang-format off
+        requires hera::forward_range<R> // clang-format on
+        constexpr F operator()(R&& r, F f) const
         noexcept(noexcept(invoke_recursively(hera::begin(std::forward<R>(r)),
                                              hera::end(std::forward<R>(r)),
                                              std::move(f))))
