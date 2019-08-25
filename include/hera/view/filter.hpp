@@ -75,8 +75,8 @@ private:
         }
 
     private:
-        template<hera::forward_iterator J>
-        static constexpr auto forward_predicate(const J& it)
+        template<typename J, typename NextFn>
+        static constexpr auto predicate_next(const J& it, NextFn op)
         {
             if constexpr (!dereferenceable<const J>)
             {
@@ -88,40 +88,27 @@ private:
             }
             else
             {
-                return forward_predicate(hera::next(it));
-            }
-        }
-
-        template<hera::bidirectional_iterator J>
-        static constexpr auto backward_predicate(const J& it)
-        {
-            if constexpr (!dereferenceable<const J>)
-            {
-                return it;
-            }
-            else if constexpr (std::invoke_result_t<Pred, decltype(*it)>::value)
-            {
-                return it;
-            }
-            else
-            {
-                return backward_predicate(hera::prev(it));
+                return predicate_next(op(it), std::move(op));
             }
         }
 
     public:
         constexpr auto operator++() const
         {
-            using iterator_type = decltype(forward_predicate(hera::next(it_)));
-            return iterator<iterator_type>{forward_predicate(hera::next(it_))};
+            using iterator_type =
+                decltype(predicate_next(hera::next(it_), hera::next));
+            return iterator<iterator_type>{
+                predicate_next(hera::next(it_), hera::next)};
         }
 
         template<typename J = I> // clang-format off
             requires hera::bidirectional_iterator<J> // clang-format on
             constexpr auto operator--() const
         {
-            using iterator_type = decltype(backward_predicate(hera::prev(it_)));
-            return iterator<iterator_type>{backward_predicate(hera::prev(it_))};
+            using iterator_type =
+                decltype(predicate_next(hera::prev(it_), hera::prev));
+            return iterator<iterator_type>{
+                predicate_next(hera::prev(it_), hera::prev)};
         }
 
         template<typename D = const I> // clang-format off
