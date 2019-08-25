@@ -213,6 +213,17 @@ public:
     constexpr array_view(T* ptr, Len) noexcept : ptr_{ptr}
     {}
 
+    template<typename Container,
+             hera::constant_convertible_to<size_type> Len> // clang-format off
+        requires 
+            requires (Container& c)
+            {
+                c.data();
+            } // clang-format on
+    constexpr array_view(Container& cont, Len l) noexcept
+        : array_view{cont.data(), std::move(l)}
+    {}
+
     constexpr auto begin() const noexcept
     {
         return array_iterator<T, Extent, 0>{ptr_};
@@ -254,4 +265,20 @@ public:
 
 template<typename T, hera::constant_convertible_to<std::size_t> Len>
 array_view(T* ptr, Len)->array_view<T, Len::value>;
+
+namespace views
+{
+struct array_fn
+{
+    template<typename... Args>
+    constexpr auto operator()(Args&&... args) const
+        noexcept(noexcept(hera::array_view{std::forward<Args>(args)...}))
+            -> decltype(hera::array_view{std::forward<Args>(args)...})
+    {
+        return hera::array_view{std::forward<Args>(args)...};
+    }
+};
+
+constexpr auto array = array_fn{};
+} // namespace views
 } // namespace hera

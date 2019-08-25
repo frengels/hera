@@ -1,5 +1,6 @@
 #include <catch2/catch.hpp>
 
+#include "hera/view/array.hpp"
 #include "hera/view/tuple.hpp"
 
 TEST_CASE("tuple")
@@ -18,14 +19,19 @@ TEST_CASE("tuple")
     auto tup_end = tup3 + std::integral_constant<std::ptrdiff_t, 7>{};
 
     static_assert(hera::end(tup_view) == tup_end);
+}
 
-    SECTION("pipeable")
+TEST_CASE("array")
+{
+    int arr[]{1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+
+    auto arr_view = hera::views::array(arr);
+
+    SECTION("unrolling")
     {
-        auto tup_pipe     = tup | hera::views::tuple();
-        auto another_pipe = tup | hera::views::tuple;
+        std::vector<int> vec{0, 1, 2, 3, 4, 5};
 
-        static_assert(hera::same_as<decltype(tup_view), decltype(tup_pipe)>);
-        static_assert(
-            hera::same_as<decltype(tup_pipe), decltype(another_pipe)>);
+        auto vec_view = hera::array_view{
+            vec.data(), std::integral_constant<std::size_t, 6>{}};
     }
 }

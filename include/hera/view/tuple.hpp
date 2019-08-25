@@ -268,7 +268,7 @@ public:
 
 namespace views
 {
-struct tuple_fn : public hera::detail::pipeable_interface<tuple_fn>
+struct tuple_fn
 {
     template<typename Tuple>
     constexpr auto operator()(Tuple& tup) const
@@ -276,16 +276,6 @@ struct tuple_fn : public hera::detail::pipeable_interface<tuple_fn>
             -> decltype(hera::tuple_view{tup})
     {
         return hera::tuple_view{tup};
-    }
-
-    template<typename D = const tuple_fn>
-    requires requires(D* self)
-    {
-        detail::view_closure{*self};
-    }
-    constexpr auto operator()() const noexcept(noexcept(*this))
-    {
-        return *this;
     }
 };
 
