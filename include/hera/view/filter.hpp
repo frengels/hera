@@ -76,7 +76,7 @@ private:
 
     private:
         template<typename J, typename NextFn>
-        static constexpr auto predicate_next(const J& it, NextFn op)
+        static constexpr auto predicate_next_impl(const J& it, NextFn op)
         {
             if constexpr (!dereferenceable<const J>)
             {
@@ -88,27 +88,29 @@ private:
             }
             else
             {
-                return predicate_next(op(it), std::move(op));
+                return predicate_next_impl(op(it), std::move(op));
             }
+        }
+
+        template<typename J, typename NextFn>
+        static constexpr auto predicate_next(const J& it, NextFn op)
+        {
+            return predicate_next_impl(op(it), std::move(op));
         }
 
     public:
         constexpr auto operator++() const
         {
-            using iterator_type =
-                decltype(predicate_next(hera::next(it_), hera::next));
-            return iterator<iterator_type>{
-                predicate_next(hera::next(it_), hera::next)};
+            using iterator_type = decltype(predicate_next(it_, hera::next));
+            return iterator<iterator_type>{predicate_next(it_, hera::next)};
         }
 
         template<typename J = I> // clang-format off
             requires hera::bidirectional_iterator<J> // clang-format on
             constexpr auto operator--() const
         {
-            using iterator_type =
-                decltype(predicate_next(hera::prev(it_), hera::prev));
-            return iterator<iterator_type>{
-                predicate_next(hera::prev(it_), hera::prev)};
+            using iterator_type = decltype(predicate_next(it_, hera::prev));
+            return iterator<iterator_type>{predicate_next(it_, hera::prev)};
         }
 
         template<typename D = const I> // clang-format off
