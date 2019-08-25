@@ -7,7 +7,7 @@
 
 TEST_CASE("filter_view")
 {
-    auto tup      = std::make_tuple(1, 2.0f, 3, 4.0f, 5);
+    auto tup      = std::make_tuple(1, 2.0f, 3, 4.0f, 5, 6.0f);
     auto tup_view = hera::tuple_view{tup};
 
     auto first_i = hera::find_if(tup_view, [](auto x) {
@@ -38,6 +38,8 @@ TEST_CASE("filter_view")
     auto filt_last = hera::next(filt_mid);
     REQUIRE(*filt_last == 5);
 
+    auto past_end = hera::next(filt_last);
+
     SECTION("unbounded")
     {
         auto v = hera::iota_view<0>{};
@@ -58,6 +60,9 @@ TEST_CASE("filter_view")
         static_assert(decltype(*first)::value == 0);
         auto it_2 = hera::next(first);
         static_assert(decltype(*it_2)::value == 2);
+
+        auto it_prev = hera::prev(it_2);
+        static_assert(decltype(*it_prev)::value == 0);
     }
 
     SECTION("pipe")
