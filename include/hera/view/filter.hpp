@@ -11,16 +11,33 @@
 
 namespace hera
 {
+namespace detail
+{
+template<typename I>
+struct filter_iterator_maybe_value_type
+{};
+
+template<typename I> // clang-format off
+    requires 
+        requires
+        {
+            typename iter_value_t<I>;
+        } // clang-format on
+struct filter_iterator_maybe_value_type<I>
+{
+    using value_type = iter_value_t<I>;
+};
+} // namespace detail
+
 template<forward_range V,
          typename Pred> // clang-format off
     requires view<V> && std::is_object_v<Pred>
 class filter_view : public view_interface<filter_view<V, Pred>> { // clang-format on
 private:
     template<hera::heterogeneous_iterator I, hera::sentinel_for<I> S>
-    class iterator {
+    class iterator : public detail::filter_iterator_maybe_value_type<I> {
     public:
         using difference_type = iter_difference_t<I>;
-        using value_type      = iter_value_t<I>;
 
     private:
         [[no_unique_address]] const I current_;
@@ -114,10 +131,10 @@ private:
             {
                 hera::iter_move(d);
             } // clang-format on
-        friend constexpr decltype(auto)
-        iter_move(const iterator& it) noexcept(noexcept(hera::iter_move(it)))
+        friend constexpr decltype(auto) iter_move(const iterator& it) noexcept(
+            noexcept(hera::iter_move(it.current_)))
         {
-            return hera::iter_move(it);
+            return hera::iter_move(it.current_);
         }
     };
 
