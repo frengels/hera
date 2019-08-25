@@ -12,7 +12,7 @@ struct distance_fn
              hera::constant_same_as<hera::iter_difference_t<I>> C>
     constexpr auto increment_until(I curr, S last, C count) const
     {
-        if constexpr (first == last)
+        if constexpr (curr == last)
         {
             return count;
         }
@@ -30,7 +30,7 @@ struct distance_fn
     {
         if constexpr (hera::sized_sentinel_for<S, I>)
         {
-            return std::integral_constant<hera::iter_different_t<I>,
+            return std::integral_constant<hera::iter_difference_t<I>,
                                           decltype(last - first)::value>{};
         }
         else
@@ -38,7 +38,7 @@ struct distance_fn
             return increment_until(
                 first,
                 last,
-                std::integral_constant<hera::iter_different_t<I>, 0>{});
+                std::integral_constant<hera::iter_difference_t<I>, 0>{});
         }
     }
 

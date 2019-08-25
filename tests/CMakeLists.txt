@@ -14,6 +14,7 @@ set(
   all_view
   filter_view
   for_each
+  unpack
   )
 
 find_package(Catch2 REQUIRED)
