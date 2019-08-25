@@ -213,11 +213,13 @@ public:
         : base_{std::move(base)}
     {}
 
-    template<forward_range R, hera::metafunction F>
-    constexpr filter_view(R&& r, F) noexcept(
-        noexcept(hera::views::all(std::forward<R>(r))))
-        : base_{hera::views::all(std::forward<R>(r))}
-    {}
+    /*
+        template<forward_range R, hera::metafunction F>
+        constexpr filter_view(R&& r, F) noexcept(
+            noexcept(hera::views::all(std::forward<R>(r))))
+            : base_{hera::views::all(std::forward<R>(r))}
+        {}
+        */
 
     constexpr V base() const noexcept(std::is_nothrow_copy_constructible_v<V>)
     {
@@ -260,23 +262,20 @@ struct filter_fn
              typename Pred> // clang-format off
         requires viewable_range<R> // clang-format on
         constexpr auto operator()(R&& r, Pred p) const
-        noexcept(noexcept(hera::filter_view<hera::all_view<R>, Pred>{
-            std::forward<R>(r),
-            hera::type_identity<Pred>{}}))
-            -> decltype(hera::filter_view<hera::all_view<R>, Pred>{
-                std::forward<R>(r),
-                hera::type_identity<Pred>{}})
+        noexcept(noexcept(hera::filter_view{std::forward<R>(r),
+                                            hera::type_identity<Pred>{}}))
+            -> decltype(hera::filter_view{std::forward<R>(r),
+                                          hera::type_identity<Pred>{}})
     {
-        return hera::filter_view<hera::all_view<R>, Pred>{
-            std::forward<R>(r), hera::type_identity<Pred>{}};
+        return hera::filter_view{std::forward<R>(r),
+                                 hera::type_identity<Pred>{}};
     }
 
     template<forward_range R, metafunction PredMeta> // clang-format off
         requires viewable_range<R> // clang-format on
         constexpr auto operator()(R&& r, PredMeta pm) const
     {
-        return hera::filter_view<hera::all_view<R>, typename PredMeta::type>{
-            std::forward<R>(r), pm};
+        return hera::filter_view{std::forward<R>(r), pm};
     }
 
     template<typename Pred>
