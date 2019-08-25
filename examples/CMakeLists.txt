@@ -1,5 +1,6 @@
 set(EXAMPLES
-  filter_ints)
+  filter_ints
+  unpack_apply)
 
   function(make_example target)
   string(CONCAT target_src ${target} ".cpp")
