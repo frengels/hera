@@ -43,10 +43,13 @@ class pipeable_interface : public pipeable_base {
         return std::invoke(std::move(drv), std::forward<R>(r));
     }
 
-    /*
     template<typename R>
-    friend constexpr auto operator|(R&& r, const D&& drv) = delete;
-    */
+    friend constexpr auto operator|(R&& r, const D&& drv) noexcept(
+        noexcept(std::invoke(std::move(drv), std::forward<R>(r))))
+        -> decltype(std::invoke(std::move(drv), std::forward<R>(r)))
+    {
+        return std::invoke(std::move(drv), std::forward<R>(r));
+    }
 };
 
 template<typename Indices, typename F, typename... Ts>
