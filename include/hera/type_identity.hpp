@@ -1,5 +1,6 @@
 #pragma once
 
+#include "hera/concepts.hpp"
 #include "hera/metafunction.hpp"
 
 namespace hera
@@ -18,6 +19,18 @@ struct type_identity
     template<typename U>
     constexpr type_identity(U&&) noexcept
     {}
+
+    template<typename U>
+    constexpr auto operator==(type_identity<U>) const noexcept
+    {
+        return std::bool_constant<hera::same_as<T, U>>{};
+    }
+
+    template<typename U>
+    constexpr auto operator!=(type_identity<U>) const noexcept
+    {
+        return std::bool_constant<!hera::same_as<T, U>>{};
+    }
 };
 
 template<hera::metafunction MF>

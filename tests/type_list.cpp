@@ -28,4 +28,16 @@ TEST_CASE("type_list")
     static_assert(
         hera::same_as<hera::type_identity<const char*>,
                       decltype(tl2[std::integral_constant<std::size_t, 1>{}])>);
+
+    SECTION("destructure")
+    {
+        auto [i1, f1, c1, i2] = std::move(tl1); // shouldn't be different
+        static_assert(hera::same_as<hera::type_identity<int>, decltype(i1)>);
+
+        auto [c, str] = tl2;
+
+        static_assert(decltype(c == hera::type_identity<char>{})::value);
+        static_assert(
+            decltype(str == hera::type_identity<const char*>{})::value);
+    }
 }

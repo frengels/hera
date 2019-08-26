@@ -106,12 +106,19 @@ private:
         }
 
         template<difference_type J = I> // clang-format off
-            requires (I >= 0) && (I < sizeof...(Ts))
+            requires (J >= 0) && (J < sizeof...(Ts))
         constexpr auto operator*() const noexcept // clang-format on
         {
             return hera::type_identity<
                 std::tuple_element_t<static_cast<std::size_t>(I),
                                      std::tuple<Ts...>>>{};
+        }
+
+        template<difference_type J = I> // clang-format off
+            requires (J >= 0) && (J < sizeof...(Ts))
+        friend constexpr auto iter_move(iterator it) noexcept
+        {
+            return *it;
         }
 
         template<hera::constant_convertible_to<difference_type>
@@ -159,6 +166,13 @@ public:
     {
         return begin()[idx];
     }
+
+    template<std::size_t I> // clang-format off
+        requires I < sizeof...(Ts)
+    friend constexpr auto get(type_list tl) noexcept // clang-format on
+    {
+        return tl[std::integral_constant<std::size_t, I>{}];
+    }
 };
 
 template<typename... Ts>
@@ -180,3 +194,17 @@ struct to_type_list_fn : detail::pipeable_interface<to_type_list_fn>
 
 constexpr auto to_type_list = to_type_list_fn{};
 } // namespace hera
+
+namespace std
+{
+template<typename... Ts>
+struct tuple_size<hera::type_list<Ts...>>
+    : std::integral_constant<std::size_t, sizeof...(Ts)>
+{};
+
+template<std::size_t I, typename... Ts>
+struct tuple_element<I, hera::type_list<Ts...>>
+{
+    using type = decltype(get<I>(std::declval<hera::type_list<Ts...>>()));
+};
+} // namespace std
