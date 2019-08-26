@@ -2,6 +2,7 @@
 
 #include "hera/metafunction.hpp"
 #include "hera/type_identity.hpp"
+#include "hera/view/conversion.hpp"
 #include "hera/view/interface.hpp"
 
 namespace hera
@@ -144,4 +145,18 @@ template<typename... Ts>
 type_list(Ts&&... ts)
     ->type_list<typename decltype(hera::type_identity{
         std::forward<Ts>(ts)})::type...>;
+
+namespace detail
+{
+struct to_type_list_impl
+{
+    template<typename... Ts>
+    constexpr auto operator()(Ts&&... ts) const noexcept
+    {
+        return hera::type_list{std::forward<Ts>(ts)...};
+    }
+};
+} // namespace detail
+
+constexpr auto to_type_list = to<detail::to_type_list_impl>;
 } // namespace hera
