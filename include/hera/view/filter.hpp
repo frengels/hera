@@ -99,15 +99,18 @@ private:
         }
 
     public:
-        constexpr auto operator++() const
+        constexpr auto operator++() const noexcept(
+            noexcept(iterator<decltype(predicate_next(it_, hera::next))>{
+                predicate_next(it_, hera::next)}))
         {
             using iterator_type = decltype(predicate_next(it_, hera::next));
             return iterator<iterator_type>{predicate_next(it_, hera::next)};
         }
 
-        template<typename J = I> // clang-format off
-            requires hera::bidirectional_iterator<J> // clang-format on
-            constexpr auto operator--() const
+        template<hera::bidirectional_iterator J = I>
+        constexpr auto operator--() const noexcept(
+            noexcept(iterator<decltype(predicate_next(it_, hera::prev))>{
+                predicate_next(it_, hera::prev)}))
         {
             using iterator_type = decltype(predicate_next(it_, hera::prev));
             return iterator<iterator_type>{predicate_next(it_, hera::prev)};
