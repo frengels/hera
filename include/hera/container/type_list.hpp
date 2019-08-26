@@ -25,7 +25,7 @@ template<std::ptrdiff_t I, typename... Ts> // clang-format off
 } // namespace detail
 
 template<typename... Ts>
-class type_list {
+class type_list : public hera::view_interface<type_list<Ts...>> {
 private:
     template<std::ptrdiff_t I>
     class iterator : detail::type_list_iterator_maybe_value_type<I, Ts...> {
@@ -127,7 +127,7 @@ private:
                 requires (const iterator<I>& it, C offset)
                 {
                     *(it + offset);
-                } // clang-format off
+                } // clang-format on
         constexpr auto operator[](C offset) const noexcept
         {
             return *(*this + offset);
@@ -158,6 +158,17 @@ public:
     friend constexpr auto end(type_list&& tl) noexcept
     {
         return tl.end();
+    }
+
+    constexpr std::integral_constant<std::size_t, sizeof...(Ts)> size() const
+        noexcept
+    {
+        return {};
+    }
+
+    constexpr std::bool_constant<sizeof...(Ts) == 0> empty() const noexcept
+    {
+        return {};
     }
 
     template<hera::constant_convertible_to<std::size_t> C> // clang-format off
