@@ -24,7 +24,7 @@ template<hera::metafunction MF>
 type_identity(MF)->type_identity<typename MF::type>;
 
 template<typename U>
-type_identity(U &&)->type_identity<std::remove_cvref_t<U>>;
+type_identity(U &&)->type_identity<std::decay_t<U>>;
 
 template<typename T>
 using type_identity_t = typename type_identity<T>::type;

@@ -24,4 +24,8 @@ TEST_CASE("type_list")
 
     static_assert(
         hera::same_as<decltype(tl2), hera::type_list<char, const char*>>);
+
+    static_assert(
+        hera::same_as<hera::type_identity<const char*>,
+                      decltype(tl2[std::integral_constant<std::size_t, 1>{}])>);
 }

@@ -1,8 +1,9 @@
 #pragma once
 
+#include "hera/algorithm/unpack.hpp"
 #include "hera/metafunction.hpp"
 #include "hera/type_identity.hpp"
-#include "hera/view/conversion.hpp"
+#include "hera/view/detail/closure.hpp"
 #include "hera/view/interface.hpp"
 
 namespace hera
@@ -112,6 +113,18 @@ private:
                 std::tuple_element_t<static_cast<std::size_t>(I),
                                      std::tuple<Ts...>>>{};
         }
+
+        template<hera::constant_convertible_to<difference_type>
+                     C> // clang-format off
+            requires
+                requires (const iterator<I>& it, C offset)
+                {
+                    *(it + offset);
+                } // clang-format off
+        constexpr auto operator[](C offset) const noexcept
+        {
+            return *(*this + offset);
+        }
     };
 
 public:
@@ -139,6 +152,13 @@ public:
     {
         return tl.end();
     }
+
+    template<hera::constant_convertible_to<std::size_t> C> // clang-format off
+        requires C::value < sizeof...(Ts)
+    constexpr auto operator[](C idx) const noexcept // clang-format on
+    {
+        return begin()[idx];
+    }
 };
 
 template<typename... Ts>
@@ -146,17 +166,17 @@ type_list(Ts&&... ts)
     ->type_list<typename decltype(hera::type_identity{
         std::forward<Ts>(ts)})::type...>;
 
-namespace detail
+struct to_type_list_fn : detail::pipeable_interface<to_type_list_fn>
 {
-struct to_type_list_impl
-{
-    template<typename... Ts>
-    constexpr auto operator()(Ts&&... ts) const noexcept
+    template<forward_range R>
+    constexpr auto operator()(const R& r) const
     {
-        return hera::type_list{std::forward<Ts>(ts)...};
+        // we can pass everything by const reference because it will internally
+        // decay everything anyway
+        return hera::unpack(
+            r, [](const auto&... xs) { return hera::type_list{xs...}; });
     }
 };
-} // namespace detail
 
-constexpr auto to_type_list = to<detail::to_type_list_impl>;
+constexpr auto to_type_list = to_type_list_fn{};
 } // namespace hera
