@@ -19,6 +19,7 @@ set(
   head_view
   pair
   type_list
+  tuple
   )
 
 find_package(Catch2 REQUIRED)
