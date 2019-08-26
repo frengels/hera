@@ -69,35 +69,35 @@ class tuple_view : public hera::view_interface<tuple_view<Tuple>> {
         {}
 
         template<std::ptrdiff_t J>
-        constexpr auto operator==(const iterator<J>& other) const noexcept
+        constexpr auto operator==(iterator<J>) const noexcept
         {
             return std::bool_constant<(I == J)>{};
         }
 
         template<std::ptrdiff_t J>
-        constexpr auto operator!=(const iterator<J>& other) const noexcept
+        constexpr auto operator!=(iterator<J>) const noexcept
         {
             return std::bool_constant<(I != J)>{};
         }
 
-        constexpr auto operator==(const hera::bounded_sentinel&) const noexcept
+        constexpr auto operator==(hera::bounded_sentinel) const noexcept
         {
             return std::bool_constant<I == bound>{};
         }
 
-        friend constexpr auto operator==(const hera::bounded_sentinel&,
-                                         const iterator&) noexcept
+        friend constexpr auto operator==(hera::bounded_sentinel,
+                                         iterator) noexcept
         {
             return std::bool_constant<bound == I>{};
         }
 
-        constexpr auto operator!=(const hera::bounded_sentinel&) const noexcept
+        constexpr auto operator!=(hera::bounded_sentinel) const noexcept
         {
             return std::bool_constant<I != bound>{};
         }
 
-        friend constexpr auto operator!=(const hera::bounded_sentinel&,
-                                         const iterator&) noexcept
+        friend constexpr auto operator!=(hera::bounded_sentinel,
+                                         iterator) noexcept
         {
             return std::bool_constant<bound != I>{};
         }

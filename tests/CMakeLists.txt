@@ -17,6 +17,7 @@ set(
   unpack
   move_view
   head_view
+  pair
   )
 
 find_package(Catch2 REQUIRED)

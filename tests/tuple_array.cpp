@@ -18,7 +18,7 @@ TEST_CASE("tuple")
 
     auto tup_end = tup3 + std::integral_constant<std::ptrdiff_t, 7>{};
 
-    static_assert(hera::end(tup_view) == tup_end);
+    static_assert(decltype(hera::end(tup_view) == tup_end)::value);
 }
 
 TEST_CASE("array")

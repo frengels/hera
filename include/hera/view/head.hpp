@@ -116,9 +116,9 @@ private:
         template<forward_iterator I>
         friend constexpr auto operator==(
             const iterator<I>& it,
-            const sentinel<S>& sent) noexcept(noexcept(it.it == sent.sent_))
+            const sentinel<S>& sent) noexcept(noexcept(it.it_ == sent.sent_))
         {
-            return it.it == sent.sent_;
+            return it.it_ == sent.sent_;
         }
 
         template<forward_iterator I>

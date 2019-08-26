@@ -12,7 +12,7 @@ struct distance_fn
              hera::constant_same_as<hera::iter_difference_t<I>> C>
     constexpr auto increment_until(I curr, S last, C count) const
     {
-        if constexpr (curr == last)
+        if constexpr (decltype(curr == last)::value)
         {
             return count;
         }
