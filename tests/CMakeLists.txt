@@ -18,6 +18,7 @@ set(
   move_view
   head_view
   pair
+  type_list
   )
 
 find_package(Catch2 REQUIRED)

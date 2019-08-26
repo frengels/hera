@@ -16,15 +16,15 @@ struct type_identity
     {}
 
     template<typename U>
-    constexpr type_identity(U) noexcept
+    constexpr type_identity(U&&) noexcept
     {}
 };
 
-template<hera::metafunction U>
-type_identity(U)->type_identity<typename U::type>;
+template<hera::metafunction MF>
+type_identity(MF)->type_identity<typename MF::type>;
 
 template<typename U>
-type_identity(U)->type_identity<U>;
+type_identity(U &&)->type_identity<std::remove_cvref_t<U>>;
 
 template<typename T>
 using type_identity_t = typename type_identity<T>::type;
