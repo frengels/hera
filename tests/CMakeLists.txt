@@ -16,6 +16,7 @@ set(
   for_each
   unpack
   move_view
+  head_view
   )
 
 find_package(Catch2 REQUIRED)

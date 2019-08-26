@@ -88,6 +88,13 @@ concept unbounded_range =
 template<typename R>
 concept bounded_range =
     range<R>&& bounded_sentinel_for<sentinel_t<R>, iterator_t<R>>;
+
+template<typename R>
+concept empty_range = range<R>&& requires(R& r)
+{
+    requires decltype(hera::begin(r) == hera::end(r))::value;
+};
+
 template<typename R>
 concept sized_range = range<R>&& // clang-format off
     requires(R& r)
