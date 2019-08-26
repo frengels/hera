@@ -405,6 +405,13 @@ constexpr hera::tuple<Ts&&...> forward_as_tuple(Ts&&... ts) noexcept(
 {
     return hera::tuple<Ts&&...>{std::forward<Ts>(ts)...};
 }
+
+template<typename... Ts>
+constexpr hera::tuple<std::decay_t<Ts>...> make_tuple(Ts&&... ts) noexcept(
+    std::is_nothrow_constructible_v<hera::tuple<std::decay_t<Ts>...>, Ts...>)
+{
+    return hera::tuple<std::decay_t<Ts>...>{std::forward<Ts>(ts)...};
+}
 } // namespace hera
 
 namespace std
