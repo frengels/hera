@@ -21,7 +21,7 @@ add_library(${PROJECT_NAME}::${PROJECT_NAME} ALIAS ${PROJECT_NAME})
 target_compile_features(${PROJECT_NAME} INTERFACE cxx_std_20)
 
 if ("${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang")
-  target_compile_options(${PROJECT_NAME} INTERFACE -fconcepts-ts)
+  target_compile_options(${PROJECT_NAME} INTERFACE -Xclang -fconcepts-ts)
 elseif ("${CMAKE_CXX_COMPILER_ID}" MATCHES "GNU")
   target_compile_options(${PROJECT_NAME} INTERFACE -fconcepts)
 endif()
@@ -33,7 +33,7 @@ target_include_directories(
   $<INSTALL_INTERFACE:include>)
 
 write_basic_package_version_file(
-  ${PROJECT_NAME}/ConfigVersion.cmake
+  ${PROJECT_NAME}ConfigVersion.cmake
   VERSION ${PROJECT_VERSION}
   COMPATIBILITY AnyNewerVersion)
 

@@ -1,0 +1,47 @@
+pkgname=hera-git
+_pkgname=hera
+pkgver=60.6fbf525
+pkgrel=1
+pkgdesc="Heterogeneous ranges for c++20"
+arch=('i686' 'x86_64')
+url="https://github.com/dreyri/hera"
+license=('MIT')
+makedepends=('cmake' 'ninja' 'git' 'catch2')
+provides=("$_pkgname")
+conflicts=("$_pkgname")
+_branch="hera"
+source=('git+https://github.com/dreyri/hera.git')
+md5sums=('SKIP')
+
+pkgver() {
+    cd "$_branch"
+    echo $(git rev-list --count HEAD).$(git rev-parse --short HEAD)
+}
+
+prepare() {
+    if [ -d _build ]; then
+        rm -rf _build
+    fi
+    mkdir _build
+}
+
+build() {
+    cd "_build"
+    cmake $srcdir/$_branch -G Ninja \
+        -D CMAKE_C_FLAGS="${CFLAGS}" \
+        -D CMAKE_CXX_FLAGS="${CXXFLAGS}" \
+        -D CMAKE_BUILD_TYPE=Release \
+        -D CMAKE_INSTALL_PREFIX=/usr \
+        -D HERA_BUILD_TESTS=ON
+    ninja
+}
+
+check() {
+    cd "_build"
+    ninja test
+}
+
+package() {
+    cd "_build"
+    DESTDIR="$pkgdir" ninja install
+}
