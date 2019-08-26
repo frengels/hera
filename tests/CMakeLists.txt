@@ -20,6 +20,7 @@ set(
   pair
   type_list
   tuple
+  transform_view
   )
 
 find_package(Catch2 REQUIRED)
