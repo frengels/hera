@@ -10,12 +10,18 @@
 
 TEST_CASE("pair")
 {
-    constexpr auto p = hera::pair{5, 6.0f};
+    auto p = hera::pair{5, 6.0f};
 
     auto other_pair = hera::pair{'c', "hello"};
 
-    static_assert(p.first == 5);
-    static_assert(p.second == 6.0f);
+    REQUIRE(p.first() == 5);
+    REQUIRE(p.second() == 6.0f);
+
+    p.first() = 10;
+
+    REQUIRE(p.first() == 10);
+
+    p.first() = 5;
 
     SECTION("construct")
     {
@@ -30,16 +36,14 @@ TEST_CASE("pair")
 
     SECTION("op[]")
     {
-        static_assert(p[std::integral_constant<std::size_t, 0>{}] == 5);
-        static_assert(p[std::integral_constant<std::size_t, 1>{}] == 6.0f);
+        REQUIRE(p[std::integral_constant<std::size_t, 0>{}] == 5);
+        REQUIRE(p[std::integral_constant<std::size_t, 1>{}] == 6.0f);
 
-        static_assert(hera::at(p, std::integral_constant<std::size_t, 0>{}) ==
-                      5);
-        static_assert(hera::at(p, std::integral_constant<std::size_t, 1>{}) ==
-                      6.0f);
+        REQUIRE(hera::at(p, std::integral_constant<std::size_t, 0>{}) == 5);
+        REQUIRE(hera::at(p, std::integral_constant<std::size_t, 1>{}) == 6.0f);
 
         static_assert(
-            hera::same_as<const int&&,
+            hera::same_as<int&&,
                           decltype(hera::at(
                               std::move(p),
                               std::integral_constant<std::size_t, 0>{}))>);
@@ -49,8 +53,8 @@ TEST_CASE("pair")
 
     SECTION("get")
     {
-        static_assert(hera::get<0>(p) == 5);
-        static_assert(hera::get<1>(p) == 6.0f);
+        REQUIRE(hera::get<0>(p) == 5);
+        REQUIRE(hera::get<1>(p) == 6.0f);
 
         static_assert(std::tuple_size_v<decltype(p)> == 2);
     }

@@ -13,9 +13,9 @@ namespace hera
 {
 template<typename T, typename U>
 class pair {
-public:
-    [[no_unique_address]] T first{};
-    [[no_unique_address]] U second{};
+private:
+    [[no_unique_address]] T first_{};
+    [[no_unique_address]] U second_{};
 
 public:
     pair() = default;
@@ -24,7 +24,7 @@ public:
     constexpr pair(U1&& u1,
                    U2&& u2) noexcept(std::is_nothrow_constructible_v<T, U1>&&
                                          std::is_nothrow_constructible_v<U, U2>)
-        : first{std::forward<U1>(u1)}, second{std::forward<U2>(u2)}
+        : first_{std::forward<U1>(u1)}, second_{std::forward<U2>(u2)}
     {
         // using constructible_from concept doesn't work to constrain somehow
     }
@@ -39,10 +39,10 @@ private:
                    RU&& args_second,
                    std::index_sequence<IsT...>,
                    std::index_sequence<IsU...>)
-        : first{*hera::next(hera::begin(args_first),
-                            std::integral_constant<std::size_t, IsT>{})...},
-          second{*hera::next(hera::begin(args_second),
-                             std::integral_constant<std::size_t, IsU>{})...}
+        : first_{*hera::next(hera::begin(args_first),
+                             std::integral_constant<std::size_t, IsT>{})...},
+          second_{*hera::next(hera::begin(args_second),
+                              std::integral_constant<std::size_t, IsU>{})...}
     {}
 
 public:
@@ -61,6 +61,46 @@ public:
                    hera::end(std::forward<RU>(args_second))))::value>{})
     {}
 
+    constexpr T& first() & noexcept
+    {
+        return static_cast<T&>(first_);
+    }
+
+    constexpr U& second() & noexcept
+    {
+        return static_cast<U&>(second_);
+    }
+
+    constexpr const T& first() const& noexcept
+    {
+        return static_cast<const T&>(first_);
+    }
+
+    constexpr const U& second() const& noexcept
+    {
+        return static_cast<const U&>(second_);
+    }
+
+    constexpr T&& first() && noexcept
+    {
+        return static_cast<T&&>(first_);
+    }
+
+    constexpr U&& second() && noexcept
+    {
+        return static_cast<U&&>(second_);
+    }
+
+    constexpr const T&& first() const&& noexcept
+    {
+        return static_cast<const T&&>(first_);
+    }
+
+    constexpr const U&& second() const&& noexcept
+    {
+        return static_cast<const U&&>(second_);
+    }
+
     constexpr std::integral_constant<std::size_t, 2> size() const noexcept
     {
         return {};
@@ -77,11 +117,11 @@ public:
     {
         if constexpr (C::value == 0)
         {
-            return first;
+            return first();
         }
         else if constexpr (C::value == 1)
         {
-            return second;
+            return second();
         }
     }
 
@@ -92,11 +132,11 @@ public:
     {
         if constexpr (C::value == 0)
         {
-            return first;
+            return first();
         }
         else if constexpr (C::value == 1)
         {
-            return second;
+            return second();
         }
     }
 
@@ -108,11 +148,11 @@ public:
     {
         if constexpr (C::value == 0)
         {
-            return std::move(first);
+            return std::move(*this).first();
         }
         else if constexpr (C::value == 1)
         {
-            return std::move(second);
+            return std::move(*this).second();
         }
     }
 
@@ -123,11 +163,11 @@ public:
     {
         if constexpr (C::value == 0)
         {
-            return std::move(first);
+            return std::move(*this).first();
         }
         else if constexpr (C::value == 1)
         {
-            return std::move(second);
+            return std::move(*this).second();
         }
     }
 
@@ -169,6 +209,17 @@ public:
 
 template<typename T, typename U>
 pair(T&&, U &&)->pair<std::decay_t<T>, std::decay_t<U>>;
+
+template<typename T, typename U>
+constexpr hera::pair<std::decay_t<T>, std::decay_t<U>>
+make_pair(T&& t, U&& u) noexcept(std::is_nothrow_constructible_v<
+                                 hera::pair<std::decay_t<T>, std::decay_t<U>>,
+                                 T,
+                                 U>)
+{
+    return hera::pair<std::decay_t<T>, std::decay_t<U>>{std::forward<T>(t),
+                                                        std::forward<U>(u)};
+}
 } // namespace hera
 
 namespace std
