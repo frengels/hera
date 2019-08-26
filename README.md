@@ -51,3 +51,20 @@ auto only_str = tup_view | hera::views::filter([](auto str) {
 hera::for_each(only_str, [](auto str) { std::cout << str << '|'; });
 std::cout << '\n';
 ```
+
+## Available views
+
+- array
+- tuple
+- filter
+- head
+- iota
+- move
+- ref
+- subrange
+
+## Available algorithms
+
+- find_if
+- for_each
+- unpack
