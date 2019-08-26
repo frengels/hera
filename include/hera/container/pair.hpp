@@ -1,5 +1,6 @@
 #pragma once
 
+#include <type_traits>
 #include <utility>
 
 #include "hera/concepts.hpp"
@@ -167,7 +168,7 @@ public:
 };
 
 template<typename T, typename U>
-pair(T&&, U &&)->pair<std::remove_cvref_t<T>, std::remove_cvref_t<U>>;
+pair(T&&, U &&)->pair<std::decay_t<T>, std::decay_t<U>>;
 } // namespace hera
 
 namespace std

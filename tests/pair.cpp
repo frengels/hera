@@ -12,6 +12,8 @@ TEST_CASE("pair")
 {
     constexpr auto p = hera::pair{5, 6.0f};
 
+    auto other_pair = hera::pair{'c', "hello"};
+
     static_assert(p.first == 5);
     static_assert(p.second == 6.0f);
 
