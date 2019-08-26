@@ -3,7 +3,7 @@ _pkgname=hera
 pkgver=62.6502834
 pkgrel=1
 pkgdesc="Heterogeneous ranges for c++20"
-arch=('i686' 'x86_64')
+arch=('any')
 url="https://github.com/dreyri/hera"
 license=('MIT')
 makedepends=('cmake' 'ninja' 'git' 'catch2')
@@ -44,4 +44,7 @@ check() {
 package() {
     cd "_build"
     DESTDIR="$pkgdir" ninja install
+
+    install -Dm644 "$srcdir/$_branch/LICENSE" \
+        "$pkgdir/usr/share/licenses/hera-git/LICENSE"
 }
