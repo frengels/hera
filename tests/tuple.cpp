@@ -19,6 +19,10 @@ TEST_CASE("tuple")
     // op []
     REQUIRE(std::strcmp("tuple", tup[size_<1>]) == 0);
 
+    // front
+    REQUIRE(std::strcmp("hello", tup.front()) == 0);
+    REQUIRE(42 == tup.back());
+
     static_assert(hera::same_as<int&&, decltype(std::move(tup)[size_<2>])>);
     static_assert(hera::same_as<int&, decltype(tup[size_<2>])>);
 

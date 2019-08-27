@@ -3,6 +3,7 @@
 #include <utility>
 
 #include "hera/concepts.hpp"
+#include "hera/next_prev.hpp"
 #include "hera/sentinel.hpp"
 
 namespace hera
@@ -314,6 +315,34 @@ public:
         noexcept
     {
         return {};
+    }
+
+    template<std::size_t N = sizeof...(Ts)> // clang-format off
+        requires(N >= 1) // clang-format on
+        constexpr decltype(auto) front() noexcept
+    {
+        return *begin();
+    }
+
+    template<std::size_t N = sizeof...(Ts)> // clang-format off
+        requires (N >= 1) // clang-format on
+        constexpr decltype(auto) front() const noexcept
+    {
+        return *begin();
+    }
+
+    template<std::size_t N = sizeof...(Ts)> // clang-format off
+        requires (N >= 1) // clang-format on
+        constexpr decltype(auto) back() noexcept
+    {
+        return *(hera::prev(begin() + size()));
+    }
+
+    template<std::size_t N = sizeof...(Ts)> // clang-format off
+        requires (N >= 1) // clang-format on
+        constexpr decltype(auto) back() const noexcept
+    {
+        return *(hera::prev(begin() + size()));
     }
 
     constexpr std::bool_constant<sizeof...(Ts) == 0> empty() const noexcept
