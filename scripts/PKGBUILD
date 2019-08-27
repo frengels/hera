@@ -1,6 +1,6 @@
 pkgname=hera-git
 _pkgname=hera
-pkgver=62.6502834
+pkgver=77.6350848
 pkgrel=1
 pkgdesc="Heterogeneous ranges for c++20"
 arch=('any')
