@@ -62,6 +62,8 @@ class tuple_impl;
 template<std::size_t... Is, typename... Ts>
 class tuple_impl<std::index_sequence<Is...>, Ts...>
     : protected tuple_box<Is, Ts>... {
+    tuple_impl() = default;
+
     template<typename... Us> // clang-format off
         requires (sizeof...(Ts) == sizeof...(Us)) // clang-format on
         constexpr tuple_impl(Us&&... us) noexcept(
