@@ -1,5 +1,7 @@
 #pragma once
 
+#include <functional>
+
 #include "hera/concepts.hpp"
 #include "hera/metafunction.hpp"
 
@@ -42,6 +44,12 @@ struct type_identity
     friend constexpr auto operator!=(Meta, type_identity) noexcept
     {
         return std::bool_constant<!hera::same_as<typename Meta::type, T>>{};
+    }
+
+    template<hera::invocable<T> F>
+    constexpr auto transform(F&& fn) const noexcept // clang-format on
+    {
+        return type_identity<std::invoke_result_t<F, T>>{};
     }
 };
 

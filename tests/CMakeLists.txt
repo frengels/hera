@@ -22,6 +22,7 @@ set(
   tuple
   transform_view
   make_from_range
+  type_identity
   )
 
 find_package(Catch2 REQUIRED)
