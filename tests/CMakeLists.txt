@@ -21,6 +21,7 @@ set(
   type_list
   tuple
   transform_view
+  make_from_range
   )
 
 find_package(Catch2 REQUIRED)
