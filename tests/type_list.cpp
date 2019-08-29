@@ -14,13 +14,16 @@ TEST_CASE("type_list")
     static_assert(hera::bounded_range<decltype(types)>);
     static_assert(hera::view<decltype(types)>);
 
-    auto tl1 = hera::type_list{5, 5.0f, 'c', hera::type_identity<int>{}};
+    auto tl1 = hera::make_type_list_metafunction(hera::typeid_(5),
+                                                 hera::typeid_(5.0f),
+                                                 hera::typeid_('c'),
+                                                 hera::type_identity<int>{});
     static_assert(
         hera::same_as<hera::type_list<int, float, char, int>, decltype(tl1)>);
 
     auto tup = std::make_tuple('c', "hello"); // char, const char*
 
-    auto tl2 = hera::tuple_view{tup} | hera::to_type_list;
+    auto tl2 = hera::tuple_view{tup} | hera::to_base_type_list;
 
     static_assert(
         hera::same_as<decltype(tl2), hera::type_list<char, const char*>>);

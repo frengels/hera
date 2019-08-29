@@ -10,10 +10,13 @@ constexpr auto deref = [](auto&& x) -> decltype(*std::forward<decltype(x)>(x)) {
 
 TEST_CASE("type_identity")
 {
-    auto ti = hera::type_identity{5}; // int
+    auto ti = hera::type_identity<int>{};
     static_assert(hera::same_as<int, typename decltype(ti)::type>);
 
-    auto tf = hera::type_identity{5.0f}; // float
+    static_assert(hera::metafunction<decltype(ti)>);
+    static_assert(hera::metafunction<std::integral_constant<int, 0>>);
+
+    auto tf = hera::type_identity<float>{}; // float
 
     tf.transform(
         [](auto&& f) { static_assert(hera::same_as<float&&, decltype(f)>); });
@@ -79,4 +82,20 @@ TEST_CASE("type_identity")
 
         static_assert(hera::same_as<const int&&, typename decltype(t)::type>);
     }
+}
+
+TEST_CASE("forward_type_identity")
+{
+    auto i     = hera::type_identity<int&>{};
+    auto fwd_i = hera::forward_type{5};
+    auto ref_i = hera::forward_type{i};
+
+    static_assert(hera::same_as<int&, typename decltype(ref_i)::type>);
+
+    static_assert(hera::same_as<int&&, typename decltype(fwd_i)::type>);
+
+    auto fwd_opt = hera::forward_type{std::optional<int>{5}};
+
+    static_assert(
+        hera::same_as<std::optional<int>&&, typename decltype(fwd_opt)::type>);
 }

@@ -137,9 +137,6 @@ private:
 public:
     type_list() = default;
 
-    constexpr type_list(hera::type_identity<Ts>...) noexcept
-    {}
-
     constexpr auto begin() const noexcept
     {
         return iterator<0>{};
@@ -186,24 +183,49 @@ public:
     }
 };
 
-template<typename... Ts>
-type_list(Ts&&... ts)
-    ->type_list<typename decltype(hera::type_identity{
-        std::forward<Ts>(ts)})::type...>;
+template<hera::metafunction... Ms>
+constexpr auto make_type_list_metafunction(Ms...) noexcept
+{
+    return hera::type_list<typename Ms::type...>{};
+}
 
-struct to_type_list_fn : detail::pipeable_interface<to_type_list_fn>
+template<typename... Ts>
+constexpr auto make_type_list_forward(Ts&&... ts) noexcept
+{
+    return make_type_list_metafunction(
+        hera::forward_type{std::forward<Ts>(ts)}...);
+}
+
+struct to_base_type_list_fn
+    : public detail::pipeable_interface<to_base_type_list_fn>
 {
     template<forward_range R>
-    constexpr auto operator()(const R& r) const
+    constexpr auto operator()(const R& r) const noexcept
     {
         // we can pass everything by const reference because it will internally
         // decay everything anyway
-        return hera::unpack(
-            r, [](const auto&... xs) { return hera::type_list{xs...}; });
+        return hera::unpack(r, [](const auto&... xs) {
+            return hera::type_list<std::decay_t<decltype(xs)>...>{};
+        });
     }
 };
 
-constexpr auto to_type_list = to_type_list_fn{};
+constexpr auto to_base_type_list = to_base_type_list_fn{};
+
+struct forward_to_type_list_fn
+    : public detail::pipeable_interface<forward_to_type_list_fn>
+{
+    template<forward_range R>
+    constexpr auto operator()(R&& r) const noexcept
+    {
+        return hera::unpack(std::forward<R>(r), [](auto&&... xs) {
+            return hera::type_list<decltype(
+                std::forward<decltype(xs)>(xs))...>{};
+        });
+    }
+};
+
+constexpr auto forward_to_type_list = forward_to_type_list_fn{};
 } // namespace hera
 
 namespace std

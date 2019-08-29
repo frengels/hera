@@ -14,14 +14,6 @@ struct type_identity
 
     type_identity() = default;
 
-    template<hera::metafunction U>
-    constexpr type_identity(U) noexcept
-    {}
-
-    template<typename U>
-    constexpr type_identity(U&&) noexcept
-    {}
-
     template<hera::metafunction Meta>
     constexpr auto operator==(Meta) const noexcept
     {
@@ -53,12 +45,34 @@ struct type_identity
     }
 };
 
-template<hera::metafunction MF>
-type_identity(MF)->type_identity<typename MF::type>;
-
-template<typename U>
-type_identity(U &&)->type_identity<std::decay_t<U>>;
+template<hera::metafunction M>
+constexpr type_identity<typename M::type> make_type_identity_mf(M) noexcept
+{
+    return {};
+}
 
 template<typename T>
 using type_identity_t = typename type_identity<T>::type;
+
+template<typename T>
+struct forward_type : type_identity<T>
+{
+    forward_type() = default;
+
+    constexpr forward_type(type_identity<T>) noexcept
+    {}
+
+    template<typename U>
+    constexpr forward_type(U&&) noexcept
+    {}
+};
+
+template<typename U>
+forward_type(U &&)->forward_type<U&&>;
+
+template<typename T>
+constexpr hera::type_identity<T> typeid_(T) noexcept
+{
+    return {};
+}
 } // namespace hera
