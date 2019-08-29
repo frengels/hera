@@ -10,7 +10,7 @@ struct next_fn
 {
     // returns the next following iterator
     template<hera::heterogeneous_iterator I>
-    [[nodiscard]] constexpr decltype(auto) operator()(const I& i) const
+    [[nodiscard]] constexpr decltype(auto) operator()(I i) const
         noexcept(noexcept(detail::decay_copy(++i)))
     {
         return detail::decay_copy(++i);
@@ -18,7 +18,7 @@ struct next_fn
 
     template<hera::heterogeneous_iterator                              I,
              hera::constant_convertible_to<hera::iter_difference_t<I>> C>
-    [[nodiscard]] constexpr decltype(auto) operator()(const I& i, C n) const
+    [[nodiscard]] constexpr decltype(auto) operator()(I i, C n) const
     {
         if constexpr (hera::random_access_iterator<I>)
         {
@@ -46,8 +46,7 @@ struct next_fn
     }
 
     template<hera::heterogeneous_iterator I, hera::sentinel_for<I> S>
-    [[nodiscard]] constexpr decltype(auto) operator()(const I& i,
-                                                      const S& bound) const
+    [[nodiscard]] constexpr decltype(auto) operator()(I i, S bound) const
     {
         // actual incrementing has to take place because a sentinel is not
         // required to ever be dereferenceable.
@@ -76,13 +75,13 @@ struct next_fn
              hera::sentinel_for<I>                                     S,
              hera::constant_convertible_to<hera::iter_difference_t<I>> Count>
     [[nodiscard]] constexpr auto
-    next_i_n_bound(const I& i, C n, const S& bound, Count cnt) const
+    next_i_n_bound(I i, C n, S bound, Count cnt) const
     {
         if constexpr ((decltype(i == bound)::value || C::value == 0))
         {
             // return a pair which contains the final iterator and the number of
             // steps required to get there.
-            return std::make_pair(i, cnt);
+            return std::make_pair(std::move(i), std::move(cnt));
         }
         else
         {
@@ -90,7 +89,7 @@ struct next_fn
                 ++i,
                 std::integral_constant<hera::iter_difference_t<I>,
                                        C::value - 1>{},
-                bound,
+                std::move(bound),
                 std::integral_constant<hera::iter_difference_t<I>,
                                        Count::value + 1>{});
         }
@@ -99,13 +98,12 @@ struct next_fn
     template<hera::heterogeneous_iterator                              I,
              hera::constant_convertible_to<hera::iter_difference_t<I>> C,
              hera::sentinel_for<I>                                     S>
-    [[nodiscard]] constexpr decltype(auto)
-    operator()(const I& i, C n, const S& bound) const
+    [[nodiscard]] constexpr decltype(auto) operator()(I i, C n, S bound) const
     {
         return next_i_n_bound(
-            i,
-            n,
-            bound,
+            std::move(i),
+            std::move(n),
+            std::move(bound),
             std::integral_constant<hera::iter_difference_t<I>, 0>{});
     }
 };
@@ -115,7 +113,7 @@ constexpr auto next = next_fn{};
 struct prev_fn
 {
     template<hera::bidirectional_iterator I>
-    [[nodiscard]] constexpr auto operator()(const I& i) const
+    [[nodiscard]] constexpr auto operator()(I i) const
         noexcept(noexcept(detail::decay_copy(--i)))
             -> decltype(detail::decay_copy(--i))
     {
@@ -124,11 +122,10 @@ struct prev_fn
 
     template<hera::bidirectional_iterator                              I,
              hera::constant_convertible_to<hera::iter_difference_t<I>> C>
-    [[nodiscard]] constexpr decltype(auto) operator()(const I& i,
-                                                      const C& n) const
+    [[nodiscard]] constexpr decltype(auto) operator()(I i, C n) const
     {
         return hera::next(
-            i,
+            std::move(i),
             std::integral_constant<hera::iter_difference_t<I>,
                                    -static_cast<hera::iter_difference_t<I>>(
                                        C::value)>{});
@@ -137,17 +134,16 @@ struct prev_fn
     template<hera::bidirectional_iterator                               I1,
              hera::constant_convertible_to<hera::iter_difference_t<I1>> C,
              hera::bidirectional_iterator                               I2>
-    [[nodiscard]] constexpr decltype(auto)
-    operator()(const I1& i, const C& n, const I2& bound) const
+    [[nodiscard]] constexpr decltype(auto) operator()(I1 i, C n, I2 bound) const
     {
         // if one has to be bidirectional, both should be.
         // sentinel_for is required in the following call to next.
         return hera::next(
-            i,
+            std::move(i),
             std::integral_constant<hera::iter_difference_t<I1>,
                                    -static_cast<hera::iter_difference_t<I1>>(
                                        C::value)>{},
-            bound);
+            std::move(bound));
     }
 };
 
