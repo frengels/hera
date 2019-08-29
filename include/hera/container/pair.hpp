@@ -13,6 +13,10 @@ namespace hera
 {
 template<typename T, typename U>
 class pair {
+public:
+    using first_type  = T;
+    using second_type = U;
+
 private:
     [[no_unique_address]] T first_{};
     [[no_unique_address]] U second_{};
