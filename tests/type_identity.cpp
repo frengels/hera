@@ -18,6 +18,11 @@ TEST_CASE("type_identity")
 
     auto tf = hera::type_identity<float>{}; // float
 
+    // typeid passes metafunctions through
+    auto typeid_tf = hera::typeid_(tf);
+
+    static_assert(decltype(typeid_tf == tf)::value);
+
     tf.transform(
         [](auto&& f) { static_assert(hera::same_as<float&&, decltype(f)>); });
 

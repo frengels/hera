@@ -75,4 +75,10 @@ constexpr hera::type_identity<T> typeid_(T) noexcept
 {
     return {};
 }
+
+template<hera::metafunction M>
+constexpr hera::type_identity<typename M::type> typeid_(M) noexcept
+{
+    return {};
+}
 } // namespace hera
