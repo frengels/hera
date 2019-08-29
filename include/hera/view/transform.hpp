@@ -125,6 +125,11 @@ private:
                  hera::random_access_iterator                   J = I>
         friend constexpr auto operator+(C n, const iterator& it) noexcept(
             noexcept(iterator<decltype(n + it.it_)>{it.parent_, n + it.it_}))
+            -> decltype(iterator<decltype(n + std::declval<const J&>())>{
+                it.parent_,
+                n + std::declval<const J&>()}) // this hefty workaround is
+                                               // required to make the function
+                                               // depend on J
         {
             return iterator<decltype(n + it.it_)>{it.parent_, n + it.it_};
         }

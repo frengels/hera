@@ -18,8 +18,7 @@ struct next_fn
 
     template<hera::heterogeneous_iterator                              I,
              hera::constant_convertible_to<hera::iter_difference_t<I>> C>
-    [[nodiscard]] constexpr decltype(auto) operator()(const I& i,
-                                                      const C& n) const
+    [[nodiscard]] constexpr decltype(auto) operator()(const I& i, C n) const
     {
         if constexpr (hera::random_access_iterator<I>)
         {
@@ -76,10 +75,8 @@ struct next_fn
              hera::constant_convertible_to<hera::iter_difference_t<I>> C,
              hera::sentinel_for<I>                                     S,
              hera::constant_convertible_to<hera::iter_difference_t<I>> Count>
-    [[nodiscard]] constexpr auto next_i_n_bound(const I&     i,
-                                                const C&     n,
-                                                const S&     bound,
-                                                const Count& cnt) const
+    [[nodiscard]] constexpr auto
+    next_i_n_bound(const I& i, C n, const S& bound, Count cnt) const
     {
         if constexpr ((decltype(i == bound)::value || C::value == 0))
         {
@@ -103,7 +100,7 @@ struct next_fn
              hera::constant_convertible_to<hera::iter_difference_t<I>> C,
              hera::sentinel_for<I>                                     S>
     [[nodiscard]] constexpr decltype(auto)
-    operator()(const I& i, const C& n, const S& bound) const
+    operator()(const I& i, C n, const S& bound) const
     {
         return next_i_n_bound(
             i,

@@ -62,5 +62,12 @@ TEST_CASE("transform")
 
         auto expect_12 = hera::next(expect_6); // 4 * 3
         static_assert(decltype(*expect_12)::value == 12);
+
+        SECTION("unpackable")
+        {
+            // tests proper forwarding for random_access_iterator concept
+            auto _ = hera::next(hera::begin(triple_even),
+                                std::integral_constant<std::ptrdiff_t, 10>{});
+        }
     }
 }
