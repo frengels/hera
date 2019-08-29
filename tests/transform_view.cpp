@@ -4,6 +4,8 @@
 #include "hera/begin_end.hpp"
 #include "hera/container/pair.hpp"
 #include "hera/container/tuple.hpp"
+#include "hera/view/filter.hpp"
+#include "hera/view/iota.hpp"
 #include "hera/view/transform.hpp"
 
 TEST_CASE("transform")
@@ -34,5 +36,31 @@ TEST_CASE("transform")
             hera::unpack(pairs_second, [](auto... xs) { return (xs + ...); });
 
         REQUIRE(sum_second == 18);
+    }
+
+    SECTION("pipe_with_filter")
+    {
+        auto ints = hera::iota_view<0>{};
+
+        auto triple_even =
+            ints | hera::views::filter([](auto integral_const) {
+                return std::bool_constant<(decltype(integral_const)::value %
+                                           2) == 0>{};
+            }) |
+            hera::views::transform([](auto even_consts) {
+                using const_type = decltype(even_consts);
+                return std::integral_constant<typename const_type::value_type,
+                                              const_type::value * 3>{};
+            });
+
+        auto expect_0 = hera::begin(triple_even); // 0 * 3
+
+        static_assert(decltype(*expect_0)::value == 0);
+        auto expect_6 = hera::next(expect_0); // 2 * 3
+
+        static_assert(decltype(*expect_6)::value == 6);
+
+        auto expect_12 = hera::next(expect_6); // 4 * 3
+        static_assert(decltype(*expect_12)::value == 12);
     }
 }
