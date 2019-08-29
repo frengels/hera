@@ -2,6 +2,7 @@
 
 #include "hera/at.hpp"
 #include "hera/container/pair.hpp"
+#include "hera/container/tuple.hpp"
 #include "hera/get.hpp"
 #include "hera/next_prev.hpp"
 #include "hera/view/head.hpp"
@@ -57,5 +58,22 @@ TEST_CASE("pair")
         REQUIRE(hera::get<1>(p) == 6.0f);
 
         static_assert(std::tuple_size_v<decltype(p)> == 2);
+    }
+
+    SECTION("pair_like")
+    {
+        auto tup = hera::tuple{"hello", 42};
+        auto p   = hera::pair{std::move(tup)};
+
+        static_assert(
+            hera::same_as<const char*, typename decltype(p)::first_type>);
+        static_assert(hera::same_as<int, typename decltype(p)::second_type>);
+
+        auto fwd_tup = hera::forward_as_tuple("hello", 42);
+        auto p1      = hera::pair{std::move(fwd_tup)};
+
+        static_assert(
+            hera::same_as<const char*, typename decltype(p1)::first_type>);
+        static_assert(hera::same_as<int, typename decltype(p1)::second_type>);
     }
 }

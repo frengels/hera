@@ -8,9 +8,22 @@
 #include "hera/distance.hpp"
 #include "hera/next_prev.hpp"
 #include "hera/ranges.hpp"
+#include "hera/size.hpp"
 
 namespace hera
 {
+template<typename T>
+concept pair_like = // clang-format off
+    requires (T&& t, 
+              std::integral_constant<std::size_t, 0> idx0, 
+              std::integral_constant<std::size_t, 1> idx1)
+    {
+        hera::size(std::forward<T>(t));
+        requires (decltype(hera::size(std::forward<T>(t)))::value == 2);
+        hera::at(std::forward<T>(t), idx0);
+        hera::at(std::forward<T>(t), idx1);
+    }; // clang-format on
+
 template<typename T, typename U>
 class pair {
 public:
@@ -32,6 +45,14 @@ public:
     {
         // using constructible_from concept doesn't work to constrain somehow
     }
+
+    template<pair_like P>
+    constexpr pair(P&& p)
+        : first_{hera::at(std::forward<P>(p),
+                          std::integral_constant<std::size_t, 0>{})},
+          second_{hera::at(std::forward<P>(p),
+                           std::integral_constant<std::size_t, 1>{})}
+    {}
 
 private:
     template<forward_range RT,
@@ -213,6 +234,16 @@ public:
 
 template<typename T, typename U>
 pair(T&&, U &&)->pair<std::decay_t<T>, std::decay_t<U>>;
+
+// basically deduce the decayed type of each entry
+template<pair_like P>
+pair(P&& p)
+    ->pair<std::decay_t<
+               decltype(hera::at(std::forward<P>(p),
+                                 std::integral_constant<std::size_t, 0>{}))>,
+           std::decay_t<
+               decltype(hera::at(std::forward<P>(p),
+                                 std::integral_constant<std::size_t, 1>{}))>>;
 
 template<typename T, typename U>
 constexpr hera::pair<std::decay_t<T>, std::decay_t<U>>
