@@ -70,12 +70,14 @@ struct forward_type : type_identity<T>
 template<typename U>
 forward_type(U &&)->forward_type<U&&>;
 
+// deduce the base type of the passed object and put it into a type_identity
 template<typename T>
-constexpr hera::type_identity<T> typeid_(T) noexcept
+constexpr hera::type_identity<std::decay_t<T>> typeid_(T&&) noexcept
 {
     return {};
 }
 
+// simply forward metafunctions into a type_identity
 template<hera::metafunction M>
 constexpr hera::type_identity<typename M::type> typeid_(M) noexcept
 {
