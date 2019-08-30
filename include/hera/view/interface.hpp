@@ -2,6 +2,7 @@
 
 #include <type_traits>
 
+#include "hera/distance.hpp"
 #include "hera/empty.hpp"
 #include "hera/next_prev.hpp"
 #include "hera/ranges.hpp"
@@ -75,21 +76,26 @@ public:
     }
 
     template<forward_range R = D> // clang-format off
-        requires sized_sentinel_for<sentinel_t<R>, iterator_t<R>> 
+        requires sentinel_for<sentinel_t<R>, iterator_t<R>>
     constexpr auto // clang-format on
-    size() noexcept(noexcept(hera::end(derived()) - hera::begin(derived())))
+    size() noexcept
     {
-        return hera::end(derived()) - hera::begin(derived());
+        return std::integral_constant<std::size_t,
+                                      decltype(hera::distance(
+                                          hera::begin(derived()),
+                                          hera::end(derived())))::value>{};
     }
 
     template<forward_range R = const D> // clang-format off
-        requires sized_sentinel_for<sentinel_t<R>, iterator_t<R>>
-    constexpr auto size() const // clang-format on 
-        noexcept(noexcept(hera::end(derived()) - hera::begin(derived())))
+        requires sentinel_for<sentinel_t<R>, iterator_t<R>>
+    constexpr auto // clang-format on
+    size() const noexcept
     {
-        return hera::end(derived()) - hera::begin(derived());
+        return std::integral_constant<std::size_t,
+                                      decltype(hera::distance(
+                                          hera::begin(derived()),
+                                          hera::end(derived())))::value>{};
     }
-    
 
     template<typename R = D> // clang-format off
         requires forward_range<R> && readable<iterator_t<R>> // clang-format on 

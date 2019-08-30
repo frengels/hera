@@ -78,6 +78,8 @@ TEST_CASE("filter_view")
                 return std::bool_constant<hera::same_as<float, decltype(x)>>{};
             });
 
+        static_assert(decltype(hera::size(filt_arr))::value == 0);
+
         static_assert(
             decltype(hera::begin(filt_arr) == hera::end(filt_arr))::value);
     }
@@ -92,13 +94,19 @@ TEST_CASE("filter_view")
                     hera::same_as<const char*, decltype(x)>>{};
             }};
 
+        static_assert(decltype(hera::size(single_match))::value == 1);
+
         auto no_match =
             hera::filter_view{tup, [](auto) { return std::false_type{}; }};
+
+        static_assert(decltype(hera::empty(no_match))::value);
 
         SECTION("match_all")
         {
             auto all_match =
                 hera::filter_view{tup, [](auto) { return std::true_type{}; }};
+
+            static_assert(decltype(hera::size(all_match))::value == 4);
         }
     }
 }
