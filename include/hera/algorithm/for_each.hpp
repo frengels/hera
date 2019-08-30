@@ -26,7 +26,8 @@ private:
         else
         {
             return invoke |
-                   std::is_nothrow_invocable_v<F, decltype(*std::declval<I>())>;
+                   std::is_nothrow_invocable_v<F&,
+                                               decltype(*std::declval<I&>())>;
         }
     }
 

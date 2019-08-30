@@ -76,7 +76,7 @@ private:
 
     private:
         template<typename J, typename NextFn>
-        static constexpr decltype(auto) predicate_next_impl(J it, NextFn op)
+        static constexpr auto predicate_next_impl(J it, NextFn op)
         {
             if constexpr (!dereferenceable<const J>)
             {
@@ -93,8 +93,7 @@ private:
         }
 
         template<typename J, typename NextFn>
-        static constexpr decltype(auto)
-        predicate_next(J it, NextFn op) noexcept(
+        static constexpr auto predicate_next(J it, NextFn op) noexcept(
             noexcept(predicate_next_impl(op(std::move(it)), std::move(op))))
         {
             return predicate_next_impl(op(std::move(it)), std::move(op));

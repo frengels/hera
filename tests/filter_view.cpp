@@ -1,5 +1,6 @@
 #include <catch2/catch.hpp>
 
+#include "hera/container/tuple.hpp"
 #include "hera/view/array.hpp"
 #include "hera/view/filter.hpp"
 #include "hera/view/iota.hpp"
@@ -79,5 +80,25 @@ TEST_CASE("filter_view")
 
         static_assert(
             decltype(hera::begin(filt_arr) == hera::end(filt_arr))::value);
+    }
+
+    SECTION("single_element")
+    {
+        auto tup = hera::tuple{"hello", 50, 49, 32};
+
+        auto single_match = hera::filter_view{
+            tup, [](auto x) {
+                return std::bool_constant<
+                    hera::same_as<const char*, decltype(x)>>{};
+            }};
+
+        auto no_match =
+            hera::filter_view{tup, [](auto) { return std::false_type{}; }};
+
+        SECTION("match_all")
+        {
+            auto all_match =
+                hera::filter_view{tup, [](auto) { return std::true_type{}; }};
+        }
     }
 }
