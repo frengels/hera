@@ -23,6 +23,7 @@ set(
   transform_view
   make_from_range
   type_identity
+  any_of_all_of
   )
 
 find_package(Catch2 REQUIRED)
