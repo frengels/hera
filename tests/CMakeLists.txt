@@ -24,6 +24,7 @@ set(
   make_from_range
   type_identity
   any_of_all_of
+  accumulate
   )
 
 find_package(Catch2 REQUIRED)
