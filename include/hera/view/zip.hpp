@@ -145,6 +145,12 @@ public:
         : iterators_{std::move(its)...}
     {}
 
+    constexpr hera::tuple<Its...> base() const
+        noexcept(std::is_nothrow_copy_constructible_v<hera::tuple<Its...>>)
+    {
+        return iterators_;
+    }
+
     template<typename... UIts> // clang-format off
         requires sizeof...(Its) == sizeof...(UIts) &&
             (forward_iterator<UIts> && ...)
@@ -375,6 +381,12 @@ public:
         std::is_nothrow_constructible_v<hera::tuple<Sents...>, Sents...>)
         : sentinels_{std::move(sents)...}
     {}
+
+    constexpr hera::tuple<Sents...> base() const
+        noexcept(std::is_nothrow_copy_constructible_v<hera::tuple<Sents...>>)
+    {
+        return sentinels_;
+    }
 
     template<typename... Its> // clang-format off
         requires sizeof...(Its) == sizeof...(Sents)
