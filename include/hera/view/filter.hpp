@@ -217,14 +217,6 @@ public:
         : base_{std::move(base)}
     {}
 
-    /*
-        template<forward_range R, hera::metafunction F>
-        constexpr filter_view(R&& r, F) noexcept(
-            noexcept(hera::views::all(std::forward<R>(r))))
-            : base_{hera::views::all(std::forward<R>(r))}
-        {}
-        */
-
     constexpr V base() const noexcept(std::is_nothrow_copy_constructible_v<V>)
     {
         return base_;
