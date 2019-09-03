@@ -168,6 +168,29 @@ public:
         return {};
     }
 
+    template<typename F> // clang-format off
+        requires (invocable<F, Ts> && ...)
+    constexpr auto transform(F&& fn) const noexcept // clang-format on
+    {
+        return hera::type_list<std::invoke_result_t<F, Ts>...>{};
+    }
+
+    template<hera::metafunction M> // clang-format off
+        requires (invocable<typename M::type, Ts> && ...)
+    constexpr auto transform(M) const noexcept // clang-format on
+    {
+        return hera::type_list<std::invoke_result_t<typename M::type, Ts>...>{};
+    }
+
+    template<typename... Fs> // clang-format off
+        requires (sizeof...(Ts) == sizeof...(Fs))
+    constexpr auto transform(hera::type_list<Fs...>) const noexcept // clang-format on
+    {
+        // move to constraints once gcc stops bugging
+        static_assert((invocable<Fs, Ts> && ...));
+        return hera::type_list<std::invoke_result_t<Fs, Ts>...>{};
+    }
+
     template<hera::constant_convertible_to<std::size_t> C> // clang-format off
         requires C::value < sizeof...(Ts)
     constexpr auto operator[](C idx) const noexcept // clang-format on
