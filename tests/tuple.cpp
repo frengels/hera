@@ -63,4 +63,15 @@ TEST_CASE("tuple")
 
         static_assert(hera::same_as<int&, decltype(tup[size_<0>])>);
     }
+
+    SECTION("assignable")
+    {
+        auto tup = hera::tuple<int, float>{5, 5.0f};
+
+        tup = hera::tuple<int, int>{42, 2};
+
+        tup = hera::tuple{43, 43};
+
+        hera::tuple<int, int> another_tup{tup};
+    }
 }

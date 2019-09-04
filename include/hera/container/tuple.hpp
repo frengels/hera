@@ -2,9 +2,12 @@
 
 #include <utility>
 
+#include "hera/begin_end.hpp"
 #include "hera/concepts.hpp"
 #include "hera/next_prev.hpp"
+#include "hera/ranges.hpp"
 #include "hera/sentinel.hpp"
+#include "hera/size.hpp"
 
 namespace hera
 {
@@ -32,7 +35,7 @@ public:
     template<typename... Args>
     constexpr tuple_box(Args&&... args) noexcept(
         std::is_nothrow_constructible_v<T, Args...>)
-        : value_{std::forward<Args>(args)...}
+        : value_(std::forward<Args>(args)...)
     {}
 
     constexpr T& get() & noexcept
@@ -285,8 +288,81 @@ public:
         using iterator_base<I, true>::iterator_base;
     };
 
+private:
+    using base_type_ =
+        detail::tuple_impl<std::index_sequence_for<Ts...>, Ts...>;
+
 public:
-    using detail::tuple_impl<std::index_sequence_for<Ts...>, Ts...>::tuple_impl;
+    using base_type_::tuple_impl;
+
+private:
+    template<std::size_t... Is, typename... Us>
+    constexpr tuple(std::index_sequence<Is...>, const hera::tuple<Us...>& other)
+        : base_type_{other[std::integral_constant<std::size_t, Is>{}]...}
+    {}
+
+    template<std::size_t... Is, typename... Us>
+    constexpr tuple(std::index_sequence<Is...>, hera::tuple<Us...>&& other)
+        : base_type_{
+              std::move(other)[std::integral_constant<std::size_t, Is>{}]...}
+    {}
+
+public:
+    template<typename... Us> // clang-format off
+            requires sizeof...(Ts) == sizeof...(Us)
+        constexpr tuple(const hera::tuple<Us...>& other) // clang-format on
+        : tuple{std::index_sequence_for<Us...>{}, other}
+    {}
+
+    template<typename... Us> // clang-format off
+            requires sizeof...(Ts) == sizeof...(Us)
+        constexpr tuple(hera::tuple<Us...>&& other) // clang-format on
+        : tuple{std::index_sequence_for<Us...>{}, std::move(other)}
+    {}
+
+private:
+    template<std::size_t... Is, typename... Us>
+    constexpr tuple& assign_impl(
+        std::index_sequence<Is...>,
+        const hera::tuple<Us...>&
+            other) noexcept((std::is_nothrow_assignable_v<Ts, Us> && ...))
+    {
+        (((*this)[std::integral_constant<std::size_t, Is>{}] =
+              other[std::integral_constant<std::size_t, Is>{}]),
+         ...);
+
+        return *this;
+    }
+
+    template<std::size_t... Is, typename... Us>
+    constexpr tuple& assign_impl(
+        std::index_sequence<Is...>,
+        hera::tuple<Us...>&&
+            other) noexcept((std::is_nothrow_assignable_v<Ts, Us&&> && ...))
+    {
+        (((*this)[std::integral_constant<std::size_t, Is>{}] =
+              std::move(other)[std::integral_constant<std::size_t, Is>{}]),
+         ...);
+
+        return *this;
+    }
+
+public:
+    template<typename... Us> // clang-format off
+        requires sizeof...(Ts) == sizeof...(Us)
+    constexpr tuple& operator=(const hera::tuple<Us...>& other) noexcept( // clang-format on
+            noexcept(assign_impl(std::index_sequence_for<Us...>{}, other)))
+    {
+        return assign_impl(std::index_sequence_for<Us...>{}, other);
+    }
+
+    template<typename... Us> // clang-format off
+        requires sizeof...(Ts) == sizeof...(Us)
+    constexpr tuple& operator=(hera::tuple<Us...>&& other) noexcept(noexcept( // clang-format on
+            assign_impl(std::index_sequence_for<Us...>{}, std::move(other))))
+    {
+        return assign_impl(std::index_sequence_for<Us...>{}, std::move(other));
+    }
 
     constexpr auto begin() noexcept
     {
@@ -429,6 +505,22 @@ public:
 
 template<typename... Ts>
 tuple(Ts&&...)->tuple<std::decay_t<Ts>...>;
+
+template<typename... Ts,
+         typename... Us,
+         template<typename>
+         typename TQual,
+         template<typename>
+         typename UQual> // clang-format off
+    requires (sizeof...(Ts) == sizeof...(Us)) &&
+        (common_reference_with<TQual<Ts>, UQual<Us>> && ...) // clang-format on
+    struct basic_common_reference<hera::tuple<Ts...>,
+                                  hera::tuple<Us...>,
+                                  TQual,
+                                  UQual>
+{
+    using type = hera::tuple<common_reference_t<TQual<Ts>, UQual<Us>>...>;
+};
 
 template<typename... Ts>
 constexpr hera::tuple<Ts&&...> forward_as_tuple(Ts&&... ts) noexcept(
