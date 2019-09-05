@@ -535,6 +535,32 @@ constexpr hera::tuple<std::decay_t<Ts>...> make_tuple(Ts&&... ts) noexcept(
 {
     return hera::tuple<std::decay_t<Ts>...>{std::forward<Ts>(ts)...};
 }
+
+namespace detail
+{
+template<typename T, std::size_t... Is, typename Tuple>
+constexpr T
+make_from_tuple_impl(std::index_sequence<Is...>, Tuple&& tup) noexcept(
+    std::is_nothrow_constructible_v<
+        T,
+        decltype(std::forward<Tuple>(
+            tup)[std::integral_constant<std::size_t, Is>{}]...)>)
+{
+    return T(
+        std::forward<Tuple>(tup)[std::integral_constant<std::size_t, Is>{}]...);
+}
+} // namespace detail
+
+template<typename T, typename Tuple>
+constexpr T
+make_from_tuple(Tuple&& tup) noexcept(noexcept(detail::make_from_tuple_impl(
+    std::make_index_sequence<decltype(hera::size(tup))::value>{},
+    std::forward<Tuple>(tup))))
+{
+    return detail::make_from_tuple_impl(
+        std::make_index_sequence<decltype(hera::size(tup))::value>{},
+        std::forward<Tuple>(tup));
+}
 } // namespace hera
 
 namespace std
