@@ -76,12 +76,13 @@ private:
 
     private:
         template<typename J, typename NextFn>
-        static constexpr auto predicate_next_impl(J it, NextFn op)
+        static constexpr auto predicate_next_impl(J it, NextFn op) noexcept
         {
-            if constexpr (!dereferenceable<const J>)
+            if constexpr (!dereferenceable<J>)
             {
                 return it;
             }
+            // return type is a constant so it's safe to ::value
             else if constexpr (std::invoke_result_t<Pred, decltype(*it)>::value)
             {
                 return it;

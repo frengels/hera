@@ -544,7 +544,7 @@ make_from_tuple_impl(std::index_sequence<Is...>, Tuple&& tup) noexcept(
     std::is_nothrow_constructible_v<
         T,
         decltype(std::forward<Tuple>(
-            tup)[std::integral_constant<std::size_t, Is>{}]...)>)
+            tup)[std::integral_constant<std::size_t, Is>{}])...>)
 {
     return T(
         std::forward<Tuple>(tup)[std::integral_constant<std::size_t, Is>{}]...);
