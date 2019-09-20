@@ -25,4 +25,18 @@ TEST_CASE("integer_sequence")
 
     static_assert(seq[size_<0>] == 0);
     static_assert(seq[size_<4>] == 6);
+
+    auto seq1 = hera::make_index_sequence<3>{};
+
+    static_assert(decltype(seq1.size())::value == 3);
+
+    hera::unpack(seq1, [](auto i0, auto i1, auto i2) {
+        static_assert(decltype(i0)::value == 0);
+        static_assert(decltype(i1)::value == 1);
+        static_assert(decltype(i2)::value == 2);
+    });
+
+    auto seq2 = hera::index_sequence_for<int, int, int, float, double>{};
+
+    static_assert(decltype(seq2.size())::value == 5);
 }
