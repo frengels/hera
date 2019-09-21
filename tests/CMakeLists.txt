@@ -27,6 +27,7 @@ set(
   zip_view
   accumulate
   integer_sequence
+  reorder_view
   )
 
 find_package(Catch2 REQUIRED)

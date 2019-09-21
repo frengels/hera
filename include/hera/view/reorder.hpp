@@ -8,14 +8,15 @@
 #include "hera/next_prev.hpp"
 #include "hera/size.hpp"
 #include "hera/view/all.hpp"
+#include "hera/view/detail/closure.hpp"
 #include "hera/view/interface.hpp"
 
 namespace hera
 {
 namespace detail
 {
-template<typename I>
-struct reordered_iterator_maybe_value_type
+template<typename I, bool Active>
+struct reorder_iterator_maybe_value_type
 {};
 
 template<typename I> // clang-format off
@@ -24,14 +25,14 @@ template<typename I> // clang-format off
         {
             typename iter_value_t<I>;
         } // clang-format on
-class reordered_iterator_maybe_value_type<I> {
+class reorder_iterator_maybe_value_type<I, true> {
     using value_type = iter_value_t<I>;
 };
 } // namespace detail
 
 template<forward_range V, std::size_t... Is> // clang-format off
     requires view<V>
-class reordered_view : public view_interface<reordered_view<V, Is...>> { // clang-format on
+class reorder_view : public view_interface<reorder_view<V, Is...>> { // clang-format on
 private:
     [[no_unique_address]] V base_;
 
@@ -42,8 +43,12 @@ private:
         std::remove_cvref_t<decltype(hera::begin(std::declval<V&>()))>;
 
     template<std::ptrdiff_t I>
+    static constexpr bool
+        in_range = (I < decltype(indices_.size())::value) && I >= 0;
+
+    template<std::ptrdiff_t I>
     static constexpr std::ptrdiff_t iter_offset = [] {
-        if constexpr (I >= decltype(indices_.size())::value || I < 0)
+        if constexpr (!in_range<I>)
         {
             return I;
         }
@@ -60,11 +65,12 @@ private:
                    std::integral_constant<std::ptrdiff_t, iter_offset<I>>{}))>;
 
     template<std::ptrdiff_t I>
-    class iterator
-        : detail::reordered_iterator_maybe_value_type<ith_iterator<I>> {
-        using begin_iterator_type    = base_iterator;
-        using current_iterator_type  = ith_iterator<I>;
-        static constexpr auto offset = iter_offset<I>;
+    class iterator : detail::reorder_iterator_maybe_value_type<ith_iterator<I>,
+                                                               in_range<I>> {
+        using begin_iterator_type           = base_iterator;
+        using current_iterator_type         = ith_iterator<I>;
+        static constexpr auto offset        = iter_offset<I>;
+        static constexpr bool iter_in_range = in_range<I>;
 
     public:
         using difference_type = std::ptrdiff_t;
@@ -140,15 +146,21 @@ private:
             return iterator<I - 1>{base_};
         }
 
-        template<dereferenceable It = ith_iterator<I>>
-        constexpr decltype(auto) operator*() const noexcept(noexcept(*base()))
+        template<bool InRange = iter_in_range> // clang-format off
+            requires InRange
+        constexpr decltype(auto) operator*() const noexcept(noexcept(*base())) // clang-format on
         {
             return *base();
         }
     };
 
 public:
-    constexpr reordered_view(V base, hera::index_sequence<Is...>) noexcept(
+    constexpr reorder_view(V base, hera::index_sequence<Is...>) noexcept(
+        std::is_nothrow_move_constructible_v<V>)
+        : base_{std::move(base)}
+    {}
+
+    constexpr reorder_view(V base, std::index_sequence<Is...>) noexcept(
         std::is_nothrow_move_constructible_v<V>)
         : base_{std::move(base)}
     {}
@@ -165,27 +177,81 @@ public:
 
     constexpr auto end() const noexcept
     {
-        auto dist = hera::distance(hera::begin(base_), hera::end(base_));
-        return iterator<decltype(dist)::value>(hera::begin(base_));
+        return iterator<sizeof...(Is)>{hera::begin(base_)};
     }
 
-    friend constexpr auto begin(reordered_view rv) noexcept
+    friend constexpr auto begin(reorder_view rv) noexcept
     {
         return rv.begin();
     }
 
-    friend constexpr auto end(reordered_view rv) noexcept
+    friend constexpr auto end(reorder_view rv) noexcept
     {
         return rv.end();
     }
 
     constexpr auto size() const noexcept
     {
-        return std::integral_constant<std::size_t, sizeof...(Is)>{};
+        return indices_.size();
+    }
+
+    constexpr auto empty() const noexcept
+    {
+        return indices_.empty();
     }
 };
 
 template<typename R, std::size_t... Is>
-reordered_view(R&&, hera::index_sequence<Is...>)
-    ->reordered_view<hera::all_view<R>, Is...>;
+reorder_view(R&&, hera::index_sequence<Is...>)
+    ->reorder_view<hera::all_view<R>, Is...>;
+
+template<typename R, std::size_t... Is>
+reorder_view(R&&, std::index_sequence<Is...>)
+    ->reorder_view<hera::all_view<R>, Is...>;
+
+namespace views
+{
+struct reorder_fn
+{
+    template<forward_range R, std::size_t... Is> // clang-format off
+            requires viewable_range<R> // clang-format on
+        constexpr auto operator()(R&&                         r,
+                                  hera::index_sequence<Is...> indices) const
+        noexcept(noexcept(hera::reorder_view{std::forward<R>(r),
+                                             std::move(indices)}))
+            -> decltype(hera::reorder_view{std::forward<R>(r),
+                                           std::move(indices)})
+    {
+        return hera::reorder_view{std::forward<R>(r), std::move(indices)};
+    }
+
+    template<forward_range R, std::size_t... Is> // clang-format off
+        requires viewable_range<R> // clang-format on
+        constexpr auto operator()(R&&                        r,
+                                  std::index_sequence<Is...> indices) const
+        noexcept(noexcept(hera::reorder_view{std::forward<R>(r),
+                                             std::move(indices)}))
+            -> decltype(hera::reorder_view{std::forward<R>(r),
+                                           std::move(indices)})
+    {
+        return hera::reorder_view{std::forward<R>(r), std::move(indices)};
+    }
+
+    template<std::size_t... Is>
+    constexpr auto operator()(hera::index_sequence<Is...> indices) const
+        noexcept(noexcept(detail::view_closure{*this, std::move(indices)}))
+    {
+        return detail::view_closure{*this, std::move(indices)};
+    }
+
+    template<std::size_t... Is>
+    constexpr auto operator()(std::index_sequence<Is...> indices) const
+        noexcept(noexcept(detail::view_closure{*this, std::move(indices)}))
+    {
+        return detail::view_closure{*this, std::move(indices)};
+    }
+};
+
+constexpr auto reorder = reorder_fn{};
+} // namespace views
 } // namespace hera
