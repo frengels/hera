@@ -4,7 +4,6 @@
 #include <variant>
 
 #include "hera/algorithm/unpack.hpp"
-#include "hera/algorithm/upper_bound.hpp"
 #include "hera/container/integer_sequence.hpp"
 #include "hera/container/pair.hpp"
 #include "hera/container/type_list.hpp"
