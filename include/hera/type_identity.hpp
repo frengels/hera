@@ -14,28 +14,16 @@ struct type_identity
 
     type_identity() = default;
 
-    template<hera::metafunction Meta>
-    constexpr auto operator==(Meta) const noexcept
+    template<typename U>
+    constexpr auto operator==(hera::type_identity<U>) const noexcept
     {
-        return std::bool_constant<hera::same_as<T, typename Meta::type>>{};
+        return std::bool_constant<hera::same_as<T, U>>{};
     }
 
-    template<hera::metafunction Meta>
-    friend constexpr auto operator==(Meta, type_identity) noexcept
+    template<typename U>
+    constexpr auto operator!=(hera::type_identity<U>) const noexcept
     {
-        return std::bool_constant<hera::same_as<typename Meta::type, T>>{};
-    }
-
-    template<hera::metafunction Meta>
-    constexpr auto operator!=(Meta) const noexcept
-    {
-        return std::bool_constant<!hera::same_as<T, typename Meta::type>>{};
-    }
-
-    template<hera::metafunction Meta>
-    friend constexpr auto operator!=(Meta, type_identity) noexcept
-    {
-        return std::bool_constant<!hera::same_as<typename Meta::type, T>>{};
+        return std::bool_constant<!hera::same_as<T, U>>{};
     }
 
     template<hera::invocable<T> F>

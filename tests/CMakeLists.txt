@@ -28,6 +28,7 @@ set(
   accumulate
   integer_sequence
   reorder_view
+  sort
   )
 
 find_package(Catch2 REQUIRED)

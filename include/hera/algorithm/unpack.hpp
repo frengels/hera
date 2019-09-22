@@ -13,15 +13,13 @@ struct unpack_fn
     static constexpr decltype(auto) invoke_with_sequence(
         std::integer_sequence<DiffT, Is...>,
         const I i,
-        F&&     fn) noexcept(noexcept(std::invoke(std::forward<F>(fn),
-                                              *hera::next(
-                                                  i,
-                                                  std::integral_constant<
-                                                      DiffT,
-                                                      Is>{})...)))
+        F&&     fn) noexcept(noexcept(std::
+                                      forward<F>(fn)(*hera::next(
+                                          i,
+                                          std::integral_constant<DiffT,
+                                                                 Is>{})...)))
     {
-        return std::invoke(
-            std::forward<F>(fn),
+        return std::forward<F>(fn)(
             *hera::next(i, std::integral_constant<DiffT, Is>{})...);
     }
 
@@ -44,15 +42,13 @@ struct unpack_fn
 
     template<hera::bounded_range R, typename F>
     constexpr decltype(auto) operator()(R&& r, F&& fn) const
-        noexcept(noexcept(std::invoke(*this,
-                                      hera::begin(std::forward<R>(r)),
-                                      hera::end(std::forward<R>(r)),
-                                      std::forward<F>(fn))))
+        noexcept(noexcept((*this)(hera::begin(std::forward<R>(r)),
+                                  hera::end(std::forward<R>(r)),
+                                  std::forward<F>(fn))))
     {
-        return std::invoke(*this,
-                           hera::begin(std::forward<R>(r)),
-                           hera::end(std::forward<R>(r)),
-                           std::forward<F>(fn));
+        return (*this)(hera::begin(std::forward<R>(r)),
+                       hera::end(std::forward<R>(r)),
+                       std::forward<F>(fn));
     }
 };
 

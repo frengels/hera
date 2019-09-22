@@ -209,6 +209,10 @@ public:
     constexpr array_view(std::array<T, Extent>& arr) noexcept : ptr_{arr.data()}
     {}
 
+    constexpr array_view(const std::array<T, Extent>& arr) noexcept
+        : ptr_{arr.data()}
+    {}
+
     template<hera::constant_convertible_to<size_type> Len>
     constexpr array_view(T* ptr, Len) noexcept : ptr_{ptr}
     {}
@@ -262,6 +266,15 @@ public:
         return ptr_[idx];
     }
 };
+
+template<typename T, std::size_t N>
+array_view(const std::array<T, N>&)->array_view<const T, N>;
+
+template<typename Container, hera::constant_convertible_to<std::size_t> Len>
+array_view(Container&, Len)
+    ->array_view<
+        std::remove_pointer_t<decltype(std::declval<Container&>().data())>,
+        Len::value>;
 
 template<typename T, hera::constant_convertible_to<std::size_t> Len>
 array_view(T* ptr, Len)->array_view<T, Len::value>;

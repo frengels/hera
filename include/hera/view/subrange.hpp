@@ -33,12 +33,12 @@ public:
         return end_;
     }
 
-    friend constexpr I begin(subrange&& sr) noexcept(noexcept(sr.begin()))
+    friend constexpr I begin(subrange sr) noexcept(noexcept(sr.begin()))
     {
         return sr.begin();
     }
 
-    friend constexpr S end(subrange&& sr) noexcept(noexcept(sr.end()))
+    friend constexpr S end(subrange sr) noexcept(noexcept(sr.end()))
     {
         return sr.end();
     }
