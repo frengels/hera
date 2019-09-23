@@ -118,11 +118,7 @@ private:
             return iterator<iterator_type>{predicate_next(it_, hera::prev)};
         }
 
-        template<typename D = const I> // clang-format off
-            requires requires(D d)
-            {
-                { *d } -> can_reference;
-            } // clang-format on
+        template<dereferenceable D = const I>
         constexpr decltype(auto) operator*() const noexcept(noexcept(*it_))
         {
             return *it_;
