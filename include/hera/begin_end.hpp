@@ -2,8 +2,7 @@
 
 #include <utility>
 
-#include "hera/iterator.hpp"
-#include "hera/normal_iterator.hpp"
+#include "hera/iterator/concepts.hpp"
 #include "hera/size.hpp"
 #include "hera/utility/detail/decay_copy.hpp"
 #include "hera/utility/detail/priority_tag.hpp"

@@ -3,7 +3,7 @@
 #include <type_traits>
 
 #include "hera/constant.hpp"
-#include "hera/iterator.hpp"
+#include "hera/iterator/concepts.hpp"
 
 template<hera::constant_incrementable I>
 void verify_const_incrementable(I)

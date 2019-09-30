@@ -1,7 +1,7 @@
 #pragma once
 
 #include "hera/constant.hpp"
-#include "hera/iterator.hpp"
+#include "hera/iterator/concepts.hpp"
 #include "hera/sentinel.hpp"
 #include "hera/view/interface.hpp"
 

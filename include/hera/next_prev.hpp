@@ -1,7 +1,7 @@
 #pragma once
 
 #include "hera/constant.hpp"
-#include "hera/iterator.hpp"
+#include "hera/iterator/concepts.hpp"
 #include "hera/utility/detail/decay_copy.hpp"
 
 namespace hera

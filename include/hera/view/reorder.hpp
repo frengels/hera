@@ -4,7 +4,7 @@
 #include "hera/container/integer_sequence.hpp"
 #include "hera/container/type_list.hpp"
 #include "hera/distance.hpp"
-#include "hera/iterator.hpp"
+#include "hera/iterator/concepts.hpp"
 #include "hera/next_prev.hpp"
 #include "hera/size.hpp"
 #include "hera/view/all.hpp"
