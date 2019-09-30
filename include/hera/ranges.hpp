@@ -4,7 +4,7 @@
 #include "hera/begin_end.hpp"
 #include "hera/constant.hpp"
 #include "hera/iterator/concepts.hpp"
-#include "hera/sentinel.hpp"
+#include "hera/iterator/sentinel.hpp"
 #include "hera/size.hpp"
 
 namespace hera

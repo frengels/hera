@@ -1,9 +1,9 @@
 #pragma once
 
 #include "hera/distance.hpp"
+#include "hera/iterator/sentinel.hpp"
 #include "hera/next_prev.hpp"
 #include "hera/ranges.hpp"
-#include "hera/sentinel.hpp"
 
 namespace hera
 {

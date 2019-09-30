@@ -4,7 +4,7 @@
 
 #include "hera/constant.hpp"
 #include "hera/get.hpp"
-#include "hera/sentinel.hpp"
+#include "hera/iterator/sentinel.hpp"
 #include "hera/view/detail/closure.hpp"
 #include "hera/view/interface.hpp"
 

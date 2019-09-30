@@ -3,7 +3,7 @@
 #include <array>
 
 #include "hera/constant.hpp"
-#include "hera/sentinel.hpp"
+#include "hera/iterator/sentinel.hpp"
 #include "hera/view/interface.hpp"
 
 namespace hera
