@@ -171,4 +171,13 @@ concept relation = predicate<R, T, T>&& predicate<R, U, U>&&
 
 template<typename R, typename T, typename U>
 concept strict_weak_order = relation<R, T, U>;
+
+template<typename T>
+concept integral = std::is_integral_v<T>;
+
+template<typename T>
+concept signed_integral = integral<T>&& std::is_signed_v<T>;
+
+template<typename T>
+concept unsigned_integral = integral<T> && !signed_integral<T>;
 } // namespace hera
