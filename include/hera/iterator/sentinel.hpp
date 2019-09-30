@@ -9,12 +9,80 @@ namespace hera
 struct bounded_sentinel
 {
     constexpr bounded_sentinel() noexcept = default;
+
+    constexpr auto operator==(bounded_sentinel) const noexcept -> std::true_type
+    {
+        return {};
+    }
+
+    constexpr auto operator!=(bounded_sentinel) const noexcept
+        -> std::false_type
+    {
+        return {};
+    }
+
+    constexpr auto operator<(bounded_sentinel) const noexcept -> std::false_type
+    {
+        return {};
+    }
+
+    constexpr auto operator>(bounded_sentinel) const noexcept -> std::false_type
+    {
+        return {};
+    }
+
+    constexpr auto operator<=(bounded_sentinel) const noexcept -> std::true_type
+    {
+        return {};
+    }
+
+    constexpr auto operator>=(bounded_sentinel) const noexcept -> std::true_type
+    {
+        return {};
+    }
 };
 
 // the default sentinel for views which have infinite bounds, such as iota_view.
 struct unbounded_sentinel
 {
-    constexpr unbounded_sentinel() noexcept = default;
+
+    unbounded_sentinel() = default;
+
+    constexpr auto operator==(unbounded_sentinel) const noexcept
+        -> std::true_type
+    {
+        return {};
+    }
+
+    constexpr auto operator!=(unbounded_sentinel) const noexcept
+        -> std::false_type
+    {
+        return {};
+    }
+
+    constexpr auto operator<(unbounded_sentinel) const noexcept
+        -> std::false_type
+    {
+        return {};
+    }
+
+    constexpr auto operator>(unbounded_sentinel) const noexcept
+        -> std::false_type
+    {
+        return {};
+    }
+
+    constexpr auto operator<=(unbounded_sentinel) const noexcept
+        -> std::true_type
+    {
+        return {};
+    }
+
+    constexpr auto operator>=(unbounded_sentinel) const noexcept
+        -> std::true_type
+    {
+        return {};
+    }
 
     template<hera::constant_incrementable I>
     constexpr std::false_type operator==(const I&) const noexcept
