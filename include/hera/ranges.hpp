@@ -82,13 +82,11 @@ template<typename R>
 concept forwarding_range = range<R>&& detail::range_impl<R>;
 
 template<typename R>
-concept unbounded_range =
-    range<R>&& unbounded_sentinel_for<sentinel_t<R>, iterator_t<R>>;
+concept unbounded_range = range<R>&& unbounded_iterator<iterator_t<R>>&&
+                                     same_as<hera::unbounded_sentinel, sentinel_t<R>>;
 
 template<typename R>
-concept bounded_range =
-    range<R>&& bounded_sentinel_for<sentinel_t<R>, iterator_t<R>>;
-
+concept bounded_range = range<R> && !unbounded_range<R>;
 template<typename R>
 concept empty_range = range<R>&& requires(R& r)
 {

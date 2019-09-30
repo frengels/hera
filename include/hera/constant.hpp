@@ -30,20 +30,23 @@ template<typename C, typename T>
 concept constant_same_as = constant<C>&& same_as<typename C::value_type, T>;
 
 template<typename C, auto I>
-concept constant_less_than =
-    constant_convertible_to<C, decltype(I)>&& C::value < I;
+concept constant_less_than = constant_convertible_to<C, decltype(I)> &&
+                             (C::value < I);
 
 template<typename C, auto I>
-concept constant_less_than_equal =
-    constant_convertible_to<C, decltype(I)>&& C::value <= I;
+concept constant_less_than_equal = constant_convertible_to<C, decltype(I)> &&
+                                   (C::value <= I);
 
 template<typename C, auto I>
-concept constant_greater_than =
-    constant_convertible_to<C, decltype(I)>&& C::value > I;
+concept constant_greater_than = constant_convertible_to<C, decltype(I)> &&
+                                (C::value > I);
 
 template<typename C, auto I>
-concept constant_greater_than_equal =
-    constant_convertible_to<C, decltype(I)>&& C::value >= I;
+concept constant_greater_than_equal = constant_convertible_to<C, decltype(I)> &&
+                                      (C::value >= I);
+
+template<typename C>
+concept constant_boolean = constant<C>&& boolean<typename C::value_type>;
 
 namespace detail
 {
@@ -52,10 +55,14 @@ concept constant_weakly_equality_comparable_with =
     requires(const std::remove_reference_t<T>& t,
              const std::remove_reference_t<U>& u) // clang-format off
     {
-        { t == u } -> constant_same_as<bool>;
-        { t != u } -> constant_same_as<bool>;
-        { u == t } -> constant_same_as<bool>;
-        { u != t } -> constant_same_as<bool>;
+        { t == u };
+        requires constant_boolean<decltype(t == u)>;
+        { t != u };
+        requires constant_boolean<decltype(t != u)>;
+        { u == t };
+        requires constant_boolean<decltype(u == t)>;
+        { u != t };
+        requires constant_boolean<decltype(u != t)>;
     }; // clang-format on
 } // namespace detail
 
@@ -70,10 +77,14 @@ concept constant_totally_ordered =
         const std::remove_reference_t<T>& a,
         const std::remove_reference_t<T>& b)
     {
-        { a < b } -> constant_same_as<bool>;
-        { a > b } -> constant_same_as<bool>;
-        { a <= b } -> constant_same_as<bool>;
-        { a >= b } -> constant_same_as<bool>;
+        { a < b };
+        requires constant_boolean<decltype(a < b)>;
+        { a > b };
+        requires constant_boolean<decltype(a > b)>;
+        { a <= b };
+        requires constant_boolean<decltype(a <= b)>;
+        { a >= b };
+        requires constant_boolean<decltype(a >= b)>;
     }; // clang-format on
 
 template<typename F, typename... Args>

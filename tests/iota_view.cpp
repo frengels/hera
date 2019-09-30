@@ -2,11 +2,15 @@
 
 #include "hera/view/iota.hpp"
 
+template<hera::unbounded_range R>
+constexpr auto verify_unbounded_range(R)
+{}
+
 TEST_CASE("iota_view")
 {
     auto iota = hera::iota_view<0>{};
 
-    static_assert(hera::unbounded_range<decltype(iota)>);
+    verify_unbounded_range(iota);
     static_assert(!hera::bounded_range<decltype(iota)>);
     static_assert(hera::forwarding_range<decltype(iota)>);
 

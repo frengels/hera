@@ -54,7 +54,8 @@ concept assignable_from = std::is_lvalue_reference_v<LHS>&&
         const std::remove_reference_t<RHS>&>&& // clang-format off
     requires(LHS lhs, RHS&& rhs)
     {
-        { lhs = static_cast<RHS&&>(rhs) } -> same_as<LHS>;
+        { lhs = static_cast<RHS&&>(rhs) };
+        requires same_as<decltype(lhs = static_cast<RHS&&>(rhs)), LHS>;
     }; // clang-format on
 
 template<typename T>
@@ -66,20 +67,34 @@ concept boolean = movable<std::remove_cvref_t<B>>&& // clang-format off
     requires(const std::remove_reference_t<B>& b1, 
         const std::remove_reference_t<B>& b2, const bool a) 
     {
-        { b1 } -> convertible_to<bool>;
-        { !b1 } -> convertible_to<bool>;
-        { b1 && b2 } -> same_as<bool>;
-        { b1 && a } -> same_as<bool>;
-        { a && b2 } -> same_as<bool>;
-        { b1 || b2 } -> same_as<bool>;
-        { b1 || a } -> same_as<bool>;
-        { a || b2 } -> same_as<bool>;
-        { b1 == b2 } -> same_as<bool>;
-        { b1 == a } -> same_as<bool>;
-        { a == b2 } -> same_as<bool>;
-        { b1 != b2 } -> same_as<bool>;
-        { b1 != a } -> same_as<bool>;
-        { a != b2 } -> same_as<bool>;
+        { b1 };
+        requires convertible_to<decltype(b1), bool>;
+        { !b1 };
+        requires convertible_to<decltype(!b1), bool>;
+        { b1 && b2 };
+        requires same_as<decltype(b1 && b2), bool>;
+        { b1 && a };
+        requires same_as<decltype(b1 && a), bool>;
+        { a && b2 };
+        requires same_as<decltype(a && b2), bool>;
+        { b1 || b2 };
+        requires same_as<decltype(b1 || b2), bool>;
+        { b1 || a };
+        requires same_as<decltype(b1 || a), bool>;
+        { a || b2 };
+        requires same_as<decltype(a || b2), bool>;
+        { b1 == b2 };
+        requires same_as<decltype(b1 == b2), bool>;
+        { b1 == a };
+        requires same_as<decltype(b1 == a), bool>;
+        { a == b2 };
+        requires same_as<decltype(a == b2), bool>;
+        { b1 != b2 };
+        requires same_as<decltype(b1 != b2), bool>;
+        { b1 != a };
+        requires same_as<decltype(b1 != a), bool>;
+        { a != b2 };
+        requires same_as<decltype(a != b2), bool>;
 };
 // clang-format on
 
