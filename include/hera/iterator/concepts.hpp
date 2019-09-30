@@ -119,4 +119,19 @@ concept random_access_iterator = bidirectional_iterator<I>&&
         { n + i } -> detail::random_access_iterator_nonrecursive;
         { i - n } -> detail::random_access_iterator_nonrecursive;
     }; // clang-format on
+
+template<typename I>
+concept unbounded_iterator =
+    heterogeneous_iterator<I>&& sentinel_for<hera::unbounded_sentinel, I>;
+
+template<typename I>
+concept bounded_iterator = heterogeneous_iterator<I> && !unbounded_iterator<I>;
+
+template<typename S, typename I>
+concept bounded_sentinel_for = bounded_iterator<I>&& sentinel_for<S, I>;
+
+template<typename S, typename I>
+concept unbounded_sentinel_for = unbounded_iterator<I>&&
+    same_as<hera::unbounded_sentinel,
+            S>; // sentinel_for checked in unbounded_iterator
 } // namespace hera
