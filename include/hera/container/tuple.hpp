@@ -2,6 +2,7 @@
 
 #include <utility>
 
+#include "hera/algorithm/unpack.hpp"
 #include "hera/begin_end.hpp"
 #include "hera/concepts.hpp"
 #include "hera/iterator/sentinel.hpp"
@@ -426,6 +427,92 @@ public:
     constexpr std::bool_constant<sizeof...(Ts) == 0> empty() const noexcept
     {
         return {};
+    }
+
+    // push_back & emplace_back variants
+
+    template<typename T, typename... Args>
+    constexpr hera::tuple<Ts..., T> emplace_back(Args&&... args) const&
+    {
+        return hera::unpack(*this, [&](auto&&... xs) {
+            return hera::tuple<Ts..., T>{xs..., T(std::forward<Args>(args)...)};
+        });
+    }
+
+    template<typename T, typename... Args>
+    constexpr hera::tuple<Ts..., T> emplace_back(Args&&... args) &&
+    {
+        return hera::unpack(*this, [&](auto&&... xs) {
+            return hera::tuple<Ts..., T>{std::move(xs)...,
+                                         T(std::forward<Args>(args)...)};
+        });
+    }
+
+    template<typename T>
+    constexpr hera::tuple<Ts..., T> push_back(const T& val) const&
+    {
+        return emplace_back<T>(val);
+    }
+
+    template<typename T>
+    constexpr hera::tuple<Ts..., T> push_back(const T& val) &&
+    {
+        return std::move(*this).template emplace_back<T>(val);
+    }
+
+    template<typename T>
+    constexpr hera::tuple<Ts..., T> push_back(T&& val) const&
+    {
+        return emplace_back<T>(std::move(val));
+    }
+
+    template<typename T>
+    constexpr hera::tuple<Ts..., T> push_back(T&& val) &&
+    {
+        return std::move(*this).template emplace_back<T>(std::move(val));
+    }
+
+    // push_front & emplace_front variants
+
+    template<typename T, typename... Args>
+    constexpr hera::tuple<T, Ts...> emplace_front(Args&&... args) const&
+    {
+        return hera::unpack(*this, [&](auto&&... xs) {
+            return hera::tuple<T, Ts...>{T(std::forward<Args>(args)...), xs...};
+        });
+    }
+
+    template<typename T, typename... Args>
+    constexpr hera::tuple<T, Ts...> emplace_front(Args&&... args) &&
+    {
+        return hera::unpack(*this, [&](auto&&... xs) {
+            return hera::tuple<T, Ts...>{T(std::forward<Args>(args)...),
+                                         std::move(xs)...};
+        });
+    }
+
+    template<typename T>
+    constexpr hera::tuple<T, Ts...> push_front(const T& val) const&
+    {
+        return emplace_front<T>(val);
+    }
+
+    template<typename T>
+    constexpr hera::tuple<T, Ts...> push_front(const T& val) &&
+    {
+        return std::move(*this).template emplace_front<T>(val);
+    }
+
+    template<typename T>
+    constexpr hera::tuple<T, Ts...> push_front(T&& val) const&
+    {
+        return emplace_front<T>(std::move(val));
+    }
+
+    template<typename T>
+    constexpr hera::tuple<T, Ts...> push_front(T&& val) &&
+    {
+        return std::move(*this).template emplace_front<T>(std::move(val));
     }
 
     template<hera::constant_convertible_to<std::size_t> C> // clang-format off

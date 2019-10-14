@@ -1,6 +1,7 @@
 #include <catch2/catch.hpp>
 
 #include <cstring>
+#include <string>
 
 #include "hera/begin_end.hpp"
 #include "hera/container/tuple.hpp"
@@ -73,5 +74,22 @@ TEST_CASE("tuple")
         tup = hera::tuple{43, 43};
 
         hera::tuple<int, int> another_tup{tup};
+    }
+
+    SECTION("emplace_back/front")
+    {
+        auto tup = hera::tuple{1, 2, 3};
+
+        auto tup1 = tup.push_back(4);
+        REQUIRE(tup1.back() == 4);
+        REQUIRE(tup1.size() == 4);
+
+        auto tup_str = hera::tuple<std::string, std::string>{"hi", "world"};
+        auto tup_str1 =
+            std::move(tup_str).emplace_front<std::string>("knock knock");
+
+        REQUIRE(tup_str.back() != "world"); // show the moved from state
+        REQUIRE(tup_str1.back() == "world");
+        REQUIRE(tup_str1.front() == "knock knock");
     }
 }

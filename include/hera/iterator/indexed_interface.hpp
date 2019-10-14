@@ -45,7 +45,7 @@ concept unbounded_concept = hera::iterator_extent<E> &&
                             (E::extent_type == hera::extent::unbounded);
 } // namespace detail
 
-template<typename D,
+template<template<auto> typename D,
          hera::signed_integral Diff,
          Diff                  I,
          hera::iterator_extent E>
