@@ -55,49 +55,40 @@ inline constexpr auto begin = begin_impl::fn{};
 
 namespace end_impl
 {
-using hera::detail::decay_copy;
-using hera::detail::priority_tag;
-
-template<typename R>
-constexpr auto
-end(priority_tag<4>,
-    R& r) noexcept(noexcept(decay_copy(std::forward<R>(r).end())))
-    -> decltype(decay_copy(std::forward<R>(r).end()))
-{
-    return decay_copy(std::forward<R>(r).end());
-}
-
 template<typename R>
 void end(R&&) = delete;
 
-template<typename R>
-constexpr auto
-end(priority_tag<3>,
-    R&& r) noexcept(noexcept(decay_copy(end(std::forward<R>(r)))))
-    -> decltype(decay_copy(end(std::forward<R>(r))))
+struct fn
 {
-    return decay_copy(end(std::forward<R>(r)));
-}
+private:
+    template<typename R>
+    static constexpr auto impl(hera::detail::priority_tag<4>,
+                               R& r) noexcept(noexcept(r.end()))
+        -> decltype(r.end())
+    {
+        return r.end();
+    }
+
+    template<typename R>
+    static constexpr auto impl(hera::detail::priority_tag<3>, R&& r) noexcept(
+        noexcept(end(std::forward<R>(r)))) -> decltype(end(std::forward<R>(r)))
+    {
+        return end(std::forward<R>(r));
+    }
+
+public:
+    template<typename R>
+    constexpr auto operator()(R&& r) const noexcept(
+        noexcept(impl(hera::detail::max_priority_tag, std::forward<R>(r))))
+        -> decltype(impl(hera::detail::max_priority_tag, std::forward<R>(r)))
+    {
+        return impl(hera::detail::max_priority_tag, std::forward<R>(r));
+    }
+};
 } // namespace end_impl
 
 inline namespace cpo
 {
-struct end_fn
-{
-    // past the end iterators have other requirements than regular iterators,
-    // therefore they don't need to be a heterogeneous iterator.
-    template<typename R>
-    constexpr auto operator()(R&& r) const
-        noexcept(noexcept(::hera::end_impl::end(hera::detail::max_priority_tag,
-                                                std::forward<R>(r))))
-            -> decltype(::hera::end_impl::end(hera::detail::max_priority_tag,
-                                              std::forward<R>(r)))
-    {
-        return ::hera::end_impl::end(hera::detail::max_priority_tag,
-                                     std::forward<R>(r));
-    }
-};
-
-constexpr auto end = end_fn{};
+inline constexpr auto end = end_impl::fn{};
 } // namespace cpo
 } // namespace hera
