@@ -22,5 +22,5 @@ concept unbounded = hera::same_as<B, infinite>;
 
 // check whether B indicates a bound
 template<typename B>
-concept bounds = bounded<B> || unbounded<B>;
+concept bound = bounded<B> || unbounded<B>;
 } // namespace hera
