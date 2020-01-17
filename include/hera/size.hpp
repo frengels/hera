@@ -58,4 +58,18 @@ concept sized = // clang-format off
     {
         hera::size(r);
     }; // clang-format off
+
+template<typename R>
+concept bounded_size = sized<R> && // clang-format off
+    requires (const R& r)
+    {
+        { hera::size(r) } -> hera::bounded;
+    }; // clang-format on
+
+template<typename R>
+concept unbounded_size = sized<R>&& // clang-format off
+    requires (const R& r)
+    {
+        { hera::size(r) } -> hera::unbounded;
+    }; // clang-format off
 } // namespace hera

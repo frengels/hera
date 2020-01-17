@@ -23,6 +23,7 @@ TEST_CASE("size")
     SECTION("infinite")
     {
         static_assert(hera::sized<infinite_range>);
+        static_assert(hera::unbounded_size<infinite_range>);
 
         auto inf = infinite_range{};
         auto sz  = hera::size(inf);
@@ -33,6 +34,7 @@ TEST_CASE("size")
     SECTION("finite")
     {
         static_assert(hera::sized<finite_range>);
+        static_assert(hera::bounded_size<finite_range>);
 
         auto fin = finite_range{};
         auto sz  = hera::size(fin);
