@@ -23,9 +23,6 @@ TEST_CASE("integer_sequence")
         static_assert(decltype(i5)::value == 6);
     });
 
-    static_assert(seq[size_<0>] == 0);
-    static_assert(seq[size_<4>] == 6);
-
     auto seq1 = hera::make_index_sequence<3>{};
 
     static_assert(decltype(seq1.size())::value == 3);
