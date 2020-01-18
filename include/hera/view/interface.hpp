@@ -29,17 +29,9 @@ private:
     }
 
 public:
-    constexpr std::false_type empty() const
-        noexcept requires hera::unbounded_size<D>
+    constexpr auto empty() const noexcept
     {
-        return {};
-    }
-
-    constexpr auto empty() const noexcept requires hera::bounded_size<D>
-    {
-        constexpr std::size_t sz = hera::size(derived());
-
-        if constexpr (sz == 0)
+        if constexpr (hera::empty_range<decltype(derived())>)
         {
             return std::true_type{};
         }
