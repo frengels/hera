@@ -13,7 +13,6 @@
 #include "hera/utility/detail/sort.hpp"
 #include "hera/view/array.hpp"
 #include "hera/view/reorder.hpp"
-#include "hera/view/subrange.hpp"
 
 namespace hera
 {
@@ -90,7 +89,7 @@ public:
     template<forward_iterator I, sentinel_for<I> S, typename Compare>
     constexpr auto operator()(I it, S sent, Compare comp) const noexcept
     {
-        return impl(hera::subrange{it, sent}, std::move(comp));
+        // return impl(hera::subrange{it, sent}, std::move(comp));
     }
 };
 

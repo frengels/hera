@@ -6,7 +6,6 @@
 #include "hera/get.hpp"
 #include "hera/next_prev.hpp"
 #include "hera/view/head.hpp"
-#include "hera/view/subrange.hpp"
 #include "hera/view/tuple.hpp"
 
 TEST_CASE("pair")
@@ -30,7 +29,8 @@ TEST_CASE("pair")
         auto tv   = hera::tuple_view{tup};
         auto head = tv | hera::views::head;
 
-        auto tail = hera::subrange{hera::next(hera::begin(tv)), hera::end(tv)};
+        // auto tail = hera::subrange{hera::next(hera::begin(tv)),
+        // hera::end(tv)};
 
         auto p1 = hera::pair<int, int>{std::piecewise_construct, head, tail};
     }

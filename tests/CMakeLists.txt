@@ -9,7 +9,6 @@ set(
   common_reference
   tuple_array
   ranges
-  subrange
   iota_view
   all_view
   filter_view
