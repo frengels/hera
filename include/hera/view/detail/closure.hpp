@@ -17,7 +17,8 @@ template<typename T>
 concept pipeable = derived_from<T, pipeable_base>&& copy_constructible<T>;
 
 template<typename D>
-class pipeable_interface : public pipeable_base {
+class pipeable_interface : public pipeable_base
+{
     template<typename R>
     friend constexpr auto
     operator|(R&& r,
@@ -75,7 +76,7 @@ public:
         : box<Is, Ts>{std::forward<Ts>(ts)}..., fn_{std::move(fn)}
     {}
 
-    template<forward_range R> // clang-format off
+    template<hera::range R> // clang-format off
         requires viewable_range<R>&& 
             invocable<F, R, Ts...>&&
             view<std::invoke_result_t<F, R, Ts...>> // clang-format on
@@ -94,7 +95,7 @@ public:
                            static_cast<box<Is, Ts>&&>(*this).value_...);
     }
 
-    template<forward_range R> // clang-format off
+    template<hera::range R> // clang-format off
         requires viewable_range<R>&&
             invocable<F, R, Ts&...>&&
             view<std::invoke_result_t<F, R, Ts&...>> // clang-format on
@@ -112,7 +113,7 @@ public:
                            static_cast<box<Is, Ts>&>(*this).value_...);
     }
 
-    template<forward_range R> // clang-format off
+    template<hera::range R> // clang-format off
         requires viewable_range<R>&&
             invocable<F, R, const Ts&...>&&
             view<std::invoke_result_t<F, R, const Ts&...>> // clang-format on
@@ -130,7 +131,7 @@ public:
                            static_cast<const box<Is, Ts>&>(*this).value_...);
     }
 
-    template<forward_range R> // clang-format off
+    template<hera::range R> // clang-format off
         requires viewable_range<R>&&
             invocable<F, R, const Ts&...>&&
             view<std::invoke_result_t<F, R, const Ts&...>> // clang-format on
