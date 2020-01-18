@@ -12,6 +12,8 @@ TEST_CASE("tuple")
     REQUIRE(hera::at<0>(tup_view) == 1);
     REQUIRE(hera::at<1>(tup_view) == 2);
     REQUIRE(hera::at<2>(tup_view) == 3);
+
+    static_assert(hera::view<decltype(tup_view)>);
 }
 
 TEST_CASE("array")
@@ -33,5 +35,6 @@ TEST_CASE("array")
         std::vector<int> vec{0, 1, 2, 3, 4, 5};
 
         auto vec_view = hera::array_view<int, 6>{vec};
+        static_assert(hera::view<decltype(vec_view)>);
     }
 }

@@ -1,5 +1,6 @@
 #include <catch2/catch.hpp>
 
+#include "hera/view.hpp"
 #include "hera/view/iota.hpp"
 
 template<hera::unbounded_range R>
@@ -8,6 +9,8 @@ constexpr auto verify_unbounded_range(R)
 
 TEST_CASE("iota_view")
 {
+    static_assert(hera::view<hera::iota_view<0>>);
+
     SECTION("finite")
     {
         auto iota = hera::iota_view<0>{};
@@ -32,5 +35,7 @@ TEST_CASE("iota_view")
         static_assert(hera::empty_range<decltype(iota)>);
 
         REQUIRE(iota.empty());
+
+        static_assert(hera::view<decltype(iota)>);
     }
 }

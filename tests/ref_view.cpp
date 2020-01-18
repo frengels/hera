@@ -2,6 +2,7 @@
 
 #include <string_view>
 
+#include "hera/view.hpp"
 #include "hera/view/ref.hpp"
 #include "hera/view/tuplelike.hpp"
 
@@ -12,6 +13,8 @@ TEST_CASE("ref_view")
     auto tup_view = hera::views::tuplelike(tup);
 
     auto ref_view = hera::ref_view(tup_view);
+
+    static_assert(hera::view<decltype(ref_view)>);
 
     REQUIRE(tup_view.size() == ref_view.size());
     REQUIRE(hera::at<0>(tup_view) == hera::at<0>(ref_view));
