@@ -2,6 +2,8 @@
 
 #include <type_traits>
 
+#include "hera/at.hpp"
+#include "hera/ranges.hpp"
 #include "hera/size.hpp"
 
 namespace hera
@@ -45,6 +47,36 @@ public:
         {
             return std::false_type{};
         }
+    }
+
+    constexpr decltype(auto) front() noexcept requires !hera::empty_range<D>
+    {
+        return hera::at<0>(derived());
+    }
+
+    constexpr decltype(auto) front() const
+        noexcept requires !hera::empty_range<D>
+    {
+        return hera::at<0>(derived());
+    }
+
+    constexpr decltype(auto) back() noexcept requires !hera::empty_range<D> &&
+        hera::bounded_range<D>
+    {
+        auto                  size_integral = hera::size(derived());
+        constexpr std::size_t size          = size_integral;
+        constexpr auto        last_index    = size - 1;
+        return hera::at<last_index>(derived());
+    }
+
+    constexpr decltype(auto) back() const
+        noexcept requires !hera::empty_range<D> &&
+        hera::bounded_range<D>
+    {
+        auto                  size_integral = hera::size(derived());
+        constexpr std::size_t size          = size_integral;
+        constexpr auto        last_index    = size - 1;
+        return hera::at<last_index>(derived());
     }
 };
 } // namespace hera
