@@ -2,77 +2,44 @@
 
 #include <utility>
 
-#include "hera/begin_end.hpp"
-#include "hera/concepts.hpp"
-#include "hera/iterator/concepts.hpp"
-#include "hera/next_prev.hpp"
+#include "hera/algorithm/unpack.hpp"
 #include "hera/ranges.hpp"
 
 namespace hera
 {
-struct accumulate_fn
+namespace accumulate_impl
 {
-    template<forward_iterator I,
-             sentinel_for<I>  S,
-             typename T,
-             typename BinaryOp>
-    constexpr auto operator()(I first, S last, T init, BinaryOp&& op) const
+struct fn
+{
+public:
+    template<hera::bounded_range R, typename T>
+    constexpr T operator()(R&& range, T init) const
     {
-        if constexpr (decltype(first == last)::value)
-        {
-            return init;
-        }
-        else
-        {
-            using op_res_type = decltype(op(std::move(init), *first));
+        auto add_to_init = [&](auto&& x) { init = std::move(init) + x; };
 
-            if constexpr (hera::same_as<T, std::remove_cvref_t<op_res_type>> &&
-                          hera::constructible_from<T, op_res_type>)
-            {
-                init = op(std::move(init), *first);
-                return (*this)(hera::next(first),
-                               last,
-                               std::move(init),
-                               std::forward<BinaryOp>(op));
-            }
-            else
-            {
-                auto&& next_init = op(std::move(init), *first);
-                return (*this)(hera::next(first),
-                               last,
-                               std::forward<decltype(next_init)>(next_init),
-                               std::forward<BinaryOp>(op));
-            }
-        }
+        hera::unpack(std::forward<R>(range), [&](auto&&... xs) {
+            (add_to_init(std::forward<decltype(xs)>(xs)), ...);
+        });
+
+        return init;
     }
 
-    template<forward_iterator I, sentinel_for<I> S, typename T>
-    constexpr auto operator()(I first, S last, T init) const
+    template<hera::bounded_range R, typename T, typename BinaryOp>
+    constexpr T operator()(R&& range, T init, BinaryOp&& op) const
     {
-        return (*this)(std::move(first),
-                       std::move(last),
-                       std::move(init),
-                       [](auto&& lhs, auto&& rhs) {
-                           return std::forward<decltype(lhs)>(lhs) +
-                                  std::forward<decltype(rhs)>(rhs);
-                       });
-    }
+        auto add_to_init = [&](auto&& x) { init = op(std::move(init), x); };
 
-    template<forward_range R, typename T, typename BinaryOp>
-    constexpr auto operator()(R&& r, T init, BinaryOp&& op) const
-    {
-        return (*this)(hera::begin(r),
-                       hera::end(r),
-                       std::move(init),
-                       std::forward<BinaryOp>(op));
-    }
+        hera::unpack(std::forward<R>(range), [&](auto&&... xs) {
+            (add_to_init(std::forward<decltype(xs)>(xs)), ...);
+        });
 
-    template<forward_range R, typename T>
-    constexpr auto operator()(R&& r, T init) const
-    {
-        return (*this)(hera::begin(r), hera::end(r), std::move(init));
+        return init;
     }
 };
+} // namespace accumulate_impl
 
-constexpr auto accumulate = accumulate_fn{};
+inline namespace cpo
+{
+inline constexpr auto accumulate = accumulate_impl::fn{};
+}
 } // namespace hera
