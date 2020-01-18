@@ -1,13 +1,13 @@
 #include <catch2/catch.hpp>
 
 #include "hera/algorithm/accumulate.hpp"
-#include "hera/view/tuplelike.hpp"
+#include "hera/view/tuple.hpp"
 
 TEST_CASE("accumulate")
 {
     auto tup = std::tuple{1, 2, 3, 4, 5};
 
-    auto tup_view = hera::tuplelike_view(tup);
+    auto tup_view = hera::tuple_view(tup);
 
     auto negate = [](auto&& lhs, auto&& rhs) {
         return std::forward<decltype(lhs)>(lhs) -

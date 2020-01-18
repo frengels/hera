@@ -12,13 +12,13 @@
 namespace hera
 {
 template<typename Tuple>
-class tuplelike_view : public view_interface<tuplelike_view<Tuple>>
+class tuple_view : public view_interface<tuple_view<Tuple>>
 {
 private:
     Tuple* tuple_;
 
 public:
-    explicit constexpr tuplelike_view(Tuple& tup) noexcept
+    explicit constexpr tuple_view(Tuple& tup) noexcept
         : tuple_{std::addressof(tup)}
     {}
 
@@ -39,17 +39,17 @@ public:
 
 namespace views
 {
-struct tuplelike_fn
+struct tuple_fn
 {
     template<typename Tuple>
     constexpr auto operator()(Tuple& tup) const
-        noexcept(noexcept(hera::tuplelike_view{tup}))
-            -> decltype(hera::tuplelike_view{tup})
+        noexcept(noexcept(hera::tuple_view{tup}))
+            -> decltype(hera::tuple_view{tup})
     {
-        return hera::tuplelike_view{tup};
+        return hera::tuple_view{tup};
     }
 };
 
-inline constexpr auto tuplelike = tuplelike_fn{};
+inline constexpr auto tuple = tuple_fn{};
 } // namespace views
 } // namespace hera

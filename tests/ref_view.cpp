@@ -4,13 +4,13 @@
 
 #include "hera/view.hpp"
 #include "hera/view/ref.hpp"
-#include "hera/view/tuplelike.hpp"
+#include "hera/view/tuple.hpp"
 
 TEST_CASE("ref_view")
 {
     auto tup = std::tuple(1, 2, 3, 'c', std::string_view("hi"));
 
-    auto tup_view = hera::views::tuplelike(tup);
+    auto tup_view = hera::views::tuple(tup);
 
     auto ref_view = hera::ref_view(tup_view);
 

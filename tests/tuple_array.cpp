@@ -1,13 +1,13 @@
 #include <catch2/catch.hpp>
 
 #include "hera/view/array.hpp"
-#include "hera/view/tuplelike.hpp"
+#include "hera/view/tuple.hpp"
 
 TEST_CASE("tuple")
 {
     auto tup = std::make_tuple(1, 2, 3, 432.f, "hello world", 4, 5, 'c', 6);
 
-    auto tup_view = hera::tuplelike_view{tup};
+    auto tup_view = hera::tuple_view{tup};
 
     REQUIRE(hera::at<0>(tup_view) == 1);
     REQUIRE(hera::at<1>(tup_view) == 2);
