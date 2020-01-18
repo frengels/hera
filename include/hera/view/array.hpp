@@ -38,7 +38,7 @@ public:
     explicit constexpr array_view(Cont& container) noexcept // clang-format on
         : data_{std::data(container)}
     {
-        assert(std::size(container) < N);
+        assert(std::size(container) >= N);
     }
 
     constexpr auto size() const noexcept
