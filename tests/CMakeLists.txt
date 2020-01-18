@@ -29,6 +29,7 @@ set(
   integer_sequence
   reorder_view
   sort
+  ref_view
   )
 
 find_package(Catch2 REQUIRED)
