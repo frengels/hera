@@ -24,4 +24,13 @@ TEST_CASE("iota_view")
         static_assert(hera::bounded_range<decltype(iota)>);
         REQUIRE(hera::at<10>(iota) == 20);
     }
+
+    SECTION("empty")
+    {
+        auto iota = hera::iota_view<20, 20>{};
+
+        static_assert(hera::empty_range<decltype(iota)>);
+
+        REQUIRE(iota.empty());
+    }
 }
