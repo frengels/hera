@@ -31,6 +31,7 @@ set(
   ref_view
   find_if
   optional
+  drop_view
   )
 
 find_package(Catch2 REQUIRED)
