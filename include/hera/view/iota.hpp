@@ -1,6 +1,7 @@
 #pragma once
 
 #include "hera/bound.hpp"
+#include "hera/optional.hpp"
 #include "hera/ranges.hpp"
 #include "hera/view/interface.hpp"
 
@@ -54,11 +55,17 @@ public:
         }
     }
 
-    template<std::size_t I> // clang-format off
-        requires in_range<I>
-    constexpr auto at() const noexcept // clang-format on
+    template<std::size_t I>
+    constexpr auto try_at() const noexcept
     {
-        return std::integral_constant<value_type, Start + I>{};
+        if constexpr (in_range<I>)
+        {
+            return hera::just<std::integral_constant<value_type, Start + I>>{};
+        }
+        else
+        {
+            return hera::none{};
+        }
     }
 };
 } // namespace hera
