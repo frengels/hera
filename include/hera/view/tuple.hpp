@@ -6,6 +6,7 @@
 #include "hera/constant.hpp"
 #include "hera/get.hpp"
 #include "hera/iterator/sentinel.hpp"
+#include "hera/optional.hpp"
 #include "hera/view/detail/closure.hpp"
 #include "hera/view/interface.hpp"
 
@@ -28,12 +29,17 @@ public:
         return {};
     }
 
-    template<std::size_t Idx>
-    constexpr decltype(auto) at() const
-        noexcept requires(Idx < std::tuple_size_v<Tuple>)
+    template<std::size_t I>
+    constexpr auto try_at() const noexcept
     {
-        using std::get;
-        return get<Idx>(*tuple_);
+        if constexpr (I < std::tuple_size_v<std::remove_const_t<Tuple>>)
+        {
+            return hera::just{std::get<I>(*tuple_)};
+        }
+        else
+        {
+            return hera::none{};
+        }
     }
 };
 
