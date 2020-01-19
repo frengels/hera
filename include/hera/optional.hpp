@@ -13,6 +13,21 @@ inline constexpr auto nullopt = nullopt_t{};
 
 namespace detail
 {
+template<typename T>
+struct const_ref
+{
+    using type = const T&;
+};
+
+template<>
+struct const_ref<void>
+{
+    using type = void;
+};
+
+template<typename T>
+using const_ref_t = typename const_ref<T>::type;
+
 template<typename T, bool = std::is_reference_v<T>>
 struct just_storage_base;
 
@@ -151,15 +166,22 @@ public:
     }
 
     template<typename U>
-    constexpr const T& value_or(U&&) const& noexcept
+    constexpr detail::const_ref_t<T> value_or(U&&) const& noexcept
     {
-        return **this;
+        if constexpr (!hera::same_as<value_type, void>)
+        {
+            return **this;
+        }
     }
 
-    template<typename U>
-    constexpr T value_or(U&&) &&
+    template<typename U> // clang-format off
+        requires !hera::same_as<value_type, void>
+    constexpr T value_or(U&&) && // clang-format on
     {
-        return **this;
+        if constexpr (!hera::same_as<value_type, void>)
+        {
+            return **this;
+        }
     }
 
     constexpr decltype(auto) operator*() &
