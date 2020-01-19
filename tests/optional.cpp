@@ -19,14 +19,14 @@ TEST_CASE("optional")
 
         REQUIRE(*ij == 42);
 
-        ij.or_else([]() { return hera::none<int>{}; });
+        ij.or_else([]() { return hera::none{}; });
         ij.or_else([]() { return hera::just<int>{5}; });
-        ij.and_then([](int i) { return hera::none<char>{}; });
+        ij.and_then([](int i) { return hera::none{}; });
     }
 
     SECTION("none")
     {
-        auto n = hera::none<int>{};
+        auto n = hera::none{};
 
         static_assert(!n);
 
@@ -34,14 +34,11 @@ TEST_CASE("optional")
 
         auto no_void = no_char.transform([](auto c) {});
 
-        no_void.and_then([]() { return hera::just<int>{5}; }).or_else([]() {
-            return hera::none<int>{};
-        });
+        auto none_again =
+            no_void.and_then([]() { return hera::just<int>{5}; }).or_else([]() {
+                return hera::none{};
+            });
 
-        static_assert(
-            hera::same_as<void, typename decltype(no_void)::value_type>);
-
-        static_assert(
-            hera::same_as<char, typename decltype(no_char)::value_type>);
+        static_assert(hera::same_as<decltype(none_again), hera::none>);
     }
 }
