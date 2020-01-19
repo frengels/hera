@@ -1,6 +1,7 @@
 #pragma once
 
 #include <type_traits>
+#include <utility>
 
 #include "hera/at.hpp"
 #include "hera/ranges.hpp"
@@ -18,13 +19,13 @@ class view_interface : public view_base // clang-format on
 private:
     constexpr D& derived() noexcept
     {
-        static_assert(hera::derived_from<D, view_interface>);
+        static_assert(hera::derived_from<D, view_interface<D>>);
         return static_cast<D&>(*this);
     }
 
     constexpr const D& derived() const noexcept
     {
-        static_assert(hera::derived_from<D, view_interface>);
+        static_assert(hera::derived_from<D, view_interface<D>>);
         return static_cast<const D&>(*this);
     }
 
@@ -69,6 +70,31 @@ public:
         constexpr std::size_t size          = size_integral;
         constexpr auto        last_index    = size - 1;
         return hera::at<last_index>(derived());
+    }
+
+    template<std::size_t I>
+    constexpr auto at() & -> decltype(*hera::try_at<I>(derived()))
+    {
+        return *hera::try_at<I>(derived());
+    }
+
+    template<std::size_t I>
+    constexpr auto at() const& -> decltype(*hera::try_at<I>(derived()))
+    {
+        return *hera::try_at<I>(derived());
+    }
+
+    template<std::size_t I>
+    constexpr auto at() && -> decltype(*hera::try_at<I>(std::move(derived())))
+    {
+        return *hera::try_at<I>(std::move(derived()));
+    }
+
+    template<std::size_t I>
+    constexpr auto
+    at() const&& -> decltype(*hera::try_at<I>(std::move(derived())))
+    {
+        return *hera::try_at<I>(std::move(derived()));
     }
 };
 } // namespace hera
