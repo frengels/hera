@@ -21,6 +21,24 @@ concept empty_range = bounded_range<R>&& // clang-format off
         requires decltype(hera::size(r))::value == 0;
     }; // clang-format on
 
+namespace detail
+{
+template<typename R, std::size_t I>
+struct range_out_of_bounds_impl;
+
+template<hera::unbounded_range R, std::size_t I>
+struct range_out_of_bounds_impl<R, I> : std::false_type
+{};
+
+template<hera::bounded_range R, std::size_t I>
+struct range_out_of_bounds_impl<R, I>
+    : std::bool_constant<!(I < decltype(hera::size(std::declval<R&>()))::value)>
+{};
+} // namespace detail
+
+template<typename R, std::size_t I>
+concept range_out_of_bounds = detail::range_out_of_bounds_impl<R, I>::value;
+
 template<hera::range T>
 inline constexpr bool enable_safe_range = false;
 
