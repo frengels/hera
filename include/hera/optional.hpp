@@ -38,7 +38,7 @@ struct just_storage_base<T, false>
         return val_;
     }
 
-    constexpr value_type&& get() && noexcept
+    constexpr value_type get() && noexcept
     {
         return std::move(val_);
     }
@@ -165,13 +165,13 @@ public:
     constexpr decltype(auto) operator*() &&
         noexcept requires !hera::same_as<void, T>
     {
-        return this->get();
+        return std::move(*this).get();
     }
 
     constexpr decltype(auto)
     operator*() const&& noexcept requires !hera::same_as<void, T>
     {
-        return this->get();
+        return std::move(*this).get();
     }
 
 private:
