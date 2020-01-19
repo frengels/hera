@@ -428,7 +428,21 @@ public:
             "invalid return type from F");
         return std::move(*this);
     }
+
+    constexpr void swap(just& other)
+    {
+        using std::swap;
+
+        swap(this->val_, other.val_);
+    }
 };
+
+just()->just<void>;
+
+template<typename T>
+just(T &&)->just<T>;
+
+just(std::in_place_t)->just<void>;
 
 template<typename T>
 class none
@@ -691,4 +705,6 @@ public:
     constexpr void swap(none<T>&) const noexcept
     {}
 };
+
+none()->none<void>;
 } // namespace hera
