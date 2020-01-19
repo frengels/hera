@@ -3,6 +3,7 @@
 #include "hera/ranges.hpp"
 #include "hera/view.hpp"
 #include "hera/view/all.hpp"
+#include "hera/view/detail/closure.hpp"
 
 namespace hera
 {
@@ -14,15 +15,28 @@ private:
     [[no_unique_address]] V base_;
 
 public:
-    constexpr drop_view(V base) noexcept(
+    explicit constexpr drop_view(V base) noexcept(
         std::is_nothrow_move_constructible_v<V>)
         : base_(std::move(base))
     {}
 
-    template<hera::constant_convertible_to<size_t> Len>
-    constexpr drop_view(V base,
-                        Len) noexcept(std::is_nothrow_move_constructible_v<V>)
-        : base_(std::move(base))
+    template<hera::constant_convertible_to<std::size_t> Len>
+    constexpr drop_view(V base, Len) : base_(std::move(base))
+    {}
+
+    template<hera::range R> // clang-format off
+        requires hera::viewable_range<R> && 
+            hera::constructible_from<V, hera::all_view<R>>
+    constexpr drop_view(R&& r) // clang-format on
+        : base_{hera::views::all(std::forward<R>(r))}
+    {}
+
+    template<hera::range                                R,
+             hera::constant_convertible_to<std::size_t> Len> // clang-format off
+        requires hera::viewable_range<R> &&
+            hera::constructible_from<V, hera::all_view<R>>
+    constexpr drop_view(R&& r, Len) // clang-format on
+        : base_{hera::views::all(std::forward<R>(r))}
     {}
 
     constexpr V base() const
@@ -53,4 +67,29 @@ public:
 
 template<hera::range R, hera::constant_convertible_to<std::size_t> Len>
 drop_view(R&&, Len)->drop_view<hera::all_view<R>, Len::value>;
+
+template<hera::range R, std::size_t N>
+drop_view(R &&)->drop_view<hera::all_view<R>, N>;
+
+namespace views
+{
+struct drop_fn
+{
+    template<hera::range R, hera::constant_convertible_to<std::size_t> Len>
+    constexpr auto operator()(R&& r, Len l) const
+        -> decltype(hera::drop_view{std::forward<R>(r), std::move(l)})
+    {
+        return hera::drop_view{std::forward<R>(r), std::move(l)};
+    }
+
+    template<hera::constant_convertible_to<std::size_t> Len>
+    constexpr auto operator()(Len l) const
+        -> decltype(detail::view_closure{*this, std::move(l)})
+    {
+        return detail::view_closure{*this, std::move(l)};
+    }
+};
+
+inline constexpr auto drop = drop_fn{};
+} // namespace views
 } // namespace hera
