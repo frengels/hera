@@ -1,6 +1,7 @@
 #pragma once
 
 #include "hera/at.hpp"
+#include "hera/optional.hpp"
 #include "hera/size.hpp"
 
 namespace hera
@@ -9,7 +10,7 @@ template<typename R>
 concept range = sized<R>&& // clang-format off
     requires (R& range)
     {
-        { hera::try_at<0>() } -> hera::optional;
+        { hera::try_at<0>(range) } -> hera::optional;
     }; // clang-format on
 
 template<typename R>
