@@ -195,4 +195,18 @@ concept signed_integral = integral<T>&& std::is_signed_v<T>;
 
 template<typename T>
 concept unsigned_integral = integral<T> && !signed_integral<T>;
+
+namespace detail
+{
+template<typename T, template<typename...> typename HOT>
+struct is_specialization_of : std::false_type
+{};
+
+template<typename T, template<typename...> typename HOT>
+struct is_specialization_of<HOT<T>, HOT> : std::true_type
+{};
+} // namespace detail
+
+template<typename T, template<typename...> typename HOT>
+concept specialization_of = detail::is_specialization_of<T, HOT>::value;
 } // namespace hera
