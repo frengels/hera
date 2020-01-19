@@ -6,7 +6,11 @@
 namespace hera
 {
 template<typename R>
-concept range = sized<R>;
+concept range = sized<R>&& // clang-format off
+    requires (R& range)
+    {
+        { hera::try_at<0>() } -> hera::optional;
+    }; // clang-format on
 
 template<typename R>
 concept bounded_range = range<R>&& bounded_size<R>;
