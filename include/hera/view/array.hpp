@@ -48,9 +48,16 @@ public:
     }
 
     template<std::size_t I>
-    constexpr decltype(auto) at() const noexcept requires(I < N)
+    constexpr auto try_at() const noexcept
     {
-        return data_[I];
+        if constexpr (I < N)
+        {
+            return hera::just{data_[I]};
+        }
+        else
+        {
+            return hera::none{};
+        }
     }
 };
 
