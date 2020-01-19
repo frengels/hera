@@ -150,6 +150,18 @@ public:
         return true;
     }
 
+    template<typename U>
+    constexpr const T& value_or(U&&) const& noexcept
+    {
+        return **this;
+    }
+
+    template<typename U>
+    constexpr T value_or(U&&) &&
+    {
+        return **this;
+    }
+
     constexpr decltype(auto) operator*() &
         noexcept requires !hera::same_as<void, T>
     {
