@@ -22,7 +22,9 @@ private:
     {
         if constexpr (hera::range_out_of_bounds<R, I>)
         {
-            return hera::none<void>{};
+            // return with integral_constant to not break transform, and_then
+            // operations
+            return hera::none{};
         }
         else
         {
@@ -53,6 +55,8 @@ public:
 
 inline namespace cpo
 {
+/// returns the index as just<integral_constant> or none<void> if nothing
+/// matches the predicate.
 inline constexpr auto find_if = hera::find_if_impl::fn{};
-}
+} // namespace cpo
 } // namespace hera
