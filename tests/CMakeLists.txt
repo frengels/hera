@@ -29,6 +29,8 @@ set(
   reorder_view
   sort
   ref_view
+  find_if
+  optional
   )
 
 find_package(Catch2 REQUIRED)
