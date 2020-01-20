@@ -45,10 +45,18 @@ public:
         return {};
     }
 
-    template<std::size_t Idx>
-    constexpr auto at() const noexcept
+    template<std::size_t I>
+    constexpr auto try_at() const noexcept
     {
-        return typename detail::ith_value<Idx, value_type, Is...>::type{};
+        if constexpr (I < sizeof...(Is))
+        {
+            return hera::just<
+                typename detail::ith_value<I, value_type, Is...>::type>{};
+        }
+        else
+        {
+            hera::none{};
+        }
     }
 };
 
