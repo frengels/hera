@@ -11,4 +11,6 @@ TEST_CASE("head")
     auto head_arr = hera::views::array(arr) | hera::views::head;
 
     static_assert(decltype(hera::size(head_arr))::value == 1);
+
+    REQUIRE(hera::at<0>(head_arr) == 1);
 }

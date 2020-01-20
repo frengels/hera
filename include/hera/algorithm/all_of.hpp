@@ -1,71 +1,27 @@
 #pragma once
 
-#include "hera/begin_end.hpp"
-#include "hera/iterator/concepts.hpp"
-#include "hera/metafunction.hpp"
-#include "hera/next_prev.hpp"
+#include "hera/algorithm/find_if.hpp"
 #include "hera/ranges.hpp"
-#include "hera/type_identity.hpp"
 
 namespace hera
 {
-struct all_of_fn
+namespace all_of_impl
 {
-    template<bool                   B,
-             hera::forward_iterator I,
-             hera::sentinel_for<I>  S,
-             hera::metafunction PredMeta> // clang-format off
-    static constexpr auto invoke(I first, S last, PredMeta pm) noexcept // clang-format on
+struct fn
+{
+    template<hera::bounded_range R, typename Pred>
+    constexpr auto operator()(R&& range, Pred p) const noexcept
     {
-        if constexpr (decltype(first == last)::value)
-        {
-            return std::bool_constant<B>{};
-        }
-        else
-        {
-            using invoke_res = std::invoke_result_t<typename PredMeta::type,
-                                                    iter_reference_t<I>>;
-            return invoke<(B && invoke_res::value)>(
-                hera::next(first), std::move(last), std::move(pm));
-        }
-    }
+        auto res = hera::find_if(std::forward<R>(range), [&](auto&&... xs) {
+            auto accept = p(std::forward<decltype(xs)>(xs)...);
+            return std::bool_constant<!decltype(accept)::value>{};
+        });
 
-    template<hera::forward_iterator I,
-             hera::sentinel_for<I>  S,
-             hera::metafunction     PredMeta>
-    constexpr auto operator()(I first, S last, PredMeta pm) const noexcept
-        -> decltype(invoke<true>(std::move(first),
-                                 std::move(last),
-                                 std::move(pm)))
-    {
-        return invoke<true>(std::move(first), std::move(last), std::move(pm));
-    }
-
-    template<hera::forward_iterator I, hera::sentinel_for<I> S, typename Pred>
-    constexpr auto operator()(I first, S last, Pred) const noexcept
-        -> decltype(invoke<true>(std::move(first),
-                                 std::move(last),
-                                 hera::type_identity<Pred>{}))
-    {
-        return invoke<true>(
-            std::move(first), std::move(last), hera::type_identity<Pred>{});
-    }
-
-    template<hera::forward_range R, typename Pred>
-    constexpr auto operator()(R&& r, Pred) const noexcept -> decltype(
-        invoke<true>(hera::begin(r), hera::end(r), hera::type_identity<Pred>{}))
-    {
-        return invoke<true>(
-            hera::begin(r), hera::end(r), hera::type_identity<Pred>{});
-    }
-
-    template<hera::forward_range R, hera::metafunction PredMeta>
-    constexpr auto operator()(R&& r, PredMeta pm) const noexcept
-        -> decltype(invoke<true>(hera::begin(r), hera::end(r), std::move(pm)))
-    {
-        return invoke<true>(hera::begin(r), hera::end(r), std::move(pm));
+        return res.transform([](auto) { return std::false_type{}; })
+            .value_or(std::true_type{});
     }
 };
+} // namespace all_of_impl
 
-constexpr auto all_of = all_of_fn{};
+inline constexpr auto all_of = all_of_impl::fn{};
 } // namespace hera

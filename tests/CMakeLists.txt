@@ -1,15 +1,10 @@
 set(
   TESTS
-  traits
   size
   at
   get
-  begin_end
-  iter_move
   common_reference
   tuple_array
-  ranges
-  subrange
   iota_view
   all_view
   filter_view
@@ -29,6 +24,11 @@ set(
   integer_sequence
   reorder_view
   sort
+  ref_view
+  find_if
+  optional
+  drop_view
+  enumerate_view
   )
 
 find_package(Catch2 REQUIRED)

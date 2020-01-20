@@ -23,7 +23,7 @@ template<typename T>
 struct make_from_range_fn
 {
 
-    template<hera::forward_range R>
+    template<hera::range R>
     constexpr T operator()(R&& r) const
         noexcept(noexcept(hera::unpack(std::forward<R>(r),
                                        detail::construct_fn<T>{})))

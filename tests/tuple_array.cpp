@@ -9,16 +9,11 @@ TEST_CASE("tuple")
 
     auto tup_view = hera::tuple_view{tup};
 
-    auto tup1 = hera::begin(tup_view);
-    REQUIRE(*tup1 == 1);
-    auto tup2 = hera::next(tup1);
-    REQUIRE(*tup2 == 2);
-    auto tup3 = hera::next(tup2);
-    REQUIRE(*tup3 == 3);
+    REQUIRE(hera::at<0>(tup_view) == 1);
+    REQUIRE(hera::at<1>(tup_view) == 2);
+    REQUIRE(hera::at<2>(tup_view) == 3);
 
-    auto tup_end = tup3 + std::integral_constant<std::ptrdiff_t, 7>{};
-
-    static_assert(decltype(hera::end(tup_view) == tup_end)::value);
+    static_assert(hera::view<decltype(tup_view)>);
 }
 
 TEST_CASE("array")
@@ -27,11 +22,19 @@ TEST_CASE("array")
 
     auto arr_view = hera::views::array(arr);
 
+    auto std_arr = std::array{1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+
+    auto std_arr_view = hera::views::array(std_arr);
+
+    const auto const_std_arr = std_arr;
+
+    auto const_std_arr_view = hera::views::array(const_std_arr);
+
     SECTION("unrolling")
     {
         std::vector<int> vec{0, 1, 2, 3, 4, 5};
 
-        auto vec_view = hera::array_view{
-            vec.data(), std::integral_constant<std::size_t, 6>{}};
+        auto vec_view = hera::array_view<int, 6>{vec};
+        static_assert(hera::view<decltype(vec_view)>);
     }
 }

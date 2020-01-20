@@ -1,24 +1,22 @@
 #include <catch2/catch.hpp>
 
 #include "hera/algorithm/unpack.hpp"
-#include "hera/begin_end.hpp"
 #include "hera/container/pair.hpp"
 #include "hera/container/tuple.hpp"
 #include "hera/view/filter.hpp"
 #include "hera/view/iota.hpp"
 #include "hera/view/transform.hpp"
+#include "hera/view/tuple.hpp"
 
 TEST_CASE("transform")
 {
-    auto tup =
-        hera::tuple{hera::pair{1, 5}, hera::pair{2, 6}, hera::pair{3, 7}};
+    auto tup = std::tuple{hera::pair{1, 5}, hera::pair{2, 6}, hera::pair{3, 7}};
+    auto tup_view = hera::tuple_view(tup);
 
-    auto pairs_first = hera::transform_view{
-        tup,
-        [](auto&& pair) { return std::forward<decltype(pair)>(pair).first(); }};
+    auto pairs_first =
+        hera::transform_view{tup_view, [](auto& pair) { return pair.first; }};
 
-    auto first = hera::begin(pairs_first);
-    REQUIRE(1 == *first);
+    REQUIRE(hera::at<0>(pairs_first) == 1);
 
     auto sum_first =
         hera::unpack(pairs_first, [](auto... xs) { return (xs + ...); });
@@ -27,10 +25,9 @@ TEST_CASE("transform")
 
     SECTION("pipe")
     {
-        auto pairs_second =
-            tup | hera::views::transform([](auto&& pair) {
-                return std::forward<decltype(pair)>(pair).second();
-            });
+        auto pairs_second = tup_view | hera::views::transform([](auto& pair) {
+                                return pair.second;
+                            });
 
         auto sum_second =
             hera::unpack(pairs_second, [](auto... xs) { return (xs + ...); });
@@ -53,21 +50,8 @@ TEST_CASE("transform")
                                               const_type::value * 3>{};
             });
 
-        auto expect_0 = hera::begin(triple_even); // 0 * 3
-
-        static_assert(decltype(*expect_0)::value == 0);
-        auto expect_6 = hera::next(expect_0); // 2 * 3
-
-        static_assert(decltype(*expect_6)::value == 6);
-
-        auto expect_12 = hera::next(expect_6); // 4 * 3
-        static_assert(decltype(*expect_12)::value == 12);
-
-        SECTION("unpackable")
-        {
-            // tests proper forwarding for random_access_iterator concept
-            auto _ = hera::next(hera::begin(triple_even),
-                                std::integral_constant<std::ptrdiff_t, 10>{});
-        }
+        static_assert(decltype(hera::at<0>(triple_even))::value == 0);
+        static_assert(decltype(hera::at<1>(triple_even))::value == 6);
+        static_assert(decltype(hera::at<2>(triple_even))::value == 12);
     }
 }

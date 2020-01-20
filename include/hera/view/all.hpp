@@ -4,7 +4,6 @@
 #include "hera/utility/detail/priority_tag.hpp"
 #include "hera/view.hpp"
 #include "hera/view/ref.hpp"
-#include "hera/view/subrange.hpp"
 
 namespace hera
 {
@@ -16,10 +15,9 @@ struct all_fn
 private:
     enum : unsigned
     {
-        throws   = 1,
-        decay    = 1 << 1,
-        ref      = 2 << 1,
-        subrange = 3 << 1
+        throws = 1,
+        decay  = 1 << 1,
+        ref    = 2 << 1,
     };
 
     template<hera::viewable_range R>
@@ -34,10 +32,7 @@ private:
         {
             return ref | noexcept(hera::ref_view{std::declval<R>()});
         }
-        else
-        {
-            return subrange | noexcept(hera::subrange(std::declval<R>()));
-        }
+        // TODO: find alternative to subrange
     }
 
 public:
@@ -53,10 +48,6 @@ public:
         else if constexpr (strategy == ref)
         {
             return hera::ref_view{r};
-        }
-        else
-        {
-            return hera::subrange{std::forward<R>(r)};
         }
     }
 };

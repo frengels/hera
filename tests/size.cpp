@@ -2,33 +2,49 @@
 
 #include "hera/size.hpp"
 
-#include <tuple>
+struct infinite_range
+{
+    constexpr hera::infinite size() const
+    {
+        return {};
+    }
+};
+
+struct finite_range
+{
+    constexpr std::integral_constant<std::size_t, 5> size() const
+    {
+        return {};
+    }
+};
 
 TEST_CASE("size")
 {
-    SECTION("tuple")
+    SECTION("infinite")
     {
-        auto       tup       = std::make_tuple(1, 2, 3, 4, 5);
-        const auto const_tup = tup;
+        static_assert(hera::sized<infinite_range>);
+        static_assert(hera::unbounded_size<infinite_range>);
 
-        static_assert(hera::size(tup) == 5);
-        static_assert(hera::size(const_tup) == 5);
+        auto inf = infinite_range{};
+        auto sz  = hera::size(inf);
+
+        static_assert(hera::unbounded<decltype(sz)>);
     }
 
-    SECTION("array")
+    SECTION("finite")
     {
-        int       arr[]{1, 2, 3};
-        const int const_arr[]{1, 2, 3, 4};
+        static_assert(hera::sized<finite_range>);
+        static_assert(hera::bounded_size<finite_range>);
 
-        static_assert(hera::size(arr) == 3);
-        static_assert(hera::size(const_arr) == 4);
+        auto fin = finite_range{};
+        auto sz  = hera::size(fin);
+
+        static_assert(hera::bounded<decltype(sz)>);
     }
 
-    SECTION("non_constant")
+    SECTION("invalid")
     {
-        auto vec = std::vector<int>{};
-
-        static_assert(
-            !std::is_invocable_v<decltype(hera::size), decltype(vec)>);
+        // has size method but not considered sized to us
+        static_assert(!hera::sized<std::vector<int>>);
     }
 }

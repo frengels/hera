@@ -3,70 +3,60 @@
 #include <functional>
 
 #include "hera/constant.hpp"
-#include "hera/indirect_unary.hpp"
-#include "hera/iterator/concepts.hpp"
 #include "hera/metafunction.hpp"
-#include "hera/next_prev.hpp"
+#include "hera/optional.hpp"
+#include "hera/ranges.hpp"
+#include "hera/size.hpp"
 #include "hera/type_identity.hpp"
 
 namespace hera
 {
-struct find_if_fn
+namespace find_if_impl
 {
-    template<hera::forward_iterator I,
-             hera::sentinel_for<I>  S,
-             hera::metafunction     PredMeta> // clang-format off
-    static constexpr decltype(auto)
-    invoke(I first, S last, PredMeta pm) noexcept
+struct fn
+{
+private:
+    template<std::size_t I, hera::range R, typename Pred>
+    static constexpr decltype(auto) check_at(R&&                     range,
+                                             [[maybe_unused]] Pred&& pred)
     {
-        using predicate_type = typename PredMeta::type;
-
-        if constexpr (decltype(first == last)::value)
+        if constexpr (hera::range_out_of_bounds<R, I>)
         {
-            return first;
-        }
-        else if constexpr (std::invoke_result_t<predicate_type,
-                                                decltype(*first)>::value)
-        {
-            return first;
+            // return with integral_constant to not break transform, and_then
+            // operations
+            return hera::none{};
         }
         else
         {
-            return invoke(hera::next(first), std::move(last), std::move(pm));
+            using element_type = decltype(hera::at<I>(std::forward<R>(range)));
+            using pred_result  = std::invoke_result_t<Pred, element_type>;
+
+            if constexpr (pred_result::value)
+            {
+                return hera::just<std::integral_constant<std::size_t, I>>{
+                    std::in_place};
+            }
+            else
+            {
+                return check_at<I + 1>(std::forward<R>(range),
+                                       std::forward<Pred>(pred));
+            }
         }
     }
 
-    template<hera::forward_iterator I, hera::sentinel_for<I> S, typename Pred>
-    constexpr auto operator()(I first, S last, Pred p) const noexcept(noexcept(
-        invoke(std::move(first), std::move(last), hera::type_identity{p})))
+public:
+    template<hera::range R, typename Pred>
+    constexpr decltype(auto) operator()(R&& range, Pred&& pred) const noexcept
     {
-        return invoke(
-            std::move(first), std::move(last), hera::type_identity{p});
+        return check_at<0>(std::forward<R>(range), std::forward<Pred>(pred));
     }
+}; // namespace find_if_impl
+} // namespace find_if_impl
 
-    // use find_if on a range
-    template<hera::forward_range R, hera::metafunction PredMeta>
-    constexpr auto operator()(R&& r, PredMeta predm) const noexcept
-        -> decltype(invoke(hera::begin(std::forward<R>(r)),
-                           hera::end(std::forward<R>(r)),
-                           predm))
-    {
-        return invoke(hera::begin(std::forward<R>(r)),
-                      hera::end(std::forward<R>(r)),
-                      predm);
-    }
-
-    template<hera::forward_range R, typename Pred>
-    constexpr auto operator()(R&& r, Pred) const noexcept
-        -> decltype(invoke(hera::begin(std::forward<R>(r)),
-                           hera::end(std::forward<R>(r)),
-                           hera::type_identity<Pred>{}))
-    {
-        return invoke(hera::begin(std::forward<R>(r)),
-                      hera::end(std::forward<R>(r)),
-                      hera::type_identity<Pred>{});
-    }
-};
-
-constexpr auto find_if = find_if_fn{};
+inline namespace cpo
+{
+/// returns the index as just<integral_constant> or none<void> if nothing
+/// matches the predicate.
+inline constexpr auto find_if = hera::find_if_impl::fn{};
+} // namespace cpo
 } // namespace hera

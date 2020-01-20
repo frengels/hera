@@ -11,34 +11,21 @@ TEST_CASE("zip_view")
 
     auto zip = hera::zip_view{tup1, tup2, tup3};
 
-    auto zip_beg  = hera::begin(zip);
-    auto zip_mid  = hera::next(zip_beg);
-    auto zip_last = hera::next(zip_mid);
-    auto zip_end  = hera::next(zip_last);
+    REQUIRE(hera::size(zip) == 3);
 
-    SECTION("end_compare")
-    {
-        auto true_end = hera::end(zip);
+    auto beg  = hera::at<0>(zip);
+    auto mid  = hera::at<1>(zip);
+    auto last = hera::at<2>(zip);
 
-        static_assert(!decltype(zip_beg == true_end)::value);
-        static_assert(!decltype(zip_mid == true_end)::value);
-        static_assert(!decltype(zip_last == true_end)::value);
-        static_assert(decltype(zip_end == true_end)::value);
-    }
+    REQUIRE(hera::at<0>(beg) == 0);
+    REQUIRE(hera::at<1>(beg) == 'a');
+    REQUIRE(hera::at<2>(beg) == 1.0f);
 
-    SECTION("sized_sentinel")
-    {
-        auto sent_end = hera::end(zip);
+    REQUIRE(hera::at<0>(mid) == 1);
+    REQUIRE(hera::at<1>(mid) == 'b');
+    REQUIRE(hera::at<2>(mid) == 2.0f);
 
-        static_assert(decltype(sent_end - zip_beg)::value == 3);
-        static_assert(decltype(zip_beg - sent_end)::value == -3);
-    }
-
-    SECTION("deref")
-    {
-        auto [a1, b1, c1] = *zip_beg;
-        REQUIRE(a1 == 0);
-        REQUIRE(b1 == 'a');
-        REQUIRE(c1 == 1.0f);
-    }
+    REQUIRE(hera::at<0>(last) == 2);
+    REQUIRE(hera::at<1>(last) == 'c');
+    REQUIRE(hera::at<2>(last) == 3.0f);
 }

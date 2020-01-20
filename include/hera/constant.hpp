@@ -90,4 +90,8 @@ concept constant_totally_ordered =
 template<typename F, typename... Args>
 concept constant_predicate = regular_invocable<F, Args...>&&
     constant_same_as<std::invoke_result_t<F, Args...>, bool>;
+
+inline constexpr auto true_  = std::true_type{};
+inline constexpr auto false_ = std::false_type{};
+
 } // namespace hera

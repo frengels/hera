@@ -3,10 +3,11 @@
 #include <utility>
 
 #include "hera/algorithm/unpack.hpp"
-#include "hera/begin_end.hpp"
+//#include "hera/begin_end.hpp"
 #include "hera/concepts.hpp"
-#include "hera/iterator/sentinel.hpp"
-#include "hera/next_prev.hpp"
+//#include "hera/iterator/sentinel.hpp"
+//#include "hera/next_prev.hpp"
+#include "hera/optional.hpp"
 #include "hera/ranges.hpp"
 #include "hera/size.hpp"
 
@@ -14,50 +15,10 @@ namespace hera
 {
 namespace detail
 {
-template<std::ptrdiff_t I, typename... Ts>
-struct tuple_iterator_maybe_value_type
-{};
-
-template<std::ptrdiff_t I, typename... Ts> // clang-format off
-    requires (I >= 0) && (I < sizeof...(Ts))
-struct tuple_iterator_maybe_value_type<I, Ts...> // clang-format on
-{
-    using value_type = std::remove_cvref_t<
-        std::tuple_element_t<static_cast<std::size_t>(I), std::tuple<Ts...>>>;
-};
-
 template<std::size_t, typename T>
 struct tuple_box
 {
-private:
-    [[no_unique_address]] T value_;
-
-public:
-    template<typename... Args>
-    constexpr tuple_box(Args&&... args) noexcept(
-        std::is_nothrow_constructible_v<T, Args...>)
-        : value_(std::forward<Args>(args)...)
-    {}
-
-    constexpr T& get() & noexcept
-    {
-        return static_cast<T&>(value_);
-    }
-
-    constexpr const T& get() const& noexcept
-    {
-        return static_cast<const T&>(value_);
-    }
-
-    constexpr T&& get() && noexcept
-    {
-        return static_cast<T&&>(value_);
-    }
-
-    constexpr const T&& get() const&& noexcept
-    {
-        return static_cast<const T&&>(value_);
-    }
+    [[no_unique_address]] T value;
 };
 
 template<typename Indices, typename... Ts>
@@ -65,230 +26,22 @@ class tuple_impl;
 
 template<std::size_t... Is, typename... Ts>
 class tuple_impl<std::index_sequence<Is...>, Ts...>
-    : protected tuple_box<Is, Ts>... {
+    : protected tuple_box<Is, Ts>...
+{
     tuple_impl() = default;
 
     template<typename... Us> // clang-format off
         requires (sizeof...(Ts) == sizeof...(Us)) // clang-format on
         constexpr tuple_impl(Us&&... us) noexcept(
             (std::is_nothrow_constructible_v<Ts, Us> && ...))
-        : tuple_box<Is, Ts>{std::forward<Us>(us)}...
+        : tuple_box<Is, Ts>{Ts(std::forward<Us>(us))}...
     {}
 };
 } // namespace detail
 
 template<typename... Ts>
-class tuple
-    : private detail::tuple_impl<std::index_sequence_for<Ts...>, Ts...> {
-private:
-    template<std::ptrdiff_t I, bool Const>
-    class iterator_base : detail::tuple_iterator_maybe_value_type<I, Ts...> {
-    private:
-        template<std::ptrdiff_t J, bool Const_>
-        friend class iterator_base;
-
-        using tuple_type = std::conditional_t<Const, const tuple, tuple>;
-
-    public:
-        using difference_type = std::ptrdiff_t;
-
-    private:
-        [[no_unique_address]] tuple_type& parent_;
-
-    public:
-        constexpr iterator_base(tuple_type& tup) noexcept : parent_{tup}
-        {}
-
-        template<bool OtherConst> // clang-format off
-            requires !OtherConst && Const // clang-format on
-            constexpr iterator_base(
-                const iterator_base<I, OtherConst>& other) noexcept
-            : parent_{other.parent_}
-        {}
-
-        template<difference_type J, bool UConst>
-        constexpr auto operator==(iterator_base<J, UConst>) const noexcept
-        {
-            return std::bool_constant<I == J>{};
-        }
-
-        constexpr auto operator==(hera::bounded_sentinel) const noexcept
-        {
-            return std::bool_constant<I == sizeof...(Ts)>{};
-        }
-
-        friend constexpr auto operator==(hera::bounded_sentinel,
-                                         iterator_base<I, Const>) noexcept
-        {
-            return std::bool_constant<sizeof...(Ts) == I>{};
-        }
-
-        template<difference_type J, bool UConst>
-        constexpr auto operator!=(iterator_base<J, UConst>) const noexcept
-        {
-            return std::bool_constant<I != J>{};
-        }
-
-        constexpr auto operator!=(hera::bounded_sentinel) const noexcept
-        {
-            return std::bool_constant<I != sizeof...(Ts)>{};
-        }
-
-        friend constexpr auto operator!=(hera::bounded_sentinel,
-                                         iterator_base<I, Const>) noexcept
-        {
-            return std::bool_constant<sizeof...(Ts) != I>{};
-        }
-
-        template<difference_type J, bool UConst>
-        constexpr auto operator<(iterator_base<J, UConst>) const noexcept
-        {
-            return std::bool_constant<(I < J)>{};
-        }
-
-        constexpr auto operator<(hera::bounded_sentinel) const noexcept
-        {
-            return std::bool_constant<(I < sizeof...(Ts))>{};
-        }
-
-        friend constexpr auto operator<(hera::bounded_sentinel,
-                                        iterator_base<I, Const>) noexcept
-        {
-            return std::bool_constant<(sizeof...(Ts) < I)>{};
-        }
-
-        template<difference_type J, bool UConst>
-        constexpr auto operator>(iterator_base<J, UConst>) const noexcept
-        {
-            return std::bool_constant<(I > J)>{};
-        }
-
-        constexpr auto operator>(hera::bounded_sentinel) const noexcept
-        {
-            return std::bool_constant<(I > sizeof...(Ts))>{};
-        }
-
-        friend constexpr auto operator>(hera::bounded_sentinel,
-                                        iterator_base<I, Const>) noexcept
-        {
-            return std::bool_constant<(sizeof...(Ts) > I)>{};
-        }
-
-        template<difference_type J, bool UConst>
-        constexpr auto operator<=(iterator_base<J, UConst>) const noexcept
-        {
-            return std::bool_constant<(I <= J)>{};
-        }
-
-        constexpr auto operator<=(hera::bounded_sentinel) const noexcept
-        {
-            return std::bool_constant<(sizeof...(Ts) <= I)>{};
-        }
-
-        friend constexpr auto operator<=(hera::bounded_sentinel,
-                                         iterator_base<I, Const>) noexcept
-        {
-            return std::bool_constant<(sizeof...(Ts) <= I)>{};
-        }
-
-        template<difference_type J, bool UConst>
-        constexpr auto operator>=(iterator_base<J, UConst>) const noexcept
-        {
-            return std::bool_constant<(I >= J)>{};
-        }
-
-        constexpr auto operator>=(hera::bounded_sentinel) const noexcept
-        {
-            return std::bool_constant<(I >= sizeof...(Ts))>{};
-        }
-
-        friend constexpr auto operator>=(hera::bounded_sentinel,
-                                         iterator_base<I, Const>) noexcept
-        {
-            return std::bool_constant<(sizeof...(Ts) >= I)>{};
-        }
-
-        constexpr auto operator++() const noexcept
-        {
-            return iterator_base<I + 1, Const>{parent_};
-        }
-
-        constexpr auto operator--() const noexcept
-        {
-            return iterator_base<I - 1, Const>{parent_};
-        }
-
-        template<hera::constant_convertible_to<difference_type> C>
-        constexpr auto operator+(C) const noexcept
-        {
-            return iterator_base<I + C::value, Const>{parent_};
-        }
-
-        template<hera::constant_convertible_to<difference_type> C>
-        friend constexpr auto
-        operator+(C, const iterator_base<I, Const> it) noexcept
-        {
-            return iterator_base<I + C::value, Const>{it.parent_};
-        }
-
-        template<hera::constant_convertible_to<difference_type> C>
-        constexpr auto operator-(C) const noexcept
-        {
-            return iterator_base<I - C::value, Const>{parent_};
-        }
-
-        template<difference_type J, bool UConst>
-        constexpr auto operator-(iterator_base<J, UConst>) const noexcept
-        {
-            return std::integral_constant<difference_type, I - J>{};
-        }
-
-        constexpr auto operator-(hera::bounded_sentinel) const noexcept
-        {
-            return std::integral_constant<difference_type, I - sizeof...(Ts)>{};
-        }
-
-        friend constexpr auto operator-(hera::bounded_sentinel,
-                                        iterator_base<I, Const>) noexcept
-        {
-            return std::integral_constant<difference_type, sizeof...(Ts) - I>{};
-        }
-
-        template<difference_type J = I> // clang-format off
-            requires(J >= 0) &&
-                (J < sizeof...(Ts)) 
-        constexpr decltype(auto) operator*() const // clang-format on
-            noexcept
-        {
-            return parent_[std::integral_constant<std::size_t,
-                                                  static_cast<std::size_t>(
-                                                      I)>{}];
-        }
-
-        template<hera::constant_convertible_to<difference_type>
-                     C> // clang-format off
-            requires
-                requires (const iterator_base<I, Const>& it, C offset)
-                {
-                    *(it + offset);
-                } // clang-format on
-        constexpr decltype(auto) operator[](C offset) const noexcept
-        {
-            return *(*this + offset);
-        }
-    };
-
-public:
-    template<std::ptrdiff_t I>
-    class iterator : public iterator_base<I, false> {
-        using iterator_base<I, false>::iterator_base;
-    };
-
-    template<std::ptrdiff_t I>
-    class const_iterator : public iterator_base<I, true> {
-        using iterator_base<I, true>::iterator_base;
-    };
-
+class tuple : private detail::tuple_impl<std::index_sequence_for<Ts...>, Ts...>
+{
 private:
     using base_type_ =
         detail::tuple_impl<std::index_sequence_for<Ts...>, Ts...>;
@@ -299,13 +52,12 @@ public:
 private:
     template<std::size_t... Is, typename... Us>
     constexpr tuple(std::index_sequence<Is...>, const hera::tuple<Us...>& other)
-        : base_type_{other[std::integral_constant<std::size_t, Is>{}]...}
+        : base_type_{hera::at<Is>(other)...}
     {}
 
     template<std::size_t... Is, typename... Us>
     constexpr tuple(std::index_sequence<Is...>, hera::tuple<Us...>&& other)
-        : base_type_{
-              std::move(other)[std::integral_constant<std::size_t, Is>{}]...}
+        : base_type_{hera::at<Is>(std::move(other))...}
     {}
 
 public:
@@ -323,7 +75,7 @@ public:
 
 private:
     template<std::size_t... Is, typename... Us>
-    constexpr tuple& assign_impl(
+    constexpr void assign_impl(
         std::index_sequence<Is...>,
         const hera::tuple<Us...>&
             other) noexcept((std::is_nothrow_assignable_v<Ts, Us> && ...))
@@ -331,21 +83,15 @@ private:
         (((*this)[std::integral_constant<std::size_t, Is>{}] =
               other[std::integral_constant<std::size_t, Is>{}]),
          ...);
-
-        return *this;
     }
 
     template<std::size_t... Is, typename... Us>
-    constexpr tuple& assign_impl(
+    constexpr void assign_impl(
         std::index_sequence<Is...>,
         hera::tuple<Us...>&&
             other) noexcept((std::is_nothrow_assignable_v<Ts, Us&&> && ...))
     {
-        (((*this)[std::integral_constant<std::size_t, Is>{}] =
-              std::move(other)[std::integral_constant<std::size_t, Is>{}]),
-         ...);
-
-        return *this;
+        ((hera::at<Is>(*this) = hera::at<Is>(std::move(other))), ...);
     }
 
 public:
@@ -354,7 +100,8 @@ public:
     constexpr tuple& operator=(const hera::tuple<Us...>& other) noexcept( // clang-format on
             noexcept(assign_impl(std::index_sequence_for<Us...>{}, other)))
     {
-        return assign_impl(std::index_sequence_for<Us...>{}, other);
+        assign_impl(std::index_sequence_for<Us...>{}, other);
+        return *this;
     }
 
     template<typename... Us> // clang-format off
@@ -362,32 +109,8 @@ public:
     constexpr tuple& operator=(hera::tuple<Us...>&& other) noexcept(noexcept( // clang-format on
             assign_impl(std::index_sequence_for<Us...>{}, std::move(other))))
     {
-        return assign_impl(std::index_sequence_for<Us...>{}, std::move(other));
-    }
-
-    constexpr auto begin() noexcept
-    {
-        return iterator<0>{*this};
-    }
-
-    constexpr auto begin() const noexcept
-    {
-        return const_iterator<0>{*this};
-    }
-
-    constexpr auto cbegin() const noexcept
-    {
-        return const_iterator<0>{*this};
-    }
-
-    constexpr auto end() const noexcept
-    {
-        return hera::bounded_sentinel{};
-    }
-
-    constexpr auto cend() const noexcept
-    {
-        return hera::bounded_sentinel{};
+        assign_impl(std::index_sequence_for<Us...>{}, std::move(other));
+        return *this;
     }
 
     constexpr std::integral_constant<std::size_t, sizeof...(Ts)> size() const
@@ -396,32 +119,30 @@ public:
         return {};
     }
 
-    template<std::size_t N = sizeof...(Ts)> // clang-format off
-        requires(N >= 1) // clang-format on
-        constexpr decltype(auto) front() noexcept
+    constexpr decltype(auto) front() noexcept requires sizeof...(Ts) >= 1
     {
-        return *begin();
+        return at<0>();
     }
 
-    template<std::size_t N = sizeof...(Ts)> // clang-format off
-        requires (N >= 1) // clang-format on
-        constexpr decltype(auto) front() const noexcept
+    constexpr decltype(auto) front() const noexcept requires sizeof...(Ts) >= 1
     {
-        return *begin();
+        return at<0>();
     }
 
-    template<std::size_t N = sizeof...(Ts)> // clang-format off
-        requires (N >= 1) // clang-format on
-        constexpr decltype(auto) back() noexcept
+    constexpr decltype(auto) back() noexcept requires sizeof...(Ts) >= 1
     {
-        return *(hera::prev(begin() + size()));
+        auto                  sz  = size();
+        constexpr std::size_t sz_ = sz;
+
+        return at<sz_ - 1>();
     }
 
-    template<std::size_t N = sizeof...(Ts)> // clang-format off
-        requires (N >= 1) // clang-format on
-        constexpr decltype(auto) back() const noexcept
+    constexpr decltype(auto) back() const noexcept requires sizeof...(Ts) >= 1
     {
-        return *(hera::prev(begin() + size()));
+        auto                  sz  = size();
+        constexpr std::size_t sz_ = sz;
+
+        return at<sz_ - 1>();
     }
 
     constexpr std::bool_constant<sizeof...(Ts) == 0> empty() const noexcept
@@ -432,42 +153,44 @@ public:
     // push_back & emplace_back variants
 
     template<typename T, typename... Args>
-    constexpr hera::tuple<Ts..., T> emplace_back(Args&&... args) const&
+    [[nodiscard]] constexpr hera::tuple<Ts..., T>
+    emplace_back(Args&&... args) const&
     {
-        return hera::unpack(*this, [&](auto&&... xs) {
+        return hera::unpack(*this, [&](const Ts&... xs) {
             return hera::tuple<Ts..., T>{xs..., T(std::forward<Args>(args)...)};
         });
     }
 
     template<typename T, typename... Args>
-    constexpr hera::tuple<Ts..., T> emplace_back(Args&&... args) &&
+    [[nodiscard]] constexpr hera::tuple<Ts..., T>
+    emplace_back(Args&&... args) &&
     {
-        return hera::unpack(*this, [&](auto&&... xs) {
-            return hera::tuple<Ts..., T>{std::move(xs)...,
+        return hera::unpack(std::move(*this), [&](Ts&&... xs) {
+            return hera::tuple<Ts..., T>{std::forward<Ts>(xs)...,
                                          T(std::forward<Args>(args)...)};
         });
     }
 
     template<typename T>
-    constexpr hera::tuple<Ts..., T> push_back(const T& val) const&
+    [[nodiscard]] constexpr hera::tuple<Ts..., T> push_back(const T& val) const&
     {
         return emplace_back<T>(val);
     }
 
     template<typename T>
-    constexpr hera::tuple<Ts..., T> push_back(const T& val) &&
+    [[nodiscard]] constexpr hera::tuple<Ts..., T> push_back(const T& val) &&
     {
         return std::move(*this).template emplace_back<T>(val);
     }
 
     template<typename T>
-    constexpr hera::tuple<Ts..., T> push_back(T&& val) const&
+    [[nodiscard]] constexpr hera::tuple<Ts..., T> push_back(T&& val) const&
     {
         return emplace_back<T>(std::move(val));
     }
 
     template<typename T>
-    constexpr hera::tuple<Ts..., T> push_back(T&& val) &&
+    [[nodiscard]] constexpr hera::tuple<Ts..., T> push_back(T&& val) &&
     {
         return std::move(*this).template emplace_back<T>(std::move(val));
     }
@@ -475,118 +198,149 @@ public:
     // push_front & emplace_front variants
 
     template<typename T, typename... Args>
-    constexpr hera::tuple<T, Ts...> emplace_front(Args&&... args) const&
+    [[nodiscard]] constexpr hera::tuple<T, Ts...>
+    emplace_front(Args&&... args) const&
     {
-        return hera::unpack(*this, [&](auto&&... xs) {
+        return hera::unpack(*this, [&](const Ts&... xs) {
             return hera::tuple<T, Ts...>{T(std::forward<Args>(args)...), xs...};
         });
     }
 
     template<typename T, typename... Args>
-    constexpr hera::tuple<T, Ts...> emplace_front(Args&&... args) &&
+    [[nodiscard]] constexpr hera::tuple<T, Ts...>
+    emplace_front(Args&&... args) &&
     {
-        return hera::unpack(*this, [&](auto&&... xs) {
+        return hera::unpack(std::move(*this), [&](Ts&&... xs) {
             return hera::tuple<T, Ts...>{T(std::forward<Args>(args)...),
-                                         std::move(xs)...};
+                                         std::forward<Ts>(xs)...};
         });
     }
 
     template<typename T>
-    constexpr hera::tuple<T, Ts...> push_front(const T& val) const&
+    [[nodiscard]] constexpr hera::tuple<T, Ts...>
+    push_front(const T& val) const&
     {
         return emplace_front<T>(val);
     }
 
     template<typename T>
-    constexpr hera::tuple<T, Ts...> push_front(const T& val) &&
+    [[nodiscard]] constexpr hera::tuple<T, Ts...> push_front(const T& val) &&
     {
         return std::move(*this).template emplace_front<T>(val);
     }
 
     template<typename T>
-    constexpr hera::tuple<T, Ts...> push_front(T&& val) const&
+    [[nodiscard]] constexpr hera::tuple<T, Ts...> push_front(T&& val) const&
     {
         return emplace_front<T>(std::move(val));
     }
 
     template<typename T>
-    constexpr hera::tuple<T, Ts...> push_front(T&& val) &&
+    [[nodiscard]] constexpr hera::tuple<T, Ts...> push_front(T&& val) &&
     {
         return std::move(*this).template emplace_front<T>(std::move(val));
     }
 
-    template<hera::constant_convertible_to<std::size_t> C> // clang-format off
-        requires(C::value < sizeof...(Ts)) // clang-format on
-        constexpr decltype(auto)
-        operator[](C) &
-        noexcept
+    template<std::size_t I>
+        constexpr auto try_at() & noexcept
     {
-        return static_cast<detail::tuple_box<
-            C::value,
-            std::tuple_element_t<C::value, std::tuple<Ts...>>>&>(*this)
-            .get();
+        if constexpr (I < sizeof...(Ts))
+        {
+            using type = std::tuple_element_t<I, std::tuple<Ts...>>&;
+
+            return hera::just<type>{std::forward<type>(
+                static_cast<detail::tuple_box<
+                    I,
+                    std::tuple_element_t<I, std::tuple<Ts...>>>&>(*this)
+                    .value)};
+        }
+        else
+        {
+            return hera::none{};
+        }
     }
 
-    template<hera::constant_convertible_to<std::size_t> C> // clang-format off
-        requires(C::value < sizeof...(Ts)) // clang-format on
-        constexpr decltype(auto)
-        operator[](C) const& noexcept
+    template<std::size_t I>
+    constexpr auto try_at() const& noexcept
     {
-        return static_cast<const detail::tuple_box<
-            C::value,
-            std::tuple_element_t<C::value, std::tuple<Ts...>>>&>(*this)
-            .get();
+        if constexpr (I < sizeof...(Ts))
+        {
+            using type = const std::tuple_element_t<I, std::tuple<Ts...>>&;
+
+            return hera::just<type>{std::forward<type>(
+                static_cast<const detail::tuple_box<
+                    I,
+                    std::tuple_element_t<I, std::tuple<Ts...>>>&>(*this)
+                    .value)};
+        }
+        else
+        {
+            return hera::none{};
+        }
     }
 
-    template<hera::constant_convertible_to<std::size_t> C> // clang-format off
-        requires (C::value < sizeof...(Ts)) // clang-format on
-        constexpr decltype(auto)
-        operator[](C) &&
-        noexcept
+    template<std::size_t I>
+        constexpr auto try_at() && noexcept
     {
-        return static_cast<detail::tuple_box<
-            C::value,
-            std::tuple_element_t<C::value, std::tuple<Ts...>>>&&>(*this)
-            .get();
+        if constexpr (I < sizeof...(Ts))
+        {
+            using type = std::tuple_element_t<I, std::tuple<Ts...>>&&;
+
+            return hera::just<type>{std::forward<type>(
+                static_cast<detail::tuple_box<
+                    I,
+                    std::tuple_element_t<I, std::tuple<Ts...>>>&&>(*this)
+                    .value)};
+        }
+        else
+        {
+            return hera::none{};
+        }
     }
 
-    template<hera::constant_convertible_to<std::size_t> C> // clang-format off
-        requires (C::value < sizeof...(Ts)) // clang-format on
-        constexpr decltype(auto)
-        operator[](C) const&& noexcept
+    template<std::size_t I>
+    constexpr auto try_at() const&& noexcept
     {
-        return static_cast<const detail::tuple_box<
-            C::value,
-            std::tuple_element_t<C::value, std::tuple<Ts...>>>&&>(*this)
-            .get();
+        if constexpr (I < sizeof...(Ts))
+        {
+            using type = const std::tuple_element_t<I, std::tuple<Ts...>>&&;
+
+            return hera::just<type>{std::forward<type>(
+                static_cast<const detail::tuple_box<
+                    I,
+                    std::tuple_element_t<I, std::tuple<Ts...>>>&&>(*this)
+                    .value)};
+        }
+        else
+        {
+            return hera::none{};
+        }
     }
 
-    template<std::size_t I> // clang-format off
-        requires (I < sizeof...(Ts)) // clang-format on
-        friend constexpr decltype(auto) get(tuple& t) noexcept
+    template<std::size_t I>
+        constexpr auto at() & noexcept -> decltype(*try_at<I>())
     {
-        return t[std::integral_constant<std::size_t, I>{}];
+        return *try_at<I>();
     }
 
-    template<std::size_t I> // clang-format off
-        requires (I < sizeof...(Ts)) // clang-format on
-        friend constexpr decltype(auto) get(const tuple& t) noexcept
+    template<std::size_t I>
+        constexpr auto at() const & noexcept -> decltype(*try_at<I>())
     {
-        return t[std::integral_constant<std::size_t, I>{}];
+        return *try_at<I>();
     }
 
-    template<std::size_t I> // clang-format off
-        requires (I < sizeof...(Ts)) // clang-format on
-        friend constexpr decltype(auto) get(tuple&& t) noexcept
+    template<std::size_t I>
+        constexpr auto at() &&
+        noexcept -> decltype(*(std::move(*this).template try_at<I>()))
     {
-        return std::move(t)[std::integral_constant<std::size_t, I>{}];
+        return *(std::move(*this).template try_at<I>());
     }
 
-    template<std::size_t I> // clang-format off
-        requires (I < sizeof...(Ts)) // clang-format on
-        friend constexpr decltype(auto) get(const tuple&& t) noexcept
+    template<std::size_t I>
+        constexpr auto at() const &&
+        noexcept -> decltype(*(std::move(*this).template try_at<I>()))
     {
-        return std::move(t)[std::integral_constant<std::size_t, I>{}];
+        return *(std::move(*this).template try_at<I>());
     }
 };
 
