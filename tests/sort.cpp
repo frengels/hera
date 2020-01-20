@@ -13,25 +13,11 @@ TEST_CASE("sort")
         return std::bool_constant<(sizeof(lhs_type) < sizeof(rhs_type))>{};
     });
 
-    auto t0  = hera::begin(sorted);
-    auto t1  = hera::next(t0);
-    auto t2  = hera::next(t1);
-    auto t3  = hera::next(t2);
-    auto end = hera::next(t3);
-
-    REQUIRE(end == hera::end(sorted));
-    REQUIRE(*t0 == hera::type_identity<uint8_t>{});
-    REQUIRE(*t1 == hera::type_identity<uint16_t>{});
-    REQUIRE(*t2 == hera::type_identity<uint32_t>{});
-    REQUIRE(*t3 == hera::type_identity<uint64_t>{});
-
-    auto sorted_from_it_sent = hera::sort(
-        hera::begin(types), hera::end(types), [](auto lhs, auto rhs) {
-            using lhs_type = typename decltype(lhs)::type;
-            using rhs_type = typename decltype(rhs)::type;
-
-            return std::bool_constant<(sizeof(lhs_type) < sizeof(rhs_type))>{};
-        });
+    REQUIRE(hera::size(sorted) == 4);
+    REQUIRE(hera::at<0>(sorted) == hera::type_identity<uint8_t>{});
+    REQUIRE(hera::at<1>(sorted) == hera::type_identity<uint16_t>{});
+    REQUIRE(hera::at<2>(sorted) == hera::type_identity<uint32_t>{});
+    REQUIRE(hera::at<3>(sorted) == hera::type_identity<uint64_t>{});
 
     // also support duplicate types
     SECTION("with duplicates")

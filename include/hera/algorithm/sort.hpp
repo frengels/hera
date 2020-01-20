@@ -5,11 +5,7 @@
 
 #include "hera/algorithm/unpack.hpp"
 #include "hera/container/integer_sequence.hpp"
-#include "hera/container/pair.hpp"
 #include "hera/container/type_list.hpp"
-#include "hera/distance.hpp"
-#include "hera/iterator/concepts.hpp"
-#include "hera/iterator/sentinel.hpp"
 #include "hera/utility/detail/sort.hpp"
 #include "hera/view/array.hpp"
 #include "hera/view/reorder.hpp"
@@ -26,7 +22,7 @@ private:
         using type                  = T;
     };
 
-    template<forward_range R, typename Compare>
+    template<hera::bounded_range R, typename Compare>
     static constexpr auto impl(R&& r, Compare comp) noexcept
     {
         constexpr std::size_t dist = decltype(hera::size(r))::value;
@@ -80,16 +76,10 @@ private:
     }
 
 public:
-    template<forward_range R, typename Compare>
+    template<hera::bounded_range R, typename Compare>
     constexpr auto operator()(R&& r, Compare comp) const noexcept
     {
         return impl(std::forward<R>(r), std::move(comp));
-    }
-
-    template<forward_iterator I, sentinel_for<I> S, typename Compare>
-    constexpr auto operator()(I it, S sent, Compare comp) const noexcept
-    {
-        // return impl(hera::subrange{it, sent}, std::move(comp));
     }
 };
 
