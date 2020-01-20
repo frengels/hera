@@ -37,7 +37,7 @@ struct just_storage_base<T> // clang-format on
 {
     using value_type = T;
 
-    T val_;
+    [[no_unique_address]] T val_;
 
     template<typename... Args>
     explicit constexpr just_storage_base(std::in_place_t, Args&&... args)
@@ -74,9 +74,9 @@ struct just_storage_base<T> // clang-format on
 
     raw_type* val_;
 
-    template<hera::convertible_to<T&> U>
+    template<typename U>
     explicit constexpr just_storage_base(std::in_place_t, U&& u) noexcept
-        : val_{std::addressof(static_cast<T&>(std::forward<U>(u)))}
+        : val_(std::addressof(u))
     {}
 
     constexpr value_type& get() & noexcept
@@ -157,9 +157,9 @@ public:
         : just(*std::move(other))
     {}
 
-    constexpr bool has_value() const noexcept
+    constexpr std::true_type has_value() const noexcept
     {
-        return true;
+        return {};
     }
 
     explicit constexpr operator bool() const noexcept
@@ -292,7 +292,7 @@ public:
         {
             static_assert(hera::invocable<F, value_type&&>, "cannot invoke F");
 
-            using result = std::invoke_result_t<F, value_type&&>;
+            using result = decltype(std::forward<F>(fn)(*std::move(*this)));
 
             if constexpr (hera::same_as<void, result>)
             {
