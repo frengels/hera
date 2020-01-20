@@ -4,11 +4,8 @@ set(
   size
   at
   get
-  begin_end
-  iter_move
   common_reference
   tuple_array
-  ranges
   iota_view
   all_view
   filter_view
