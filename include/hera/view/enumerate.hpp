@@ -4,6 +4,7 @@
 #include "hera/ranges.hpp"
 #include "hera/size.hpp"
 #include "hera/view.hpp"
+#include "hera/view/detail/closure.hpp"
 #include "hera/view/interface.hpp"
 
 namespace hera
@@ -39,4 +40,20 @@ public:
         });
     }
 };
+
+namespace views
+{
+struct enumerate_fn : public detail::pipeable_interface<enumerate_fn>
+{
+    template<hera::range R> // clang-format off
+        requires hera::viewable_range<R>
+    constexpr auto operator()(R&& r) const // clang-format on
+        -> decltype(hera::enumerate_view{std::forward<R>(r)})
+    {
+        return hera::enumerate_view{std::forward<R>(r)};
+    }
+};
+
+inline constexpr auto enumerate = enumerate_fn{};
+} // namespace views
 } // namespace hera

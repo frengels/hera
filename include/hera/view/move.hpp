@@ -45,7 +45,7 @@ move_view(R &&)->move_view<hera::all_view<R>>;
 
 namespace views
 {
-struct move_fn : detail::pipeable_interface<move_fn>
+struct move_fn : public detail::pipeable_interface<move_fn>
 {
     template<hera::range R>
     constexpr auto operator()(R&& r) const
@@ -55,6 +55,6 @@ struct move_fn : detail::pipeable_interface<move_fn>
     }
 };
 
-constexpr auto move = move_fn{};
+inline constexpr auto move = move_fn{};
 } // namespace views
 } // namespace hera

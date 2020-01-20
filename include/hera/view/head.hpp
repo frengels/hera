@@ -16,7 +16,7 @@ private:
     [[no_unique_address]] V base_;
 
 public:
-    constexpr head_view(V base) noexcept(
+    explicit constexpr head_view(V base) noexcept(
         std::is_nothrow_move_constructible_v<V>)
         : base_{std::move(base)}
     {}
@@ -65,6 +65,6 @@ struct head_fn : public detail::pipeable_interface<head_fn>
     }
 };
 
-constexpr auto head = head_fn{};
+inline constexpr auto head = head_fn{};
 } // namespace views
 } // namespace hera

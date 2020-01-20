@@ -14,4 +14,6 @@ TEST_CASE("enumerate")
 
     REQUIRE(hera::at<50>(enumerated).first == 50);
     REQUIRE(hera::at<50>(enumerated).second == 50);
+
+    iota | hera::views::enumerate;
 }
