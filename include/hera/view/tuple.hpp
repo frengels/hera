@@ -4,8 +4,6 @@
 #include <tuple>
 
 #include "hera/constant.hpp"
-#include "hera/get.hpp"
-#include "hera/iterator/sentinel.hpp"
 #include "hera/optional.hpp"
 #include "hera/view/detail/closure.hpp"
 #include "hera/view/interface.hpp"

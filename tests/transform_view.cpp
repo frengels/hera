@@ -1,7 +1,6 @@
 #include <catch2/catch.hpp>
 
 #include "hera/algorithm/unpack.hpp"
-#include "hera/begin_end.hpp"
 #include "hera/container/pair.hpp"
 #include "hera/container/tuple.hpp"
 #include "hera/view/filter.hpp"

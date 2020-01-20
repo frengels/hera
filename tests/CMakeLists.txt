@@ -1,6 +1,5 @@
 set(
   TESTS
-  traits
   size
   at
   get
