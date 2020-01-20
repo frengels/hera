@@ -28,11 +28,12 @@ struct const_ref<void>
 template<typename T>
 using const_ref_t = typename const_ref<T>::type;
 
-template<typename T, bool = std::is_reference_v<T>>
+template<typename T>
 struct just_storage_base;
 
-template<typename T>
-struct just_storage_base<T, false>
+template<typename T> // clang-format off
+    requires !std::is_reference_v<T>
+struct just_storage_base<T> // clang-format on
 {
     using value_type = T;
 
@@ -64,8 +65,9 @@ struct just_storage_base<T, false>
     }
 };
 
-template<typename T>
-struct just_storage_base<T, true>
+template<typename T> // clang-format off
+    requires std::is_reference_v<T>
+struct just_storage_base<T> // clang-format on
 {
     using value_type = T;
     using raw_type   = std::remove_reference_t<T>;
@@ -99,7 +101,7 @@ struct just_storage_base<T, true>
 };
 
 template<>
-struct just_storage_base<void, false>
+struct just_storage_base<void>
 {
     just_storage_base() = default;
 
