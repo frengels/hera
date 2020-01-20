@@ -21,14 +21,7 @@ auto tup_view = hera::tuple_view{tup};
 
 // Predicate must return an integral constant of type bool.
 auto only_ints = tup_view | hera::views::filter([](auto x) {
-                        if constexpr (hera::same_as<decltype(x), int>)
-                        {
-                            return std::true_type{};
-                        }
-                        else
-                        {
-                            return std::false_type{};
-                        }
+                        return std::is_same<decltype(x), int>{};
                     });
 
 auto res = 0;
@@ -38,14 +31,7 @@ std::cout << "result is: " << res << '\n';
 
 // now we only care about the strings
 auto only_str = tup_view | hera::views::filter([](auto str) {
-                    if constexpr (hera::same_as<decltype(str), const char*>)
-                    {
-                        return std::true_type{};
-                    }
-                    else
-                    {
-                        return std::false_type{};
-                    }
+                    return std::is_same<decltype(str), const char*>{};
                 });
 
 hera::for_each(only_str, [](auto str) { std::cout << str << '|'; });
