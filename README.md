@@ -38,21 +38,28 @@ hera::for_each(only_str, [](auto str) { std::cout << str << '|'; });
 std::cout << '\n';
 ```
 
-The result of the filter must return an integral constant, otherwise the compiler does not know what the type of the next iterator will be. As a result `filter_view` does not store anything other than the underlying view (not even the predicate), making filtering a zero overhead.
+The result of the filter must return an integral constant, otherwise the compiler cannot know the size of the range. As a result `filter_view` does not store anything other than the underlying view (not even the predicate), making filtering a zero overhead.
 
 ## Available views
 
 - array
 - tuple
 - filter
+- transform
 - head
 - iota
 - move
 - ref
-- subrange
+- drop
+- reorder
+- zip
+- enumerate
 
 ## Available algorithms
 
 - find_if
 - for_each
 - unpack
+- any_of
+- all_of
+- sort
