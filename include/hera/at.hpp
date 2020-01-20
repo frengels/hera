@@ -3,7 +3,6 @@
 #include <utility>
 
 #include "hera/constant.hpp"
-#include "hera/size.hpp"
 #include "hera/utility/detail/priority_tag.hpp"
 
 namespace hera
