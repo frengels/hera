@@ -29,6 +29,7 @@ set(
   find_if
   optional
   drop_view
+  enumerate_view
   )
 
 find_package(Catch2 REQUIRED)
