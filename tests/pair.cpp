@@ -3,9 +3,6 @@
 #include "hera/at.hpp"
 #include "hera/container/pair.hpp"
 #include "hera/container/tuple.hpp"
-#include "hera/get.hpp"
-#include "hera/next_prev.hpp"
-//#include "hera/view/head.hpp"
 #include "hera/view/tuple.hpp"
 
 TEST_CASE("pair")
@@ -41,14 +38,4 @@ TEST_CASE("pair")
 
         static_assert(decltype(hera::size(p))::value == 2);
     }
-    // TODO add back with hera/destructure
-    /*
-            SECTION("get")
-            {
-                REQUIRE(hera::get<0>(p) == 5);
-                REQUIRE(hera::get<1>(p) == 6.0f);
-
-                static_assert(std::tuple_size_v<decltype(p)> == 2);
-            }
-            */
 }
