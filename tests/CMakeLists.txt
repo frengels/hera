@@ -39,7 +39,7 @@ target_link_libraries(catch PUBLIC Catch2::Catch2)
 function(make_test target)
   string(CONCAT target_src ${target} ".cpp")
   add_executable(${target} ${target_src})
-  target_link_libraries(${target} PRIVATE ${CMAKE_PROJECT_NAME} catch)
+  target_link_libraries(${target} PRIVATE ${PROJECT_NAME} catch)
   add_test(NAME ${target} COMMAND ${target})
 endfunction()
 
