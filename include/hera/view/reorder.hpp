@@ -14,7 +14,9 @@ class reorder_view : public view_interface<reorder_view<V, Is...>> { // clang-fo
 private:
     [[no_unique_address]] V base_;
 
-    static constexpr hera::index_sequence<Is...> indices_{};
+public:
+    /// The sequence used for reordering
+    static constexpr hera::index_sequence<Is...> sequence{};
 
 public:
     constexpr reorder_view(V base) noexcept(
@@ -34,7 +36,7 @@ public:
 
     constexpr auto size() const noexcept
     {
-        return hera::size(indices_);
+        return hera::size(sequence);
     }
 
     template<std::size_t I>
@@ -42,7 +44,7 @@ public:
     {
         if constexpr (I < sizeof...(Is))
         {
-            auto                  pos_const = hera::at<I>(indices_);
+            auto                  pos_const = hera::at<I>(sequence);
             constexpr std::size_t pos       = pos_const;
 
             // guaranteed not out of bounds thanks to concept check
