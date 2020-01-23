@@ -1,6 +1,7 @@
 #pragma once
 
 #include <array>
+#include <cassert>
 
 #include "hera/constant.hpp"
 #include "hera/view/interface.hpp"
