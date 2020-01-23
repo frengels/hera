@@ -1,6 +1,6 @@
 #pragma once
 
-#include <functional>
+#include <type_traits>
 
 #include "hera/concepts.hpp"
 #include "hera/ranges.hpp"
@@ -21,35 +21,35 @@ class pipeable_interface : public pipeable_base
 {
     template<typename R>
     friend constexpr auto
+    operator|(R&& r, D& drv) noexcept(noexcept(drv(std::forward<R>(r))))
+        -> decltype(drv(std::forward<R>(r)))
+    {
+        return drv(std::forward<R>(r));
+    }
+
+    template<typename R>
+    friend constexpr auto
+    operator|(R&& r, const D& drv) noexcept(noexcept(drv(std::forward<R>(r))))
+        -> decltype(drv(std::forward<R>(r)))
+    {
+        return drv(std::forward<R>(r));
+    }
+
+    template<typename R>
+    friend constexpr auto
     operator|(R&& r,
-              D&  drv) noexcept(noexcept(std::invoke(drv, std::forward<R>(r))))
-        -> decltype(std::invoke(drv, std::forward<R>(r)))
+              D&& drv) noexcept(noexcept(std::move(drv)(std::forward<R>(r))))
+        -> decltype(std::move(drv)(std::forward<R>(r)))
     {
-        return std::invoke(drv, std::forward<R>(r));
-    }
-
-    template<typename R>
-    friend constexpr auto operator|(R&& r, const D& drv) noexcept(
-        noexcept(std::invoke(drv, std::forward<R>(r))))
-        -> decltype(std::invoke(drv, std::forward<R>(r)))
-    {
-        return std::invoke(drv, std::forward<R>(r));
-    }
-
-    template<typename R>
-    friend constexpr auto operator|(R&& r, D&& drv) noexcept(
-        noexcept(std::invoke(std::move(drv), std::forward<R>(r))))
-        -> decltype(std::invoke(std::move(drv), std::forward<R>(r)))
-    {
-        return std::invoke(std::move(drv), std::forward<R>(r));
+        return std::move(drv)(std::forward<R>(r));
     }
 
     template<typename R>
     friend constexpr auto operator|(R&& r, const D&& drv) noexcept(
-        noexcept(std::invoke(std::move(drv), std::forward<R>(r))))
-        -> decltype(std::invoke(std::move(drv), std::forward<R>(r)))
+        noexcept(std::move(drv)(std::forward<R>(r))))
+        -> decltype(std::move(drv)(std::forward<R>(r)))
     {
-        return std::invoke(std::move(drv), std::forward<R>(r));
+        return std::move(drv)(std::forward<R>(r));
     }
 };
 
@@ -81,18 +81,15 @@ public:
             invocable<F, R, Ts...>&&
             view<std::invoke_result_t<F, R, Ts...>> // clang-format on
         constexpr auto operator()(R&& r) &&
-        noexcept(
-            noexcept(std::invoke(std::move(fn_),
-                                 std::forward<R>(r),
-                                 static_cast<box<Is, Ts>&&>(*this).value_...)))
+        noexcept(noexcept(
+            std::move(fn_)(std::forward<R>(r),
+                           static_cast<box<Is, Ts>&&>(*this).value_...)))
             -> decltype(
-                std::invoke(std::move(fn_),
-                            std::forward<R>(r),
-                            static_cast<box<Is, Ts>&&>(*this).value_...))
+                std::move(fn_)(std::forward<R>(r),
+                               static_cast<box<Is, Ts>&&>(*this).value_...))
     {
-        return std::invoke(std::move(fn_),
-                           std::forward<R>(r),
-                           static_cast<box<Is, Ts>&&>(*this).value_...);
+        return std::move(fn_)(std::forward<R>(r),
+                              static_cast<box<Is, Ts>&&>(*this).value_...);
     }
 
     template<hera::range R> // clang-format off
@@ -100,35 +97,27 @@ public:
             invocable<F, R, Ts&...>&&
             view<std::invoke_result_t<F, R, Ts&...>> // clang-format on
         constexpr auto operator()(R&& r) &
-        noexcept(
-            noexcept(std::invoke(fn_,
-                                 std::forward<R>(r),
-                                 static_cast<box<Is, Ts>&>(*this).value_...)))
-            -> decltype(std::invoke(fn_,
-                                    std::forward<R>(r),
-                                    static_cast<box<Is, Ts>&>(*this).value_...))
+        noexcept(noexcept(fn_(std::forward<R>(r),
+                              static_cast<box<Is, Ts>&>(*this).value_...)))
+            -> decltype(fn_(std::forward<R>(r),
+                            static_cast<box<Is, Ts>&>(*this).value_...))
     {
-        return std::invoke(fn_,
-                           std::forward<R>(r),
-                           static_cast<box<Is, Ts>&>(*this).value_...);
+        return fn_(std::forward<R>(r),
+                   static_cast<box<Is, Ts>&>(*this).value_...);
     }
 
     template<hera::range R> // clang-format off
         requires viewable_range<R>&&
             invocable<F, R, const Ts&...>&&
             view<std::invoke_result_t<F, R, const Ts&...>> // clang-format on
-        constexpr auto operator()(R&& r) const& noexcept(noexcept(
-            std::invoke(fn_,
-                        std::forward<R>(r),
-                        static_cast<const box<Is, Ts>&>(*this).value_...)))
-            -> decltype(
-                std::invoke(fn_,
-                            std::forward<R>(r),
+        constexpr auto operator()(R&& r) const& noexcept(
+            noexcept(fn_(std::forward<R>(r),
+                         static_cast<const box<Is, Ts>&>(*this).value_...)))
+            -> decltype(fn_(std::forward<R>(r),
                             static_cast<const box<Is, Ts>&>(*this).value_...))
     {
-        return std::invoke(fn_,
-                           std::forward<R>(r),
-                           static_cast<const box<Is, Ts>&>(*this).value_...);
+        return fn_(std::forward<R>(r),
+                   static_cast<const box<Is, Ts>&>(*this).value_...);
     }
 
     template<hera::range R> // clang-format off
@@ -136,17 +125,13 @@ public:
             invocable<F, R, const Ts&...>&&
             view<std::invoke_result_t<F, R, const Ts&...>> // clang-format on
         constexpr auto operator()(R&& r) const&& noexcept(noexcept(
-            std::invoke(std::move(fn_),
-                        std::forward<R>(r),
-                        static_cast<const box<Is, Ts>&&>(*this).value_...)))
-            -> decltype(
-                std::invoke(fn_,
-                            std::forward<R>(r),
+            std::move(fn_)(std::forward<R>(r),
+                           static_cast<const box<Is, Ts>&&>(*this).value_...)))
+            -> decltype(fn_(std::forward<R>(r),
                             static_cast<const box<Is, Ts>&&>(*this).value_...))
     {
-        return std::invoke(fn_,
-                           std::forward<R>(r),
-                           static_cast<const box<Is, Ts>&&>(*this).value_...);
+        return fn_(std::forward<R>(r),
+                   static_cast<const box<Is, Ts>&&>(*this).value_...);
     }
 };
 
@@ -183,8 +168,7 @@ public:
         constexpr decltype(auto) operator()(R&& r) &&
         noexcept(std::is_nothrow_invocable_v<B, std::invoke_result_t<A, R>>)
     {
-        return std::invoke(std::move(right_),
-                           std::invoke(std::move(left_), std::forward<R>(r)));
+        return std::move(right_)(std::move(left_)(std::forward<R>(r)));
     }
 
     template<viewable_range R> // clang-format off
@@ -193,7 +177,7 @@ public:
         constexpr decltype(auto) operator()(R&& r) &
         noexcept(std::is_nothrow_invocable_v<B&, std::invoke_result_t<B&, R>>)
     {
-        return std::invoke(right_, std::invoke(left_, std::forward<R>(r)));
+        return right_(left_(std::forward<R>(r)));
     }
 
     template<viewable_range R> // clang-format off
@@ -203,7 +187,7 @@ public:
             std::is_nothrow_invocable_v<const B&,
                                         std::invoke_result_t<const A&, R>>)
     {
-        return std::invoke(right_, std::invoke(left_, std::forward<R>(r)));
+        return right_(left_(std::forward<R>(r)));
     }
 
     template<viewable_range R> // clang-format off
@@ -213,8 +197,7 @@ public:
             std::is_nothrow_invocable_v<const B&&,
                                         std::invoke_result_t<const A&&, R>>)
     {
-        return std::invoke(std::move(right_),
-                           std::invoke(std::move(left_), std::forward<R>(r)));
+        return std::move(right_)(std::move(left_)(std::forward<R>(r)));
     }
 };
 } // namespace detail
