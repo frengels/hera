@@ -10,7 +10,8 @@ namespace hera
 {
 template<hera::range V, std::size_t... Is> // clang-format off
     requires view<V> && (!hera::range_out_of_bounds<V, Is> && ...)
-class reorder_view : public view_interface<reorder_view<V, Is...>> { // clang-format on
+class reorder_view : public view_interface<reorder_view<V, Is...>> // clang-format on
+{
 private:
     [[no_unique_address]] V base_;
 

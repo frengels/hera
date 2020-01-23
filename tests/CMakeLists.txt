@@ -29,6 +29,7 @@ set(
   optional
   drop_view
   enumerate_view
+  unreorder_view
   )
 
 find_package(Catch2 REQUIRED)
