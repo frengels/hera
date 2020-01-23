@@ -2,7 +2,6 @@ set(
   TESTS
   size
   at
-  get
   common_reference
   tuple_array
   iota_view

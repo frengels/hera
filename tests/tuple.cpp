@@ -4,7 +4,6 @@
 #include <string>
 
 #include "hera/container/tuple.hpp"
-#include "hera/get.hpp"
 #include "hera/ranges.hpp"
 
 template<std::size_t I>
