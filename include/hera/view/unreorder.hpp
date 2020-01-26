@@ -119,14 +119,14 @@ public:
     }
 
     template<std::size_t I>
-    constexpr auto try_at() const noexcept
+    constexpr auto try_get() const noexcept
     {
         if constexpr (I < sizeof...(Is))
         {
-            auto                  pos_const = hera::at<I>(unsequence);
+            auto                  pos_const = hera::get<I>(unsequence);
             constexpr std::size_t pos       = pos_const;
 
-            return hera::try_at<pos>(base_);
+            return hera::try_get<pos>(base_);
         }
         else
         {

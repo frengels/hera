@@ -10,12 +10,12 @@ TEST_CASE("reordered_view")
     auto reordered =
         hera::reorder_view{tup, hera::index_sequence<5, 4, 3, 2, 1, 0>{}};
 
-    REQUIRE(hera::at<0>(reordered) == 0);
-    REQUIRE(hera::at<1>(reordered) == 1);
-    REQUIRE(hera::at<2>(reordered) == 2);
-    REQUIRE(hera::at<3>(reordered) == 3);
-    REQUIRE(hera::at<4>(reordered) == 4);
-    REQUIRE(hera::at<5>(reordered) == 5);
+    REQUIRE(hera::get<0>(reordered) == 0);
+    REQUIRE(hera::get<1>(reordered) == 1);
+    REQUIRE(hera::get<2>(reordered) == 2);
+    REQUIRE(hera::get<3>(reordered) == 3);
+    REQUIRE(hera::get<4>(reordered) == 4);
+    REQUIRE(hera::get<5>(reordered) == 5);
 
     REQUIRE(hera::size(reordered) == 6);
 
@@ -24,8 +24,8 @@ TEST_CASE("reordered_view")
         auto partial_reorder =
             hera::reorder_view{tup, hera::index_sequence<1, 0>{}};
 
-        REQUIRE(hera::at<0>(partial_reorder) == 4);
-        REQUIRE(hera::at<1>(partial_reorder) == 5);
+        REQUIRE(hera::get<0>(partial_reorder) == 4);
+        REQUIRE(hera::get<1>(partial_reorder) == 5);
 
         REQUIRE(hera::size(partial_reorder) == 2);
     }
@@ -37,13 +37,13 @@ TEST_CASE("reordered_view")
 
         REQUIRE(hera::size(larger) == 7);
 
-        REQUIRE(hera::at<0>(larger) == 5);
-        REQUIRE(hera::at<1>(larger) == 5);
-        REQUIRE(hera::at<2>(larger) == 5);
-        REQUIRE(hera::at<3>(larger) == 5);
-        REQUIRE(hera::at<4>(larger) == 5);
-        REQUIRE(hera::at<5>(larger) == 5);
-        REQUIRE(hera::at<6>(larger) == 0);
+        REQUIRE(hera::get<0>(larger) == 5);
+        REQUIRE(hera::get<1>(larger) == 5);
+        REQUIRE(hera::get<2>(larger) == 5);
+        REQUIRE(hera::get<3>(larger) == 5);
+        REQUIRE(hera::get<4>(larger) == 5);
+        REQUIRE(hera::get<5>(larger) == 5);
+        REQUIRE(hera::get<6>(larger) == 0);
 
         REQUIRE(larger.front() == 5);
         REQUIRE(larger.back() == 0);

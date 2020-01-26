@@ -16,7 +16,7 @@ TEST_CASE("transform")
     auto pairs_first =
         hera::transform_view{tup_view, [](auto& pair) { return pair.first; }};
 
-    REQUIRE(hera::at<0>(pairs_first) == 1);
+    REQUIRE(hera::get<0>(pairs_first) == 1);
 
     auto sum_first =
         hera::unpack(pairs_first, [](auto... xs) { return (xs + ...); });
@@ -50,8 +50,8 @@ TEST_CASE("transform")
                                               const_type::value * 3>{};
             });
 
-        static_assert(decltype(hera::at<0>(triple_even))::value == 0);
-        static_assert(decltype(hera::at<1>(triple_even))::value == 6);
-        static_assert(decltype(hera::at<2>(triple_even))::value == 12);
+        static_assert(decltype(hera::get<0>(triple_even))::value == 0);
+        static_assert(decltype(hera::get<1>(triple_even))::value == 6);
+        static_assert(decltype(hera::get<2>(triple_even))::value == 12);
     }
 }

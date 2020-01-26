@@ -17,7 +17,7 @@ TEST_CASE("ref_view")
     static_assert(hera::view<decltype(ref_view)>);
 
     REQUIRE(tup_view.size() == ref_view.size());
-    REQUIRE(hera::at<0>(tup_view) == hera::at<0>(ref_view));
+    REQUIRE(hera::get<0>(tup_view) == hera::get<0>(ref_view));
 
     // == doesn't work because I'm using catch2 a little wrong
     REQUIRE(tup_view.back().compare(ref_view.back()) == 0);

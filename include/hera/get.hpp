@@ -7,10 +7,10 @@
 
 namespace hera
 {
-namespace try_at_impl
+namespace try_get_impl
 {
 template<std::size_t, typename T>
-void try_at(T&&) = delete;
+void try_get(T&&) = delete;
 
 template<std::size_t I>
 struct fn
@@ -18,16 +18,16 @@ struct fn
 private:
     template<typename R>
     static constexpr auto impl(hera::detail::priority_tag<4>, R&& r) noexcept
-        -> decltype(std::forward<R>(r).template try_at<I>())
+        -> decltype(std::forward<R>(r).template try_get<I>())
     {
-        return std::forward<R>(r).template try_at<I>();
+        return std::forward<R>(r).template try_get<I>();
     }
 
     template<typename R>
     static constexpr auto impl(hera::detail::priority_tag<3>, R&& r) noexcept
-        -> decltype(try_at<I>(std::forward<R>(r)))
+        -> decltype(try_get<I>(std::forward<R>(r)))
     {
-        return try_at<I>(std::forward<R>(r));
+        return try_get<I>(std::forward<R>(r));
     }
 
 public:
@@ -38,18 +38,18 @@ public:
         return impl(hera::detail::max_priority_tag, std::forward<R>(r));
     }
 };
-} // namespace try_at_impl
+} // namespace try_get_impl
 
 inline namespace cpo
 {
 template<std::size_t I>
-inline constexpr auto try_at = hera::try_at_impl::fn<I>{};
+inline constexpr auto try_get = hera::try_get_impl::fn<I>{};
 }
 
-namespace at_impl
+namespace get_impl
 {
 template<std::size_t, typename T>
-void at(T&&) = delete;
+void get(T&&) = delete;
 
 template<std::size_t Idx>
 struct fn
@@ -57,23 +57,23 @@ struct fn
 private:
     template<typename R>
     static constexpr auto impl(hera::detail::priority_tag<4>, R&& r) noexcept
-        -> decltype(std::forward<R>(r).template at<Idx>())
+        -> decltype(std::forward<R>(r).template get<Idx>())
     {
-        return std::forward<R>(r).template at<Idx>();
+        return std::forward<R>(r).template get<Idx>();
     }
 
     template<typename R>
     static constexpr auto impl(hera::detail::priority_tag<3>, R&& r) noexcept
-        -> decltype(at<Idx>(std::forward<R>(r)))
+        -> decltype(get<Idx>(std::forward<R>(r)))
     {
-        return at<Idx>(std::forward<R>(r));
+        return get<Idx>(std::forward<R>(r));
     }
 
     template<typename R>
     static constexpr auto impl(hera::detail::priority_tag<2>, R&& r) noexcept
-        -> decltype(*hera::try_at<Idx>(std::forward<R>(r)))
+        -> decltype(*hera::try_get<Idx>(std::forward<R>(r)))
     {
-        return *hera::try_at<Idx>(std::forward<R>(r));
+        return *hera::try_get<Idx>(std::forward<R>(r));
     }
 
 public:
@@ -84,11 +84,11 @@ public:
         return impl(hera::detail::max_priority_tag, std::forward<R>(r));
     }
 };
-} // namespace at_impl
+} // namespace get_impl
 
 inline namespace cpo
 {
 template<std::size_t Idx>
-inline constexpr auto at = hera::at_impl::fn<Idx>{};
+inline constexpr auto get = hera::get_impl::fn<Idx>{};
 }
 } // namespace hera

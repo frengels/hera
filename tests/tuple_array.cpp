@@ -9,9 +9,9 @@ TEST_CASE("tuple")
 
     auto tup_view = hera::tuple_view{tup};
 
-    REQUIRE(hera::at<0>(tup_view) == 1);
-    REQUIRE(hera::at<1>(tup_view) == 2);
-    REQUIRE(hera::at<2>(tup_view) == 3);
+    REQUIRE(hera::get<0>(tup_view) == 1);
+    REQUIRE(hera::get<1>(tup_view) == 2);
+    REQUIRE(hera::get<2>(tup_view) == 3);
 
     static_assert(hera::view<decltype(tup_view)>);
 }

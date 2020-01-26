@@ -17,8 +17,8 @@ struct fn
 {
 private:
     template<std::size_t I, hera::range R, typename Pred>
-    static constexpr decltype(auto) check_at(R&&                     range,
-                                             [[maybe_unused]] Pred&& pred)
+    static constexpr decltype(auto) check_get(R&&                     range,
+                                              [[maybe_unused]] Pred&& pred)
     {
         if constexpr (hera::range_out_of_bounds<R, I>)
         {
@@ -28,7 +28,7 @@ private:
         }
         else
         {
-            using element_type = decltype(hera::at<I>(std::forward<R>(range)));
+            using element_type = decltype(hera::get<I>(std::forward<R>(range)));
             using pred_result  = std::invoke_result_t<Pred, element_type>;
 
             if constexpr (pred_result::value)
@@ -38,8 +38,8 @@ private:
             }
             else
             {
-                return check_at<I + 1>(std::forward<R>(range),
-                                       std::forward<Pred>(pred));
+                return check_get<I + 1>(std::forward<R>(range),
+                                        std::forward<Pred>(pred));
             }
         }
     }
@@ -48,7 +48,7 @@ public:
     template<hera::range R, typename Pred>
     constexpr decltype(auto) operator()(R&& range, Pred&& pred) const noexcept
     {
-        return check_at<0>(std::forward<R>(range), std::forward<Pred>(pred));
+        return check_get<0>(std::forward<R>(range), std::forward<Pred>(pred));
     }
 }; // namespace find_if_impl
 } // namespace find_if_impl

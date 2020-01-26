@@ -14,10 +14,10 @@ TEST_CASE("unreorder_view")
     auto unreordered =
         hera::unreorder_view{reordered, decltype(reordered)::sequence};
 
-    REQUIRE(hera::at<0>(tup) == hera::at<0>(unreordered));
-    REQUIRE(hera::at<1>(tup) == hera::at<1>(unreordered));
-    REQUIRE(hera::at<2>(tup) == hera::at<2>(unreordered));
-    REQUIRE(hera::at<3>(tup) == hera::at<3>(unreordered));
-    REQUIRE(hera::at<4>(tup) == hera::at<4>(unreordered));
-    REQUIRE(hera::at<5>(tup) == hera::at<5>(unreordered));
+    REQUIRE(hera::get<0>(tup) == hera::get<0>(unreordered));
+    REQUIRE(hera::get<1>(tup) == hera::get<1>(unreordered));
+    REQUIRE(hera::get<2>(tup) == hera::get<2>(unreordered));
+    REQUIRE(hera::get<3>(tup) == hera::get<3>(unreordered));
+    REQUIRE(hera::get<4>(tup) == hera::get<4>(unreordered));
+    REQUIRE(hera::get<5>(tup) == hera::get<5>(unreordered));
 }

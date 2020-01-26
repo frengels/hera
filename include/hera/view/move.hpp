@@ -33,9 +33,9 @@ public:
     }
 
     template<std::size_t I>
-    constexpr auto try_at() const noexcept
+    constexpr auto try_get() const noexcept
     {
-        return hera::try_at<I>(base_).transform(
+        return hera::try_get<I>(base_).transform(
             [](auto&& x) -> decltype(auto) { return std::move(x); });
     }
 };

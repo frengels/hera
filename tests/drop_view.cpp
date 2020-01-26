@@ -9,7 +9,7 @@ TEST_CASE("drop_view")
 
     auto drop = hera::drop_view{iota, std::integral_constant<std::size_t, 5>{}};
 
-    static_assert(decltype(hera::at<0>(drop))::value == 5);
+    static_assert(decltype(hera::get<0>(drop))::value == 5);
 
     static_assert(hera::size(iota) == hera::size(drop));
 
@@ -19,5 +19,5 @@ TEST_CASE("drop_view")
     auto drop3 =
         iota | hera::views::drop(std::integral_constant<std::size_t, 10>{});
 
-    static_assert(hera::at<0>(drop3) == 10);
+    static_assert(hera::get<0>(drop3) == 10);
 }

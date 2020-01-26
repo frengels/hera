@@ -31,9 +31,9 @@ public:
     }
 
     template<std::size_t I>
-    constexpr auto try_at() const noexcept
+    constexpr auto try_get() const noexcept
     {
-        return hera::try_at<I>(base_).transform([](auto&& val) {
+        return hera::try_get<I>(base_).transform([](auto&& val) {
             return hera::pair<std::integral_constant<std::size_t, I>,
                               decltype(val)>{{},
                                              std::forward<decltype(val)>(val)};

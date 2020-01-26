@@ -17,8 +17,8 @@ concept pair_like = // clang-format off
     {
         hera::size(std::forward<R>(range));
         requires (decltype(hera::size(std::forward<R>(range)))::value == 2);
-        hera::at<0>(std::forward<R>(range));
-        hera::at<1>(std::forward<R>(range));
+        hera::get<0>(std::forward<R>(range));
+        hera::get<1>(std::forward<R>(range));
     }; // clang-format on
 
 template<typename T, typename U>
@@ -43,7 +43,7 @@ public:
     }
 
     template<std::size_t I>
-        constexpr auto try_at() & noexcept
+        constexpr auto try_get() & noexcept
     {
         if constexpr (I == 0)
         {
@@ -60,7 +60,7 @@ public:
     }
 
     template<std::size_t I>
-    constexpr auto try_at() const& noexcept
+    constexpr auto try_get() const& noexcept
     {
         if constexpr (I == 0)
         {
@@ -77,7 +77,7 @@ public:
     }
 
     template<std::size_t I>
-        constexpr auto try_at() && noexcept
+        constexpr auto try_get() && noexcept
     {
         if constexpr (I == 0)
         {
@@ -94,7 +94,7 @@ public:
     }
 
     template<std::size_t I>
-    constexpr auto try_at() const&& noexcept
+    constexpr auto try_get() const&& noexcept
     {
         if constexpr (I == 0)
         {
@@ -124,8 +124,8 @@ pair(T&&, U &&)->pair<std::decay_t<T>, std::decay_t<U>>;
 // basically deduce the decayed type of each entry
 template<pair_like P>
 pair(P&& p)
-    ->pair<std::decay_t<decltype(hera::at<0>(std::forward<P>(p)))>,
-           std::decay_t<decltype(hera::at<1>(std::forward<P>(p)))>>;
+    ->pair<std::decay_t<decltype(hera::get<0>(std::forward<P>(p)))>,
+           std::decay_t<decltype(hera::get<1>(std::forward<P>(p)))>>;
 
 template<typename T, typename U>
 constexpr hera::pair<std::decay_t<T>, std::decay_t<U>>

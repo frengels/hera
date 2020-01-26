@@ -1,6 +1,6 @@
 #pragma once
 
-#include "hera/at.hpp"
+#include "hera/get.hpp"
 #include "hera/concepts.hpp"
 #include "hera/ranges.hpp"
 #include "hera/size.hpp"
@@ -36,9 +36,9 @@ public:
     }
 
     template<std::size_t I>
-    constexpr auto try_at() const noexcept
+    constexpr auto try_get() const noexcept
     {
-        return hera::try_at<I>(base_).transform(transform_fn_);
+        return hera::try_get<I>(base_).transform(transform_fn_);
     }
 };
 

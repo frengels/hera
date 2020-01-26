@@ -39,7 +39,7 @@ private:
     {
         if constexpr (I < sizeof...(Vs))
         {
-            auto curr_size = hera::size(hera::at<I>(base_));
+            auto curr_size = hera::size(hera::get<I>(base_));
 
             constexpr auto cmp = [](auto lhs, auto rhs) {
                 if constexpr (hera::same_as<hera::infinite, decltype(lhs)>)
@@ -79,7 +79,7 @@ public:
     }
 
     template<std::size_t I>
-    constexpr auto try_at() const noexcept
+    constexpr auto try_get() const noexcept
     {
         if constexpr (decltype(hera::any_of(base_, [](auto view) {
                           return std::bool_constant<
@@ -92,7 +92,7 @@ public:
                 // in bounds
                 return hera::unpack(base_, [](auto... views) {
                     return hera::just{
-                        hera::forward_as_tuple(hera::at<I>(views)...)};
+                        hera::forward_as_tuple(hera::get<I>(views)...)};
                 });
             }
             else
@@ -106,7 +106,7 @@ public:
             // always valid
             return hera::unpack(base_, [](auto... views) {
                 return hera::just{
-                    hera::forward_as_tuple(hera::at<I>(views)...)};
+                    hera::forward_as_tuple(hera::get<I>(views)...)};
             });
         }
     }

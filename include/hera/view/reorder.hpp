@@ -41,15 +41,15 @@ public:
     }
 
     template<std::size_t I>
-    constexpr auto try_at() const noexcept
+    constexpr auto try_get() const noexcept
     {
         if constexpr (I < sizeof...(Is))
         {
-            auto                  pos_const = hera::at<I>(sequence);
+            auto                  pos_const = hera::get<I>(sequence);
             constexpr std::size_t pos       = pos_const;
 
             // guaranteed not out of bounds thanks to concept check
-            return hera::try_at<pos>(base_);
+            return hera::try_get<pos>(base_);
         }
         else
         {

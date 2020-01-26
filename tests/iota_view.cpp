@@ -17,10 +17,10 @@ TEST_CASE("iota_view")
 
         verify_unbounded_range(iota);
         static_assert(!hera::bounded_range<decltype(iota)>);
-        REQUIRE(hera::at<50>(iota) == 50);
+        REQUIRE(hera::get<50>(iota) == 50);
 
         static_assert(hera::same_as<std::integral_constant<int, 50>,
-                                    decltype(hera::at<50>(iota))>);
+                                    decltype(hera::get<50>(iota))>);
     }
 
     SECTION("finite")
@@ -28,7 +28,7 @@ TEST_CASE("iota_view")
         auto iota = hera::iota_view<10, 50>{};
 
         static_assert(hera::bounded_range<decltype(iota)>);
-        REQUIRE(hera::at<10>(iota) == 20);
+        REQUIRE(hera::get<10>(iota) == 20);
     }
 
     SECTION("empty")

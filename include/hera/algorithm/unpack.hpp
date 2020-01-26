@@ -2,7 +2,7 @@
 
 #include <type_traits>
 
-#include "hera/at.hpp"
+#include "hera/get.hpp"
 #include "hera/ranges.hpp"
 #include "hera/size.hpp"
 
@@ -17,7 +17,7 @@ private:
     static constexpr decltype(auto)
     impl(std::index_sequence<Is...>, R&& r, F&& fn) noexcept
     {
-        return std::forward<F>(fn)(hera::at<Is>(std::forward<R>(r))...);
+        return std::forward<F>(fn)(hera::get<Is>(std::forward<R>(r))...);
     }
 
 public:

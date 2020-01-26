@@ -12,8 +12,8 @@ TEST_CASE("move")
     auto move_pipe = tupv | hera::views::move;
     static_assert(hera::same_as<decltype(move_tupv), decltype(move_pipe)>);
 
-    auto&& ref  = hera::at<0>(tupv);
-    auto&& move = hera::at<0>(move_tupv);
+    auto&& ref  = hera::get<0>(tupv);
+    auto&& move = hera::get<0>(move_tupv);
 
     static_assert(hera::same_as<std::string&, decltype(ref)>);
     static_assert(hera::same_as<std::string&&, decltype(move)>);

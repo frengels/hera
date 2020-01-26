@@ -28,7 +28,7 @@ public:
     }
 
     template<std::size_t I>
-    constexpr auto try_at() const noexcept
+    constexpr auto try_get() const noexcept
     {
         if constexpr (I < std::tuple_size_v<std::remove_const_t<Tuple>>)
         {
