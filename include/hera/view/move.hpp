@@ -38,10 +38,17 @@ public:
         return hera::try_get<I>(base_).transform(
             [](auto&& x) -> decltype(auto) { return std::move(x); });
     }
+
+    template<std::size_t I>
+    constexpr auto get() const noexcept
+        -> decltype(std::move(hera::get<I>(base_)))
+    {
+        return std::move(hera::get<I>(base_));
+    }
 };
 
 template<hera::range R>
-move_view(R &&)->move_view<hera::all_view<R>>;
+move_view(R&&) -> move_view<hera::all_view<R>>;
 
 namespace views
 {
