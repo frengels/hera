@@ -28,8 +28,9 @@ private:
         }
         else
         {
-            using element_type = decltype(hera::get<I>(std::forward<R>(range)));
-            using pred_result  = std::invoke_result_t<Pred, element_type>;
+            using element_type =
+                decltype(hera::get<I>(static_cast<R&&>(range)));
+            using pred_result = std::invoke_result_t<Pred, element_type>;
 
             if constexpr (pred_result::value)
             {
@@ -38,8 +39,8 @@ private:
             }
             else
             {
-                return check_get<I + 1>(std::forward<R>(range),
-                                        std::forward<Pred>(pred));
+                return check_get<I + 1>(static_cast<R&&>(range),
+                                        static_cast<Pred&&>(pred));
             }
         }
     }
@@ -48,7 +49,7 @@ public:
     template<hera::range R, typename Pred>
     constexpr decltype(auto) operator()(R&& range, Pred&& pred) const noexcept
     {
-        return check_get<0>(std::forward<R>(range), std::forward<Pred>(pred));
+        return check_get<0>(static_cast<R&&>(range), static_cast<Pred&&>(pred));
     }
 }; // namespace find_if_impl
 } // namespace find_if_impl
