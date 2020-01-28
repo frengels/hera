@@ -32,7 +32,7 @@ template<typename T>
 struct just_storage_base;
 
 template<typename T> // clang-format off
-    requires !std::is_reference_v<T>
+    requires (!std::is_reference_v<T>)
 struct just_storage_base<T> // clang-format on
 {
     using value_type = T;
@@ -54,7 +54,7 @@ struct just_storage_base<T> // clang-format on
         return val_;
     }
 
-    constexpr value_type get() && noexcept
+    constexpr value_type&& get() && noexcept
     {
         return std::move(val_);
     }
@@ -144,16 +144,16 @@ public:
     {}
 
     template<typename U> // clang-format off
-        requires !hera::same_as<T, U>
+        requires (!hera::same_as<T, U>)
     explicit(!hera::convertible_to<const U&, T>) // clang-format on
         constexpr just(const just<U>& other)
         : just(*other)
     {}
 
     template<typename U> // clang-format off
-        requires !hera::same_as<T, U>
+        requires (!hera::same_as<T, U>)
     explicit(!hera::convertible_to<U&&, T>) // clang-format on
-        constexpr just(just<U> && other)
+        constexpr just(just<U>&& other)
         : just(*std::move(other))
     {}
 
@@ -177,7 +177,7 @@ public:
     }
 
     template<typename U> // clang-format off
-        requires !hera::same_as<value_type, void>
+        requires (!hera::same_as<value_type, void>)
     constexpr T value_or(U&&) && // clang-format on
     {
         if constexpr (!hera::same_as<value_type, void>)
@@ -186,26 +186,26 @@ public:
         }
     }
 
-    constexpr decltype(auto) operator*() &
-        noexcept requires !hera::same_as<void, T>
+    constexpr decltype(auto) operator*() & noexcept
+        requires(!hera::same_as<void, T>)
     {
         return this->get();
     }
 
-    constexpr decltype(auto)
-    operator*() const& noexcept requires !hera::same_as<void, T>
+    constexpr decltype(auto) operator*() const& noexcept
+        requires(!hera::same_as<void, T>)
     {
         return this->get();
     }
 
-    constexpr decltype(auto) operator*() &&
-        noexcept requires !hera::same_as<void, T>
+    constexpr decltype(auto) operator*() && noexcept
+        requires(!hera::same_as<void, T>)
     {
         return std::move(*this).get();
     }
 
-    constexpr decltype(auto)
-    operator*() const&& noexcept requires !hera::same_as<void, T>
+    constexpr decltype(auto) operator*() const&& noexcept
+        requires(!hera::same_as<void, T>)
     {
         return std::move(*this).get();
     }
@@ -339,13 +339,9 @@ private:
     constexpr decltype(auto) and_then_void(F&& fn) const
     {
         static_assert(hera::invocable<F>, "cannot invoke F");
-        static_assert(hera::specialization_of<
-                          std::remove_cvref_t<std::invoke_result_t<F>>,
-                          hera::just> ||
-                          hera::specialization_of<
-                              std::remove_cvref_t<std::invoke_result_t<F>>,
-                              hera::none>,
-                      "F must return just or none");
+        static_assert(
+            hera::optional<std::remove_cvref_t<std::invoke_result_t<F>>>,
+            "F must return just/none");
 
         return std::forward<F>(fn)();
     }
@@ -434,7 +430,7 @@ public:
     }
 
     template<typename F>
-        constexpr just&& or_else(F&&) && noexcept
+    constexpr just&& or_else(F&&) && noexcept
     {
         return std::move(*this);
     }
@@ -450,7 +446,7 @@ public:
 just()->just<void>;
 
 template<typename T>
-just(T &&)->just<T>;
+just(T&&) -> just<T>;
 
 just(std::in_place_t)->just<void>;
 
