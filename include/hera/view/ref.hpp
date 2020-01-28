@@ -1,5 +1,6 @@
 #pragma once
 
+#include "hera/element_type.hpp"
 #include "hera/ranges.hpp"
 #include "hera/size.hpp"
 #include "hera/view/interface.hpp"
@@ -63,7 +64,7 @@ public:
 };
 
 template<typename R>
-ref_view(R&) -> ref_view<R>;
+ref_view(R&)->ref_view<R>;
 
 template<typename T>
 inline constexpr bool enable_safe_range<ref_view<T>> = true;
