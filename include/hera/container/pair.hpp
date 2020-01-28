@@ -8,6 +8,7 @@
 #include "hera/optional.hpp"
 #include "hera/ranges.hpp"
 #include "hera/size.hpp"
+#include "hera/type_identity.hpp"
 
 namespace hera
 {
