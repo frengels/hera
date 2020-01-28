@@ -30,6 +30,7 @@ set(
   enumerate_view
   unreorder_view
   element_type
+  destructure
   )
 
 find_package(Catch2 REQUIRED)
