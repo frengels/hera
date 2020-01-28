@@ -41,7 +41,7 @@ struct just_storage_base<T> // clang-format on
 
     template<typename... Args>
     explicit constexpr just_storage_base(std::in_place_t, Args&&... args)
-        : val_(std::forward<Args>(args)...)
+        : val_(static_cast<Args&&>(args)...)
     {}
 
     constexpr value_type& get() & noexcept
@@ -91,12 +91,12 @@ struct just_storage_base<T> // clang-format on
 
     constexpr value_type&& get() && noexcept
     {
-        return std::forward<value_type>(*val_);
+        return static_cast<value_type&&>(*val_);
     }
 
     constexpr const value_type&& get() const&& noexcept
     {
-        return std::forward<value_type>(*val_);
+        return static_cast<const value_type&&>(*val_);
     }
 };
 
@@ -136,11 +136,11 @@ public:
 
     template<typename... Args>
     explicit constexpr just(std::in_place_t, Args&&... args)
-        : base(std::in_place, std::forward<Args>(args)...)
+        : base(std::in_place, static_cast<Args&&>(args)...)
     {}
 
     template<typename U = value_type>
-    constexpr just(U&& value) : base(std::in_place, std::forward<U>(value))
+    constexpr just(U&& value) : base(std::in_place, static_cast<U&&>(value))
     {}
 
     template<typename U> // clang-format off
@@ -220,12 +220,12 @@ private:
 
         if constexpr (hera::same_as<void, result>)
         {
-            std::forward<F>(fn)();
+            static_cast<F&&>(fn)();
             return hera::just<void>{std::in_place};
         }
         else
         {
-            return hera::just<result>{std::forward<F>(fn)()};
+            return hera::just<result>{static_cast<F&&>(fn)()};
         }
     }
 
@@ -235,7 +235,7 @@ public:
     {
         if constexpr (hera::same_as<T, void>)
         {
-            return transform_void(std::forward<F>(fn));
+            return transform_void(static_cast<F&&>(fn));
         }
         else
         {
@@ -245,12 +245,12 @@ public:
 
             if constexpr (hera::same_as<void, result>)
             {
-                std::forward<F>(fn)(**this);
+                static_cast<F&&>(fn)(**this);
                 return hera::just<void>{std::in_place};
             }
             else
             {
-                return hera::just<result>{std::forward<F>(fn)(**this)};
+                return hera::just<result>{static_cast<F&&>(fn)(**this)};
             }
         }
     }
@@ -260,7 +260,7 @@ public:
     {
         if constexpr (hera::same_as<T, void>)
         {
-            return transform_void(std::forward<F>(fn));
+            return transform_void(static_cast<F&&>(fn));
         }
         else
         {
@@ -271,12 +271,12 @@ public:
 
             if constexpr (hera::same_as<void, result>)
             {
-                std::forward<F>(fn)(**this);
+                static_cast<F&&>(fn)(**this);
                 return hera::just<void>{std::in_place};
             }
             else
             {
-                return hera::just<result>{std::forward<F>(fn)(**this)};
+                return hera::just<result>{static_cast<F&&>(fn)(**this)};
             }
         }
     }
@@ -286,23 +286,23 @@ public:
     {
         if constexpr (hera::same_as<T, void>)
         {
-            return transform_void(std::forward<F>(fn));
+            return transform_void(static_cast<F&&>(fn));
         }
         else
         {
             static_assert(hera::invocable<F, value_type&&>, "cannot invoke F");
 
-            using result = decltype(std::forward<F>(fn)(*std::move(*this)));
+            using result = decltype(static_cast<F&&>(fn)(*std::move(*this)));
 
             if constexpr (hera::same_as<void, result>)
             {
-                std::forward<F>(fn)(*std::move(*this));
+                static_cast<F&&>(fn)(*std::move(*this));
                 return hera::just<void>{std::in_place};
             }
             else
             {
                 return hera::just<result>{
-                    std::forward<F>(fn)(*std::move(*this))};
+                    static_cast<F&&>(fn)(*std::move(*this))};
             }
         }
     }
@@ -312,7 +312,7 @@ public:
     {
         if constexpr (hera::same_as<T, void>)
         {
-            return transform_void(std::forward<F>(fn));
+            return transform_void(static_cast<F&&>(fn));
         }
         else
         {
@@ -323,13 +323,13 @@ public:
 
             if constexpr (hera::same_as<void, result>)
             {
-                std::forward<F>(fn)(*std::move(*this));
+                static_cast<F&&>(fn)(*std::move(*this));
                 return hera::just<void>{std::in_place};
             }
             else
             {
                 return hera::just<result>{
-                    std::forward<F>(fn)(*std::move(*this))};
+                    static_cast<F&&>(fn)(*std::move(*this))};
             }
         }
     }
@@ -343,7 +343,7 @@ private:
             hera::optional<std::remove_cvref_t<std::invoke_result_t<F>>>,
             "F must return just/none");
 
-        return std::forward<F>(fn)();
+        return static_cast<F&&>(fn)();
     }
 
 public:
@@ -352,7 +352,7 @@ public:
     {
         if constexpr (hera::same_as<void, T>)
         {
-            return and_then_void(std::forward<F>(fn));
+            return and_then_void(static_cast<F&&>(fn));
         }
         else
         {
@@ -362,7 +362,7 @@ public:
                     std::remove_cvref_t<std::invoke_result_t<F, value_type&>>>,
                 "F must return just/none");
 
-            return std::forward<F>(fn)(**this);
+            return static_cast<F&&>(fn)(**this);
         }
     }
 
@@ -371,7 +371,7 @@ public:
     {
         if constexpr (hera::same_as<void, T>)
         {
-            return and_then_void(std::forward<F>(fn));
+            return and_then_void(static_cast<F&&>(fn));
         }
         else
         {
@@ -381,7 +381,7 @@ public:
                               std::invoke_result_t<F, const value_type&>>>,
                           "F must return just/none");
 
-            return std::forward<F>(fn)(**this);
+            return static_cast<F&&>(fn)(**this);
         }
     }
 
@@ -390,7 +390,7 @@ public:
     {
         if constexpr (hera::same_as<void, T>)
         {
-            return and_then_void(std::forward<F>(fn));
+            return and_then_void(static_cast<F&&>(fn));
         }
         else
         {
@@ -400,7 +400,7 @@ public:
                     std::remove_cvref_t<std::invoke_result_t<F, value_type&&>>>,
                 "F must return just/none");
 
-            return std::forward<F>(fn)(*std::move(*this));
+            return static_cast<F&&>(fn)(*std::move(*this));
         }
     }
 
@@ -409,7 +409,7 @@ public:
     {
         if constexpr (hera::same_as<void, T>)
         {
-            return and_then_void(std::forward<F>(fn));
+            return and_then_void(static_cast<F&&>(fn));
         }
         else
         {
@@ -419,7 +419,7 @@ public:
                               std::invoke_result_t<F, const value_type&&>>>,
                           "F must return just/none");
 
-            return std::forward<F>(fn)(*std::move(*this));
+            return static_cast<F&&>(fn)(*std::move(*this));
         }
     }
 
@@ -473,7 +473,7 @@ public:
     template<typename U>
     constexpr U&& value_or(U&& u) const noexcept
     {
-        return std::forward<U>(u);
+        return static_cast<U&&>(u);
     }
 
     template<typename F>
@@ -496,7 +496,7 @@ public:
             hera::optional<std::remove_cvref_t<std::invoke_result_t<F>>>,
             "F must return just/none");
 
-        return std::forward<F>(fn)();
+        return static_cast<F&&>(fn)();
     }
 };
 } // namespace hera
