@@ -35,9 +35,14 @@ private:
         return check(size(static_cast<R&&>(r)));
     }
 
-    template<typename R>
-    static constexpr auto impl(hera::detail::priority_tag<2>, R&&) noexcept
-        -> decltype(std::tuple_size<std::remove_reference_t<R>>{})
+    template<typename R> // clang-format off
+        requires
+            requires
+            {
+                // only the non const is sfinae version so use it for sfinae
+                std::tuple_size<std::remove_cvref_t<R>>{};
+            }
+    static constexpr auto impl(hera::detail::priority_tag<2>, R&&) noexcept // clang-format on
     {
         return std::tuple_size<std::remove_reference_t<R>>{};
     }
@@ -69,14 +74,14 @@ concept sized = // clang-format off
 
 template<typename R>
 concept bounded_size = sized<R> && // clang-format off
-    requires (const R& r)
+    requires (R& r)
     {
         { hera::size(r) } -> hera::bounded;
     }; // clang-format on
 
 template<typename R>
 concept unbounded_size = sized<R>&& // clang-format off
-    requires (const R& r)
+    requires (R& r)
     {
         { hera::size(r) } -> hera::unbounded;
     }; // clang-format off

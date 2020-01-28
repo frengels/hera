@@ -53,5 +53,6 @@ TEST_CASE("size")
         auto tup = std::make_tuple(5, 5, 5, 5, 5);
 
         static_assert(hera::size_v<decltype(tup)> == 5);
+        static_assert(hera::size_v<const decltype(tup)> == 5);
     }
 }
