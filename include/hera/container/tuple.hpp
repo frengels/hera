@@ -3,13 +3,11 @@
 #include <utility>
 
 #include "hera/algorithm/unpack.hpp"
-//#include "hera/begin_end.hpp"
 #include "hera/concepts.hpp"
-//#include "hera/iterator/sentinel.hpp"
-//#include "hera/next_prev.hpp"
 #include "hera/optional.hpp"
 #include "hera/ranges.hpp"
 #include "hera/size.hpp"
+#include "hera/type_identity.hpp"
 
 namespace hera
 {
@@ -113,8 +111,8 @@ public:
         return *this;
     }
 
-    constexpr std::integral_constant<std::size_t, sizeof...(Ts)>
-    size() const noexcept
+    constexpr std::integral_constant<std::size_t, sizeof...(Ts)> size() const
+        noexcept
     {
         return {};
     }
@@ -241,8 +239,24 @@ public:
         return std::move(*this).template emplace_front<T>(std::move(val));
     }
 
+    template<std::size_t I> // clang-format off
+        requires (I < sizeof...(Ts))
+    constexpr auto element_type() noexcept // clang-format on
+    {
+        return hera::type_identity<
+            std::tuple_element_t<I, std::tuple<Ts...>>>{};
+    }
+
+    template<std::size_t I> // clang-format off
+        requires (I < sizeof...(Ts))
+    constexpr auto element_type() const noexcept // clang-format on
+    {
+        return hera::type_identity<
+            std::tuple_element_t<I, const std::tuple<Ts...>>>{};
+    }
+
     template<std::size_t I>
-    constexpr auto try_get() & noexcept
+        constexpr auto try_get() & noexcept
     {
         if constexpr (I < sizeof...(Ts))
         {
@@ -280,13 +294,13 @@ public:
     }
 
     template<std::size_t I>
-    constexpr auto try_get() && noexcept
+        constexpr auto try_get() && noexcept
     {
         if constexpr (I < sizeof...(Ts))
         {
             using type = std::tuple_element_t<I, std::tuple<Ts...>>&&;
 
-            return hera::just<type>{std::forward<type>(
+            return hera::just<type>{static_cast<type&&>(
                 static_cast<detail::tuple_box<
                     I,
                     std::tuple_element_t<I, std::tuple<Ts...>>>&&>(*this)
@@ -305,7 +319,7 @@ public:
         {
             using type = const std::tuple_element_t<I, std::tuple<Ts...>>&&;
 
-            return hera::just<type>{std::forward<type>(
+            return hera::just<type>{static_cast<const type&&>(
                 static_cast<const detail::tuple_box<
                     I,
                     std::tuple_element_t<I, std::tuple<Ts...>>>&&>(*this)
@@ -341,53 +355,39 @@ public:
         requires (I < sizeof...(Ts))
     constexpr decltype(auto) get() && noexcept // clang-format on
     {
-        // TODO cast to forward
-        return static_cast<detail::tuple_box<
-            I,
-            std::tuple_element_t<I, std::tuple<Ts...>>>&&>(*this)
-            .value;
+        using type =
+            decltype(static_cast<const detail::tuple_box<
+                         I,
+                         std::tuple_element_t<I, std::tuple<Ts...>>>&&>(*this)
+                         .value);
+
+        return static_cast<type&&>(
+            static_cast<detail::tuple_box<
+                I,
+                std::tuple_element_t<I, std::tuple<Ts...>>>&&>(*this)
+                .value);
     }
 
     template<std::size_t I> // clang-format off
         requires (I < sizeof...(Ts))
     constexpr decltype(auto) get() const && noexcept // clang-format on
     {
-        // TODO cast with forward
-        return static_cast<const detail::tuple_box<
-            I,
-            std::tuple_element_t<I, std::tuple<Ts...>>>&&>(*this)
-            .value;
-    }
+        using type =
+            decltype(static_cast<const detail::tuple_box<
+                         I,
+                         std::tuple_element_t<I, std::tuple<Ts...>>>&&>(*this)
+                         .value);
 
-    template<std::size_t I>
-    constexpr auto get() & noexcept -> decltype(*try_get<I>())
-    {
-        return *try_get<I>();
-    }
-
-    template<std::size_t I>
-    constexpr auto get() const& noexcept -> decltype(*try_get<I>())
-    {
-        return *try_get<I>();
-    }
-
-    template<std::size_t I>
-    constexpr auto get() && noexcept
-        -> decltype(*(std::move(*this).template try_get<I>()))
-    {
-        return *(std::move(*this).template try_get<I>());
-    }
-
-    template<std::size_t I>
-    constexpr auto get() const&& noexcept
-        -> decltype(*(std::move(*this).template try_get<I>()))
-    {
-        return *(std::move(*this).template try_get<I>());
+        return static_cast<const type&&>(
+            static_cast<const detail::tuple_box<
+                I,
+                std::tuple_element_t<I, std::tuple<Ts...>>>&&>(*this)
+                .value);
     }
 };
 
 template<typename... Ts>
-tuple(Ts&&...) -> tuple<std::decay_t<Ts>...>;
+tuple(Ts&&...)->tuple<std::decay_t<Ts>...>;
 
 template<typename... Ts,
          typename... Us,
