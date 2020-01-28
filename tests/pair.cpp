@@ -55,11 +55,9 @@ TEST_CASE("pair")
                       typename decltype(
                           static_cast<const hera::pair<const char*, int>&>(p_)
                               .template element_type<1>())::type>);
-        // this is ill formed for some reason
-        /*
+
         static_assert(
             hera::same_as<const int,
                           hera::element_type_t<1, const decltype(p_)>>);
-                          */
     }
 }

@@ -19,7 +19,7 @@ struct fn
 {
 private:
     template<typename MetaF> // clang-format off
-        requires (hera::metafunction<std::decay_t<MetaF>>)
+        requires (hera::metafunction<std::remove_cvref_t<MetaF>>)
     static constexpr auto check(MetaF&& mf) noexcept // clang-format on
         -> decltype(std::decay_t<MetaF>(static_cast<MetaF&&>(mf)))
     {
@@ -42,9 +42,15 @@ private:
         return check(element_type<I>(static_cast<R&&>(range)));
     }
 
-    template<typename R>
-    static constexpr auto impl(hera::detail::priority_tag<2>, R&&) noexcept
-        -> decltype(std::tuple_element<I, std::remove_reference_t<R>>{})
+    template<typename R> // clang-format off
+        requires 
+            requires
+            {
+                // require that tuple_element is complete otherwise because the 
+                // const variant is already defined
+                std::tuple_element<I, std::remove_cvref_t<R>>{};
+            }
+    static constexpr auto impl(hera::detail::priority_tag<2>, R&&) noexcept // clang-format on
     {
         return std::tuple_element<I, std::remove_reference_t<R>>{};
     }
