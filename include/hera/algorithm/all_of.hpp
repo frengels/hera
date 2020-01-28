@@ -12,8 +12,8 @@ struct fn
     template<hera::bounded_range R, typename Pred>
     constexpr auto operator()(R&& range, Pred p) const noexcept
     {
-        auto res = hera::find_if(std::forward<R>(range), [&](auto&&... xs) {
-            auto accept = p(std::forward<decltype(xs)>(xs)...);
+        auto res = hera::find_if(static_cast<R&&>(range), [&](auto&&... xs) {
+            auto accept = p(static_cast<decltype(xs)&&>(xs)...);
             return std::bool_constant<!decltype(accept)::value>{};
         });
 

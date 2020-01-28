@@ -15,7 +15,7 @@ public:
     constexpr auto operator()(R&& range, Pred p) const noexcept
     {
         // this will find the first occurence
-        auto res = hera::find_if(std::forward<R>(range), std::move(p));
+        auto res = hera::find_if(static_cast<R&&>(range), std::move(p));
 
         return res.transform([](auto&&) { return std::true_type{}; })
             .value_or(std::false_type{});

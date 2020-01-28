@@ -65,7 +65,7 @@ private:
                 });
 
             // return the sorted sequence
-            return std::forward<R>(r) |
+            return static_cast<R&&>(r) |
                    hera::views::reorder(
                        hera::index_sequence<std::visit(
                            [](auto boxed_type) {
@@ -79,7 +79,7 @@ public:
     template<hera::bounded_range R, typename Compare>
     constexpr auto operator()(R&& r, Compare comp) const noexcept
     {
-        return impl(std::forward<R>(r), std::move(comp));
+        return impl(static_cast<R&&>(r), std::move(comp));
     }
 };
 
