@@ -335,20 +335,22 @@ public:
         requires (I < sizeof...(Ts))
     constexpr decltype(auto) get() & noexcept // clang-format on
     {
-        return static_cast<detail::tuple_box<
-            I,
-            std::tuple_element_t<I, std::tuple<Ts...>>>&>(*this)
-            .value;
+        return (
+            static_cast<
+                detail::tuple_box<I,
+                                  std::tuple_element_t<I, std::tuple<Ts...>>>&>(
+                *this)
+                .value);
     }
 
     template<std::size_t I> // clang-format off
         requires (I < sizeof...(Ts))
     constexpr decltype(auto) get() const & noexcept // clang-format on
     {
-        return static_cast<const detail::tuple_box<
-            I,
-            std::tuple_element_t<I, std::tuple<Ts...>>>&>(*this)
-            .value;
+        return (static_cast<const detail::tuple_box<
+                    I,
+                    std::tuple_element_t<I, std::tuple<Ts...>>>&>(*this)
+                    .value);
     }
 
     template<std::size_t I> // clang-format off
@@ -409,54 +411,44 @@ template<typename... Ts>
 constexpr hera::tuple<Ts&&...> forward_as_tuple(Ts&&... ts) noexcept(
     std::is_nothrow_constructible_v<hera::tuple<Ts&&...>, Ts...>)
 {
-    return hera::tuple<Ts&&...>{std::forward<Ts>(ts)...};
+    return hera::tuple<Ts&&...>{static_cast<Ts&&>(ts)...};
 }
 
 template<typename... Ts>
 constexpr hera::tuple<std::decay_t<Ts>...> make_tuple(Ts&&... ts) noexcept(
     std::is_nothrow_constructible_v<hera::tuple<std::decay_t<Ts>...>, Ts...>)
 {
-    return hera::tuple<std::decay_t<Ts>...>{std::forward<Ts>(ts)...};
+    return hera::tuple<std::decay_t<Ts>...>{static_cast<Ts&&>(ts)...};
 }
 
-namespace detail
+template<typename T, typename... Ts> // clang-format off
+    requires (std::is_object_v<T>) && hera::constructible_from<T, Ts&...>
+constexpr T make_from_tuple(hera::tuple<Ts...>& tup) // clang-format on
 {
-template<typename T, std::size_t... Is, typename Tuple>
-constexpr T
-make_from_tuple_impl(std::index_sequence<Is...>, Tuple&& tup) noexcept(
-    std::is_nothrow_constructible_v<
-        T,
-        decltype(std::forward<Tuple>(
-            tup)[std::integral_constant<std::size_t, Is>{}])...>)
-{
-    return T(
-        std::forward<Tuple>(tup)[std::integral_constant<std::size_t, Is>{}]...);
+    return hera::unpack(tup, [](Ts&... ts) { return T(ts...); });
 }
-} // namespace detail
 
-template<typename T, typename Tuple>
-constexpr T
-make_from_tuple(Tuple&& tup) noexcept(noexcept(detail::make_from_tuple_impl(
-    std::make_index_sequence<decltype(hera::size(tup))::value>{},
-    std::forward<Tuple>(tup))))
+template<typename T, typename... Ts> // clang-format off
+    requires (std::is_object_v<T>) && hera::constructible_from<T, const Ts&...>
+constexpr T make_from_tuple(const hera::tuple<Ts...>& tup) // clang-format on
 {
-    return detail::make_from_tuple_impl(
-        std::make_index_sequence<decltype(hera::size(tup))::value>{},
-        std::forward<Tuple>(tup));
+    return hera::unpack(tup, [](const Ts&... ts) { return T(ts...); });
+}
+
+template<typename T, typename... Ts> // clang-format off
+    requires (std::is_object_v<T>) && hera::constructible_from<T, Ts&&...>
+constexpr T make_from_tuple(hera::tuple<Ts...>&& tup) // clang-format on
+{
+    return hera::unpack(std::move(tup),
+                        [](Ts&&... ts) { return T(static_cast<Ts&&>(ts)...); });
+}
+
+template<typename T, typename... Ts> // clang-format off
+    requires (std::is_object_v<T>) && hera::constructible_from<T, const Ts&&...>
+constexpr T make_from_tuple(const hera::tuple<Ts...>&& tup) // clang-format on
+{
+    return hera::unpack(std::move(tup), [](const Ts&&... ts) {
+        return T(static_cast<const Ts&&>(ts)...);
+    });
 }
 } // namespace hera
-
-namespace std
-{
-template<typename... Ts>
-struct tuple_size<hera::tuple<Ts...>>
-    : std::integral_constant<std::size_t, sizeof...(Ts)>
-{};
-
-template<std::size_t I, typename... Ts> // clang-format off
-    requires (I < sizeof...(Ts)) // clang-format on
-    struct tuple_element<I, hera::tuple<Ts...>>
-{
-    using type = std::tuple_element_t<I, std::tuple<Ts...>>;
-};
-} // namespace std
