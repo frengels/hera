@@ -1,7 +1,5 @@
 #pragma once
 
-#include <utility>
-
 #include "hera/constant.hpp"
 #include "hera/utility/detail/priority_tag.hpp"
 
@@ -18,24 +16,24 @@ struct fn
 private:
     template<typename R>
     static constexpr auto impl(hera::detail::priority_tag<4>, R&& r) noexcept
-        -> decltype(std::forward<R>(r).template try_get<I>())
+        -> decltype(static_cast<R&&>(r).template try_get<I>())
     {
-        return std::forward<R>(r).template try_get<I>();
+        return static_cast<R&&>(r).template try_get<I>();
     }
 
     template<typename R>
     static constexpr auto impl(hera::detail::priority_tag<3>, R&& r) noexcept
-        -> decltype(try_get<I>(std::forward<R>(r)))
+        -> decltype(try_get<I>(static_cast<R&&>(r)))
     {
-        return try_get<I>(std::forward<R>(r));
+        return try_get<I>(static_cast<R&&>(r));
     }
 
 public:
     template<typename R>
     constexpr auto operator()(R&& r) const noexcept
-        -> decltype(impl(hera::detail::max_priority_tag, std::forward<R>(r)))
+        -> decltype(impl(hera::detail::max_priority_tag, static_cast<R&&>(r)))
     {
-        return impl(hera::detail::max_priority_tag, std::forward<R>(r));
+        return impl(hera::detail::max_priority_tag, static_cast<R&&>(r));
     }
 };
 } // namespace try_get_impl
@@ -57,31 +55,31 @@ struct fn
 private:
     template<typename R>
     static constexpr auto impl(hera::detail::priority_tag<4>, R&& r) noexcept
-        -> decltype(std::forward<R>(r).template get<Idx>())
+        -> decltype(static_cast<R&&>(r).template get<Idx>())
     {
-        return std::forward<R>(r).template get<Idx>();
+        return static_cast<R&&>(r).template get<Idx>();
     }
 
     template<typename R>
     static constexpr auto impl(hera::detail::priority_tag<3>, R&& r) noexcept
-        -> decltype(get<Idx>(std::forward<R>(r)))
+        -> decltype(get<Idx>(static_cast<R&&>(r)))
     {
-        return get<Idx>(std::forward<R>(r));
+        return get<Idx>(static_cast<R&&>(r));
     }
 
     template<typename R>
     static constexpr auto impl(hera::detail::priority_tag<2>, R&& r) noexcept
-        -> decltype(*hera::try_get<Idx>(std::forward<R>(r)))
+        -> decltype(*hera::try_get<Idx>(static_cast<R&&>(r)))
     {
-        return *hera::try_get<Idx>(std::forward<R>(r));
+        return *hera::try_get<Idx>(static_cast<R&&>(r));
     }
 
 public:
     template<typename R>
     constexpr auto operator()(R&& r) const noexcept
-        -> decltype(impl(hera::detail::max_priority_tag, std::forward<R>(r)))
+        -> decltype(impl(hera::detail::max_priority_tag, static_cast<R&&>(r)))
     {
-        return impl(hera::detail::max_priority_tag, std::forward<R>(r));
+        return impl(hera::detail::max_priority_tag, static_cast<R&&>(r));
     }
 };
 } // namespace get_impl
