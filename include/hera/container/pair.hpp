@@ -15,10 +15,10 @@ template<hera::bounded_range R>
 concept pair_like = // clang-format off
     requires (R&& range)
     {
-        hera::size(std::forward<R>(range));
-        requires (decltype(hera::size(std::forward<R>(range)))::value == 2);
-        hera::get<0>(std::forward<R>(range));
-        hera::get<1>(std::forward<R>(range));
+        hera::size(static_cast<R&&>(range));
+        requires (decltype(hera::size(static_cast<R&&>(range)))::value == 2);
+        hera::get<0>(static_cast<R&&>(range));
+        hera::get<1>(static_cast<R&&>(range));
     }; // clang-format on
 
 template<typename T, typename U>
@@ -43,7 +43,7 @@ public:
     }
 
     template<std::size_t I>
-        constexpr auto try_get() & noexcept
+    constexpr auto try_get() & noexcept
     {
         if constexpr (I == 0)
         {
@@ -77,7 +77,7 @@ public:
     }
 
     template<std::size_t I>
-        constexpr auto try_get() && noexcept
+    constexpr auto try_get() && noexcept
     {
         if constexpr (I == 0)
         {
@@ -119,13 +119,12 @@ public:
 };
 
 template<typename T, typename U>
-pair(T&&, U &&)->pair<std::decay_t<T>, std::decay_t<U>>;
+pair(T&&, U&&) -> pair<std::decay_t<T>, std::decay_t<U>>;
 
 // basically deduce the decayed type of each entry
 template<pair_like P>
-pair(P&& p)
-    ->pair<std::decay_t<decltype(hera::get<0>(std::forward<P>(p)))>,
-           std::decay_t<decltype(hera::get<1>(std::forward<P>(p)))>>;
+pair(P&& p) -> pair<std::decay_t<decltype(hera::get<0>(static_cast<P&&>(p)))>,
+                    std::decay_t<decltype(hera::get<1>(static_cast<P&&>(p)))>>;
 
 template<typename T, typename U>
 constexpr hera::pair<std::decay_t<T>, std::decay_t<U>>
@@ -134,7 +133,7 @@ make_pair(T&& t, U&& u) noexcept(std::is_nothrow_constructible_v<
                                  T,
                                  U>)
 {
-    return hera::pair<std::decay_t<T>, std::decay_t<U>>{std::forward<T>(t),
-                                                        std::forward<U>(u)};
+    return hera::pair<std::decay_t<T>, std::decay_t<U>>{static_cast<T&&>(t),
+                                                        static_cast<U&&>(u)};
 }
 } // namespace hera
