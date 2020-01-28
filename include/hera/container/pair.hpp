@@ -72,7 +72,7 @@ public:
     }
 
     template<std::size_t I>
-    constexpr auto try_get() & noexcept
+        constexpr auto try_get() & noexcept
     {
         if constexpr (I == 0)
         {
@@ -106,15 +106,15 @@ public:
     }
 
     template<std::size_t I>
-    constexpr auto try_get() && noexcept
+        constexpr auto try_get() && noexcept
     {
         if constexpr (I == 0)
         {
-            return hera::just<T&&>(first);
+            return hera::just<T&&>(static_cast<T&&>(first));
         }
         else if constexpr (I == 1)
         {
-            return hera::just<U&&>(second);
+            return hera::just<U&&>(static_cast<U&&>(second));
         }
         else
         {
@@ -127,11 +127,11 @@ public:
     {
         if constexpr (I == 0)
         {
-            return hera::just<const T&&>(first);
+            return hera::just<const T&&>(static_cast<const T&&>(first));
         }
         else if constexpr (I == 1)
         {
-            return hera::just<const U&&>(second);
+            return hera::just<const U&&>(static_cast<const U&&>(second));
         }
         else
         {
@@ -145,11 +145,11 @@ public:
     {
         if constexpr (I == 0)
         {
-            return first;
+            return static_cast<first_type&>(first);
         }
         else
         {
-            return second;
+            return static_cast<second_type&>(second);
         }
     }
 
@@ -159,11 +159,11 @@ public:
     {
         if constexpr (I == 0)
         {
-            return first;
+            return static_cast<const first_type&>(first);
         }
         else
         {
-            return second;
+            return static_cast<const second_type&>(second);
         }
     }
 
@@ -206,12 +206,13 @@ public:
 };
 
 template<typename T, typename U>
-pair(T&&, U&&) -> pair<std::decay_t<T>, std::decay_t<U>>;
+pair(T&&, U &&)->pair<std::decay_t<T>, std::decay_t<U>>;
 
 // basically deduce the decayed type of each entry
 template<pair_like P>
-pair(P&& p) -> pair<std::decay_t<decltype(hera::get<0>(static_cast<P&&>(p)))>,
-                    std::decay_t<decltype(hera::get<1>(static_cast<P&&>(p)))>>;
+pair(P&& p)
+    ->pair<std::decay_t<decltype(hera::get<0>(static_cast<P&&>(p)))>,
+           std::decay_t<decltype(hera::get<1>(static_cast<P&&>(p)))>>;
 
 template<typename T, typename U>
 constexpr hera::pair<std::decay_t<T>, std::decay_t<U>>
