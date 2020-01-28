@@ -8,15 +8,145 @@
 
 namespace hera
 {
-// a special marker type to indicate the size is infinite
 struct infinite
 {
-    constexpr std::true_type operator==(const infinite&) const noexcept
+    constexpr bool operator==(const infinite&) const noexcept
+    {
+        return true;
+    }
+
+    constexpr bool operator!=(const infinite&) const noexcept
+    {
+        return false;
+    }
+
+    constexpr bool operator<(const infinite&) const noexcept
+    {
+        return false;
+    }
+
+    constexpr bool operator>(const infinite&) const noexcept
+    {
+        return false;
+    }
+
+    constexpr bool operator<=(const infinite&) const noexcept
+    {
+        return true;
+    }
+
+    constexpr bool operator>=(const infinite&) const noexcept
+    {
+        return true;
+    }
+
+    template<hera::integral I>
+    constexpr bool operator==(const I&) const noexcept
+    {
+        return false;
+    }
+
+    template<hera::integral I>
+    friend constexpr bool operator==(const I&, const infinite&) noexcept
+    {
+        return false;
+    }
+
+    template<hera::integral I>
+    constexpr bool operator!=(const I&) const noexcept
+    {
+        return true;
+    }
+
+    template<hera::integral I>
+    friend constexpr bool operator!=(const I&, const infinite&) noexcept
+    {
+        return true;
+    }
+
+    template<hera::integral I>
+    constexpr bool operator<(const I&) const noexcept
+    {
+        return false;
+    }
+
+    template<hera::integral I>
+    friend constexpr bool operator<(const I&, const infinite&) noexcept
+    {
+        return true;
+    }
+
+    template<hera::integral I>
+    constexpr bool operator>(const I&) const noexcept
+    {
+        return true;
+    }
+
+    template<hera::integral I>
+    friend constexpr bool operator>(const I&, const infinite&) noexcept
+    {
+        return false;
+    }
+
+    template<hera::integral I>
+    constexpr bool operator<=(const I&) const noexcept
+    {
+        return false;
+    }
+
+    template<hera::integral I>
+    friend constexpr bool operator<=(const I&, const infinite&) noexcept
+    {
+        return true;
+    }
+
+    template<hera::integral I>
+    constexpr bool operator>=(const I&) const noexcept
+    {
+        return true;
+    }
+
+    template<hera::integral I>
+    friend constexpr bool operator>=(const I&, const infinite&) noexcept
+    {
+        return false;
+    }
+};
+
+// a special marker type to indicate the size is infinite
+struct infinite_constant
+{
+    using type                  = infinite_constant;
+    using value_type            = infinite;
+    static constexpr auto value = infinite{};
+
+    constexpr std::true_type operator==(const infinite_constant&) const noexcept
     {
         return {};
     }
 
-    constexpr std::false_type operator!=(const infinite&) const noexcept
+    constexpr std::false_type
+    operator!=(const infinite_constant&) const noexcept
+    {
+        return {};
+    }
+
+    constexpr std::false_type operator<(const infinite_constant&) const noexcept
+    {
+        return {};
+    }
+
+    constexpr std::false_type operator>(const infinite_constant&) const noexcept
+    {
+        return {};
+    }
+
+    constexpr std::true_type operator<=(const infinite_constant&) const noexcept
+    {
+        return {};
+    }
+
+    constexpr std::true_type operator>=(const infinite_constant&) const noexcept
     {
         return {};
     }
@@ -34,15 +164,15 @@ struct infinite
     }
 
     template<hera::constant_convertible_to<std::size_t> C>
-    friend constexpr std::false_type operator==(const C&,
-                                                const infinite&) noexcept
+    friend constexpr std::false_type
+    operator==(const C&, const infinite_constant&) noexcept
     {
         return {};
     }
 
     template<hera::constant_convertible_to<std::size_t> C>
-    friend constexpr std::true_type operator!=(const C&,
-                                               const infinite&) noexcept
+    friend constexpr std::true_type
+    operator!=(const C&, const infinite_constant&) noexcept
     {
         return {};
     }
