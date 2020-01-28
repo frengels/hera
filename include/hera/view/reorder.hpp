@@ -56,11 +56,20 @@ public:
             return hera::none{};
         }
     }
+
+    template<std::size_t I> // clang-format off
+        requires (I < sizeof...(Is))
+    constexpr decltype(auto) get() const noexcept // clang-format on
+    {
+        constexpr std::size_t pos = decltype(hera::get<I>(sequence))::value;
+
+        return hera::get<pos>(base_);
+    }
 };
 
 template<hera::range R, std::size_t... Is>
 reorder_view(R&&, hera::index_sequence<Is...>)
-    ->reorder_view<hera::all_view<R>, Is...>;
+    -> reorder_view<hera::all_view<R>, Is...>;
 
 namespace views
 {
