@@ -46,7 +46,7 @@ public:
     {
         if constexpr (hera::unbounded<std::remove_cvref_t<decltype(Bound)>>)
         {
-            return hera::infinite{};
+            return hera::infinite_constant{};
         }
         else
         {
