@@ -21,9 +21,7 @@ TEST_CASE("tuple")
     REQUIRE(std::strcmp("hello", tup.front()) == 0);
     REQUIRE(42 == tup.back());
 
-    // TODO make this work
-    // static_assert(hera::same_as<int&&,
-    // decltype(hera::get<2>(std::move(tup)))>);
+    static_assert(hera::same_as<int&&, decltype(hera::get<2>(std::move(tup)))>);
     static_assert(hera::same_as<int&, decltype(hera::get<2>(tup))>);
 
     // TODO structured bindings
