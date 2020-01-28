@@ -39,8 +39,8 @@ public:
     using value_type = T;
 
 public:
-    constexpr std::integral_constant<std::size_t, sizeof...(Is)> size() const
-        noexcept
+    constexpr std::integral_constant<std::size_t, sizeof...(Is)>
+    size() const noexcept
     {
         return {};
     }
@@ -57,6 +57,13 @@ public:
         {
             hera::none{};
         }
+    }
+
+    template<std::size_t I> // clang-format off
+        requires (I < sizeof...(Is))
+    constexpr auto get() const noexcept // clang-format on
+    {
+        return typename detail::ith_value<I, value_type, Is...>::type{};
     }
 };
 
