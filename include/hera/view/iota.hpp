@@ -16,7 +16,8 @@ public:
 private:
     static_assert(
         []() -> bool {
-            if constexpr (hera::unbounded<std::remove_cvref_t<decltype(Bound)>>)
+            if constexpr (hera::same_as<hera::infinite,
+                                        std::remove_cvref_t<decltype(Bound)>>)
             {
                 return true;
             }
@@ -29,7 +30,8 @@ private:
 
     template<std::size_t I>
     static constexpr bool in_range = []() -> bool {
-        if constexpr (hera::unbounded<std::remove_cvref_t<decltype(Bound)>>)
+        if constexpr (hera::same_as<hera::infinite,
+                                    std::remove_cvref_t<decltype(Bound)>>)
         {
             return true;
         }
@@ -44,7 +46,8 @@ public:
 
     constexpr auto size() const noexcept
     {
-        if constexpr (hera::unbounded<std::remove_cvref_t<decltype(Bound)>>)
+        if constexpr (hera::same_as<hera::infinite,
+                                    std::remove_cvref_t<decltype(Bound)>>)
         {
             return hera::infinite_constant{};
         }
