@@ -42,6 +42,34 @@ public:
         return {};
     }
 
+    template<std::size_t I> // clang-format off
+        requires (I < 2)
+    constexpr auto element_type() noexcept // clang-format on
+    {
+        if constexpr (I == 0)
+        {
+            return hera::type_identity<first_type>{};
+        }
+        else
+        {
+            return hera::type_identity<second_type>{};
+        }
+    }
+
+    template<std::size_t I> // clang-format off
+        requires (I < 2)
+    constexpr auto element_type() const noexcept // clang-format on
+    {
+        if constexpr (I == 0)
+        {
+            return hera::type_identity<const first_type>{};
+        }
+        else
+        {
+            return hera::type_identity<const second_type>{};
+        }
+    }
+
     template<std::size_t I>
     constexpr auto try_get() & noexcept
     {
@@ -110,7 +138,65 @@ public:
         }
     }
 
-    constexpr void swap(pair& other)
+    template<std::size_t I> // clang-format off
+        requires (I < 2)
+    constexpr decltype(auto) get() & noexcept // clang-format on
+    {
+        if constexpr (I == 0)
+        {
+            return first;
+        }
+        else
+        {
+            return second;
+        }
+    }
+
+    template<std::size_t I> // clang-format off
+        requires (I < 2)
+    constexpr decltype(auto) get() const & noexcept // clang-format on
+    {
+        if constexpr (I == 0)
+        {
+            return first;
+        }
+        else
+        {
+            return second;
+        }
+    }
+
+    template<std::size_t I> // clang-format off
+        requires (I < 2)
+    constexpr decltype(auto) get() && noexcept // clang-format on
+    {
+        if constexpr (I == 0)
+        {
+            return static_cast<first_type&&>(first);
+        }
+        else
+        {
+            return static_cast<second_type&&>(second);
+        }
+    }
+
+    template<std::size_t I> // clang-format off
+        requires (I < 2)
+    constexpr decltype(auto) get() const && noexcept // clang-format on
+    {
+        if constexpr (I == 0)
+        {
+            return static_cast<const first_type&&>(first);
+        }
+        else
+        {
+            return static_cast<const second_type&&>(second);
+        }
+    }
+
+    constexpr void
+    swap(pair& other) noexcept(std::is_nothrow_swappable_v<first_type>&&
+                                   std::is_nothrow_swappable_v<second_type>)
     {
         using std::swap;
         swap(first, other.first);
