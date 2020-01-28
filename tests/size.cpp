@@ -4,7 +4,7 @@
 
 struct infinite_range
 {
-    constexpr hera::infinite size() const
+    constexpr hera::infinite_constant size() const
     {
         return {};
     }

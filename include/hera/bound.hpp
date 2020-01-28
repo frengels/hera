@@ -125,8 +125,8 @@ struct infinite_constant
         return {};
     }
 
-    constexpr std::false_type
-    operator!=(const infinite_constant&) const noexcept
+    constexpr std::false_type operator!=(const infinite_constant&) const
+        noexcept
     {
         return {};
     }
@@ -184,7 +184,7 @@ concept bounded = constant_convertible_to<B, std::size_t>;
 
 // unbounded must be indicated with the type unreachable
 template<typename B>
-concept unbounded = hera::same_as<B, infinite>;
+concept unbounded = hera::same_as<B, infinite_constant>;
 
 // check whether B indicates a bound
 template<typename B>
