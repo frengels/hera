@@ -67,5 +67,12 @@ public:
             return hera::none{};
         }
     }
+
+    template<std::size_t I> // clang-format off
+        requires (in_range<I>)
+    constexpr auto get() const noexcept // clang-format on
+    {
+        return std::integral_constant<value_type, Start + I>{};
+    }
 };
 } // namespace hera
