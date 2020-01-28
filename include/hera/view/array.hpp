@@ -59,6 +59,13 @@ public:
             return hera::none{};
         }
     }
+
+    template<std::size_t I> // clang-format off
+        requires (I < N)
+    constexpr decltype(auto) get() const
+    {
+        return data_[I];
+    }
 };
 
 template<typename T, std::size_t N>
