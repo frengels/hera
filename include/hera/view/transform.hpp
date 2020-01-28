@@ -41,6 +41,13 @@ public:
     {
         return hera::try_get<I>(base_).transform(transform_fn_);
     }
+
+    template<std::size_t I> // clang-format off
+        requires hera::range_reachable<V, I>
+    constexpr decltype(auto) get const // clang-format on
+    {
+        return transform_fn(hera::get<I>(base_));
+    }
 };
 
 template<hera::range R, typename F>
