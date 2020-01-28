@@ -333,7 +333,8 @@ public:
 
     template<std::size_t I> // clang-format off
         requires (I < sizeof...(Ts))
-    constexpr decltype(auto) get() & noexcept // clang-format on
+    constexpr std::tuple_element_t<I, std::tuple<Ts...>>&
+    get() & noexcept // clang-format on
     {
         return (
             static_cast<
@@ -345,7 +346,8 @@ public:
 
     template<std::size_t I> // clang-format off
         requires (I < sizeof...(Ts))
-    constexpr decltype(auto) get() const & noexcept // clang-format on
+    constexpr const std::tuple_element_t<I, std::tuple<Ts...>>& 
+    get() const & noexcept // clang-format on
     {
         return (static_cast<const detail::tuple_box<
                     I,
@@ -355,7 +357,8 @@ public:
 
     template<std::size_t I> // clang-format off
         requires (I < sizeof...(Ts))
-    constexpr decltype(auto) get() && noexcept // clang-format on
+    constexpr std::tuple_element_t<I, std::tuple<Ts...>>&&
+    get() && noexcept // clang-format on
     {
         using type =
             decltype(static_cast<const detail::tuple_box<
@@ -372,7 +375,8 @@ public:
 
     template<std::size_t I> // clang-format off
         requires (I < sizeof...(Ts))
-    constexpr decltype(auto) get() const && noexcept // clang-format on
+    constexpr const std::tuple_element_t<I, std::tuple<Ts...>>&&
+    get() const && noexcept // clang-format on
     {
         using type =
             decltype(static_cast<const detail::tuple_box<
