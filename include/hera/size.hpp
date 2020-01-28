@@ -35,6 +35,13 @@ private:
         return check(size(static_cast<R&&>(r)));
     }
 
+    template<typename R>
+    static constexpr auto impl(hera::detail::priority_tag<2>, R&&) noexcept
+        -> decltype(std::tuple_size<std::remove_reference_t<R>>{})
+    {
+        return std::tuple_size<std::remove_reference_t<R>>{};
+    }
+
 public:
     template<typename R>
     constexpr auto operator()(R&& r) const noexcept
