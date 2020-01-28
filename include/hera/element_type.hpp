@@ -74,4 +74,8 @@ inline namespace cpo
 template<std::size_t I>
 inline constexpr auto element_type = hera::element_type_impl::fn<I>{};
 }
+
+template<std::size_t I, typename R>
+using element_type_t =
+    typename decltype(hera::element_type<I>(std::declval<R&>()))::type;
 } // namespace hera
