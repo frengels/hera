@@ -6,8 +6,8 @@
 #include "hera/view/array.hpp"
 #include "hera/view/tuple.hpp"
 
-template<std::size_t I>
-inline constexpr auto size_t_ = std::integral_constant<std::size_t, I>{};
+struct ungettable
+{};
 
 TEST_CASE("get")
 {
@@ -38,5 +38,21 @@ TEST_CASE("get")
 
         static_assert(
             !std::is_invocable_v<decltype(hera::get<100>), decltype(arr_view)>);
+    }
+
+    SECTION("std_tuple")
+    {
+        static_assert(
+            std::is_invocable_v<decltype(hera::get<0>), decltype((tup))>);
+
+        // this is not a property I can achieve at the moment
+        // because the program is ill formed on exceeded bounds (static_assert)
+        // static_assert(
+        //    !std::is_invocable_v<decltype(hera::get<200>), decltype((tup))>);
+    }
+
+    SECTION("ungettable")
+    {
+        static_assert(!std::is_invocable_v<decltype(hera::get<0>), ungettable>);
     }
 }

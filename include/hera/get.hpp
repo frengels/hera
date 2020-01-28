@@ -54,29 +54,22 @@ struct fn
 {
 private:
     template<typename R>
-    static constexpr auto impl(hera::detail::priority_tag<4>, R&& r) noexcept
+    static constexpr auto impl(hera::detail::priority_tag<4>, R&& r)
         -> decltype(static_cast<R&&>(r).template get<Idx>())
     {
         return static_cast<R&&>(r).template get<Idx>();
     }
 
     template<typename R>
-    static constexpr auto impl(hera::detail::priority_tag<3>, R&& r) noexcept
+    static constexpr auto impl(hera::detail::priority_tag<3>, R&& r)
         -> decltype(get<Idx>(static_cast<R&&>(r)))
     {
         return get<Idx>(static_cast<R&&>(r));
     }
 
-    template<typename R>
-    static constexpr auto impl(hera::detail::priority_tag<2>, R&& r) noexcept
-        -> decltype(*hera::try_get<Idx>(static_cast<R&&>(r)))
-    {
-        return *hera::try_get<Idx>(static_cast<R&&>(r));
-    }
-
 public:
     template<typename R>
-    constexpr auto operator()(R&& r) const noexcept
+    constexpr auto operator()(R&& r) const
         -> decltype(impl(hera::detail::max_priority_tag, static_cast<R&&>(r)))
     {
         return impl(hera::detail::max_priority_tag, static_cast<R&&>(r));
