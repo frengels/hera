@@ -51,7 +51,14 @@ template<typename T>
 concept safe_range = range<T> && (std::is_lvalue_reference_v<T> ||
                                   enable_safe_range<std::remove_cvref_t<T>>);
 
+template<typename R, std::size_t I>
+concept range_reachable = range<R>&& // clang-format off
+    requires (R range)
+    {
+        hera::get<I>(static_cast<R&&>(range));
+    }; // clang-format on
+
 template<hera::range R, std::size_t I> // clang-format off
-    requires !hera::empty_range<R> // clang-format on
-    using range_reference_at_t = decltype(hera::get<I>(std::declval<R&>()));
+    requires (!hera::empty_range<R>)
+using range_reference_at_t = decltype(hera::get<I>(std::declval<R&>())); // clang-format on
 } // namespace hera
