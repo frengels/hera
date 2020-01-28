@@ -33,6 +33,14 @@ public:
         : base_{std::addressof(static_cast<R&>(std::forward<T>(t)))}
     {}
 
+    template<std::size_t I>
+    constexpr auto element_type() const
+        noexcept(noexcept(hera::element_type<I>(*base_)))
+            -> decltype(hera::element_type<I>(*base_))
+    {
+        hera::element_type<I>(*base_);
+    }
+
     constexpr auto size() const noexcept(noexcept(hera::size(*base_)))
         -> decltype(hera::size(*base_))
     {
@@ -40,13 +48,15 @@ public:
     }
 
     template<std::size_t I>
-    constexpr auto try_get() const noexcept
+    constexpr auto try_get() const noexcept(noexcept(hera::try_get<I>(*base_)))
+        -> decltype(hera::try_get<I>(*base_))
     {
         return hera::try_get<I>(*base_);
     }
 
     template<std::size_t I>
-    constexpr auto get() const noexcept -> decltype(hera::get<I>(*base_))
+    constexpr auto get() const noexcept(noexcept(hera::try_get<I>(*base_)))
+        -> decltype(hera::get<I>(*base_))
     {
         return hera::get<I>(*base_);
     }
