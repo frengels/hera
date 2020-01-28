@@ -62,13 +62,13 @@ private:
 
 public:
     template<typename... Us> // clang-format off
-            requires sizeof...(Ts) == sizeof...(Us)
-        constexpr tuple(const hera::tuple<Us...>& other) // clang-format on
+            requires (sizeof...(Ts) == sizeof...(Us))
+    constexpr tuple(const hera::tuple<Us...>& other) // clang-format on
         : tuple{std::index_sequence_for<Us...>{}, other}
     {}
 
     template<typename... Us> // clang-format off
-            requires sizeof...(Ts) == sizeof...(Us)
+            requires (sizeof...(Ts) == sizeof...(Us))
         constexpr tuple(hera::tuple<Us...>&& other) // clang-format on
         : tuple{std::index_sequence_for<Us...>{}, std::move(other)}
     {}
@@ -96,40 +96,40 @@ private:
 
 public:
     template<typename... Us> // clang-format off
-        requires sizeof...(Ts) == sizeof...(Us)
+        requires (sizeof...(Ts) == sizeof...(Us))
     constexpr tuple& operator=(const hera::tuple<Us...>& other) noexcept( // clang-format on
-            noexcept(assign_impl(std::index_sequence_for<Us...>{}, other)))
+        noexcept(assign_impl(std::index_sequence_for<Us...>{}, other)))
     {
         assign_impl(std::index_sequence_for<Us...>{}, other);
         return *this;
     }
 
     template<typename... Us> // clang-format off
-        requires sizeof...(Ts) == sizeof...(Us)
+        requires (sizeof...(Ts) == sizeof...(Us))
     constexpr tuple& operator=(hera::tuple<Us...>&& other) noexcept(noexcept( // clang-format on
-            assign_impl(std::index_sequence_for<Us...>{}, std::move(other))))
+        assign_impl(std::index_sequence_for<Us...>{}, std::move(other))))
     {
         assign_impl(std::index_sequence_for<Us...>{}, std::move(other));
         return *this;
     }
 
-    constexpr std::integral_constant<std::size_t, sizeof...(Ts)> size() const
-        noexcept
+    constexpr std::integral_constant<std::size_t, sizeof...(Ts)>
+    size() const noexcept
     {
         return {};
     }
 
-    constexpr decltype(auto) front() noexcept requires sizeof...(Ts) >= 1
+    constexpr decltype(auto) front() noexcept requires(sizeof...(Ts) >= 1)
     {
         return get<0>();
     }
 
-    constexpr decltype(auto) front() const noexcept requires sizeof...(Ts) >= 1
+    constexpr decltype(auto) front() const noexcept requires(sizeof...(Ts) >= 1)
     {
         return get<0>();
     }
 
-    constexpr decltype(auto) back() noexcept requires sizeof...(Ts) >= 1
+    constexpr decltype(auto) back() noexcept requires(sizeof...(Ts) >= 1)
     {
         auto                  sz  = size();
         constexpr std::size_t sz_ = sz;
@@ -137,7 +137,7 @@ public:
         return get<sz_ - 1>();
     }
 
-    constexpr decltype(auto) back() const noexcept requires sizeof...(Ts) >= 1
+    constexpr decltype(auto) back() const noexcept requires(sizeof...(Ts) >= 1)
     {
         auto                  sz  = size();
         constexpr std::size_t sz_ = sz;
@@ -242,7 +242,7 @@ public:
     }
 
     template<std::size_t I>
-        constexpr auto try_get() & noexcept
+    constexpr auto try_get() & noexcept
     {
         if constexpr (I < sizeof...(Ts))
         {
@@ -280,7 +280,7 @@ public:
     }
 
     template<std::size_t I>
-        constexpr auto try_get() && noexcept
+    constexpr auto try_get() && noexcept
     {
         if constexpr (I < sizeof...(Ts))
         {
@@ -317,35 +317,77 @@ public:
         }
     }
 
+    template<std::size_t I> // clang-format off
+        requires (I < sizeof...(Ts))
+    constexpr decltype(auto) get() & noexcept // clang-format on
+    {
+        return static_cast<detail::tuple_box<
+            I,
+            std::tuple_element_t<I, std::tuple<Ts...>>>&>(*this)
+            .value;
+    }
+
+    template<std::size_t I> // clang-format off
+        requires (I < sizeof...(Ts))
+    constexpr decltype(auto) get() const & noexcept // clang-format on
+    {
+        return static_cast<const detail::tuple_box<
+            I,
+            std::tuple_element_t<I, std::tuple<Ts...>>>&>(*this)
+            .value;
+    }
+
+    template<std::size_t I> // clang-format off
+        requires (I < sizeof...(Ts))
+    constexpr decltype(auto) get() && noexcept // clang-format on
+    {
+        // TODO cast to forward
+        return static_cast<detail::tuple_box<
+            I,
+            std::tuple_element_t<I, std::tuple<Ts...>>>&&>(*this)
+            .value;
+    }
+
+    template<std::size_t I> // clang-format off
+        requires (I < sizeof...(Ts))
+    constexpr decltype(auto) get() const && noexcept // clang-format on
+    {
+        // TODO cast with forward
+        return static_cast<const detail::tuple_box<
+            I,
+            std::tuple_element_t<I, std::tuple<Ts...>>>&&>(*this)
+            .value;
+    }
+
     template<std::size_t I>
-        constexpr auto get() & noexcept -> decltype(*try_get<I>())
+    constexpr auto get() & noexcept -> decltype(*try_get<I>())
     {
         return *try_get<I>();
     }
 
     template<std::size_t I>
-        constexpr auto get() const & noexcept -> decltype(*try_get<I>())
+    constexpr auto get() const& noexcept -> decltype(*try_get<I>())
     {
         return *try_get<I>();
     }
 
     template<std::size_t I>
-        constexpr auto get() &&
-        noexcept -> decltype(*(std::move(*this).template try_get<I>()))
+    constexpr auto get() && noexcept
+        -> decltype(*(std::move(*this).template try_get<I>()))
     {
         return *(std::move(*this).template try_get<I>());
     }
 
     template<std::size_t I>
-        constexpr auto get() const &&
-        noexcept -> decltype(*(std::move(*this).template try_get<I>()))
+    constexpr auto get() const&& noexcept
+        -> decltype(*(std::move(*this).template try_get<I>()))
     {
         return *(std::move(*this).template try_get<I>());
     }
 };
 
 template<typename... Ts>
-tuple(Ts&&...)->tuple<std::decay_t<Ts>...>;
+tuple(Ts&&...) -> tuple<std::decay_t<Ts>...>;
 
 template<typename... Ts,
          typename... Us,
