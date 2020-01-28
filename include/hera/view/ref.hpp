@@ -44,10 +44,16 @@ public:
     {
         return hera::try_get<I>(*base_);
     }
+
+    template<std::size_t I>
+    constexpr auto get() const noexcept -> decltype(hera::get<I>(*base_))
+    {
+        return hera::get<I>(*base_);
+    }
 };
 
 template<typename R>
-ref_view(R&)->ref_view<R>;
+ref_view(R&) -> ref_view<R>;
 
 template<typename T>
 inline constexpr bool enable_safe_range<ref_view<T>> = true;
