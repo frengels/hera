@@ -30,14 +30,22 @@ public:
     template<std::size_t I>
     constexpr auto try_get() const noexcept
     {
-        if constexpr (I < std::tuple_size_v<std::remove_const_t<Tuple>>)
+        if constexpr (I < std::tuple_size<Tuple>::value)
         {
-            return hera::just{std::get<I>(*tuple_)};
+            return hera::just{hera::get<I>(*tuple_)};
+            // return hera::just{std::get<I>(*tuple_)};
         }
         else
         {
             return hera::none{};
         }
+    }
+
+    template<std::size_t I> // clang-format off
+        requires (I < std::tuple_size<Tuple>::value)
+    constexpr decltype(auto) get() const
+    {
+        return hera::get<I>(*tuple_);
     }
 };
 
