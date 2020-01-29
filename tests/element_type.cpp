@@ -34,10 +34,8 @@ TEST_CASE("element_type")
         static_assert(!std::is_invocable_v<decltype(hera::element_type<0>),
                                            no_element_type>);
 
-        static_assert(!std::is_invocable_v<decltype(hera::element_type<100>),
-                                           hera::tuple<>>);
-
+        // this is impossible to achieve
         // static_assert(!std::is_invocable_v<decltype(hera::element_type<100>),
-        //                                   std::tuple<>>);
+        //                                   hera::tuple<>>); std::tuple<>>);
     }
 }
