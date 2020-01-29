@@ -161,7 +161,7 @@ public:
         : just(*std::move(other))
     {}
 
-    /// \brief checks whether `*this` contains a value
+    /// \brief Checks whether `*this` contains a value.
     ///
     /// Because this is known at compile time this method returns an instance of
     /// `std::true_type`.
@@ -171,7 +171,7 @@ public:
         return {};
     }
 
-    /// \brief checks whether `*this` contains a value
+    /// \brief checks whether `*this` contains a value.
     /// \return `true`
     explicit constexpr operator bool() const noexcept
     {
@@ -465,7 +465,8 @@ public:
     }
     /// \endcond
 
-    /// \brief gives the current optional if filled.
+    /// \brief gives the current optional if filled, otherwise return value of
+    /// `F`.
     ///
     /// Because `just` always holds a value, this simply gives `*this`.
     /// An rvalue qualified `just` will return `*this` with rvalue qualifiers.
@@ -500,44 +501,79 @@ just(T &&)->just<T>;
 
 just(std::in_place_t)->just<void>;
 
+/// \brief A compile time optional value holding nothing.
+///
+/// \see just
 class none
 {
+    /// \brief our contained value_type
+    ///
+    /// `none` contains nothing so has `void` as its `value_type`.
     using value_type = void;
 
 public:
+    /// \brief default construct none
+    ///
+    /// since `none` represents the compile time knowledge of having no value,
+    /// this effectively does nothing.
     none() = default;
 
+    /// \brief initialize from `nullopt_t`
     constexpr none(hera::nullopt_t) noexcept
     {}
 
+    /// \brief Checks whether `*this` contains a value.
+    ///
+    /// `none`'s emptiness is known at compile time so returns an instance of
+    /// `std::false_type`.
+    /// \return the boolean constant `std::false_type`.
     constexpr std::false_type has_value() const noexcept
     {
         return {};
     }
 
+    /// \brief checks whether `*this` contains a value.
+    /// \return `false`
     explicit constexpr operator bool() const noexcept
     {
         return false;
     }
 
+    /// \brief retrieve the inner value or an alternative.
+    ///
+    /// This will always forward the alternative as `none` holds no value.
+    /// \return `u`
     template<typename U>
     constexpr U&& value_or(U&& u) const noexcept
     {
         return static_cast<U&&>(u);
     }
 
+    /// \brief apply `F` to the inner value.
+    ///
+    /// There is no inner value so we return a new instance of `none`.
+    /// \return new instance of `none`.
     template<typename F>
     constexpr hera::none transform(F&&) const noexcept
     {
         return {};
     }
 
+    /// \brief apply a function which returns another `optional`
+    ///
+    /// Holds no value so returns `none`.
+    /// \return new instance of `none`.
     template<typename F>
     constexpr hera::none and_then(F&&) const noexcept
     {
         return {};
     }
 
+    /// \brief gives the current optional if filled, otherwise return value of
+    /// `F`.
+    ///
+    /// `none` is always empty, therefore returns the result of invoking `fn`.
+    /// \return `fn()`
     template<hera::invocable F>
     constexpr decltype(auto) or_else(F&& fn) const
         noexcept(std::is_nothrow_invocable_v<F>)
