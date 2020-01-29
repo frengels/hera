@@ -30,9 +30,14 @@ set(
   enumerate_view
   unreorder_view
   element_type
-  destructure
   to
   )
+
+set (DESTRUCTURE_TEST OFF)
+
+if (${DESTRUCTURE_TEST})
+  list(APPEND ${TESTS} destructure)
+endif ()
 
 find_package(Catch2 REQUIRED)
 
