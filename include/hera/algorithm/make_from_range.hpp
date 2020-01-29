@@ -14,7 +14,7 @@ struct construct_fn
     constexpr T operator()(Args&&... args) const
         noexcept(std::is_nothrow_constructible_v<T, Args...>)
     {
-        return T(std::forward<Args>(args)...);
+        return T(static_cast<Args&&>(args)...);
     }
 };
 } // namespace detail
@@ -25,10 +25,10 @@ struct make_from_range_fn
 
     template<hera::range R>
     constexpr T operator()(R&& r) const
-        noexcept(noexcept(hera::unpack(std::forward<R>(r),
+        noexcept(noexcept(hera::unpack(static_cast<R&&>(r),
                                        detail::construct_fn<T>{})))
     {
-        return hera::unpack(std::forward<R>(r), detail::construct_fn<T>{});
+        return hera::unpack(static_cast<R&&>(r), detail::construct_fn<T>{});
     }
 };
 

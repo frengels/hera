@@ -41,26 +41,35 @@ public:
     }
 
     template<std::size_t I>
-    constexpr auto try_at() const noexcept
+    constexpr auto try_get() const noexcept
     {
         if constexpr (I < sizeof...(Is))
         {
-            auto                  pos_const = hera::at<I>(sequence);
+            auto                  pos_const = hera::get<I>(sequence);
             constexpr std::size_t pos       = pos_const;
 
             // guaranteed not out of bounds thanks to concept check
-            return hera::try_at<pos>(base_);
+            return hera::try_get<pos>(base_);
         }
         else
         {
             return hera::none{};
         }
     }
+
+    template<std::size_t I> // clang-format off
+        requires (I < sizeof...(Is))
+    constexpr decltype(auto) get() const noexcept // clang-format on
+    {
+        constexpr std::size_t pos = decltype(hera::get<I>(sequence))::value;
+
+        return hera::get<pos>(base_);
+    }
 };
 
 template<hera::range R, std::size_t... Is>
 reorder_view(R&&, hera::index_sequence<Is...>)
-    ->reorder_view<hera::all_view<R>, Is...>;
+    -> reorder_view<hera::all_view<R>, Is...>;
 
 namespace views
 {

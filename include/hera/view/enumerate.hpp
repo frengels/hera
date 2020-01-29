@@ -17,7 +17,7 @@ private:
     [[no_unique_address]] V base_;
 
 public:
-    explicit constexpr enumerate_view(V base) : base_(std::move(base_))
+    explicit constexpr enumerate_view(V base) : base_(static_cast<V&&>(base_))
     {}
 
     constexpr V base() const
@@ -31,13 +31,26 @@ public:
     }
 
     template<std::size_t I>
-    constexpr auto try_at() const noexcept
+    constexpr auto try_get() const noexcept
     {
-        return hera::try_at<I>(base_).transform([](auto&& val) {
+        return hera::try_get<I>(base_).transform([](auto&& val) {
             return hera::pair<std::integral_constant<std::size_t, I>,
                               decltype(val)>{{},
-                                             std::forward<decltype(val)>(val)};
+                                             static_cast<decltype(val)&&>(val)};
         });
+    }
+
+    template<std::size_t I> // clang-format off
+        requires 
+            requires 
+            {
+                hera::get<I>(base_);
+            } // clang-format on
+    constexpr decltype(auto) get() const noexcept
+    {
+        return hera::pair<std::integral_constant<std::size_t, I>,
+                          decltype(hera::get<I>(base_))>{{},
+                                                         hera::get<I>(base_)};
     }
 };
 
@@ -48,9 +61,9 @@ struct enumerate_fn : public detail::pipeable_interface<enumerate_fn>
     template<hera::range R> // clang-format off
         requires hera::viewable_range<R>
     constexpr auto operator()(R&& r) const // clang-format on
-        -> decltype(hera::enumerate_view{std::forward<R>(r)})
+        -> decltype(hera::enumerate_view{static_cast<R&&>(r)})
     {
-        return hera::enumerate_view{std::forward<R>(r)};
+        return hera::enumerate_view{static_cast<R&&>(r)};
     }
 };
 

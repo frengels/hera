@@ -17,9 +17,9 @@ TEST_CASE("filter_view")
 
     auto filt = hera::filter_view{tup_view, int_predicate};
 
-    REQUIRE(hera::at<0>(filt) == 1);
-    REQUIRE(hera::at<1>(filt) == 3);
-    REQUIRE(hera::at<2>(filt) == 5);
+    REQUIRE(hera::get<0>(filt) == 1);
+    REQUIRE(hera::get<1>(filt) == 3);
+    REQUIRE(hera::get<2>(filt) == 5);
 
     REQUIRE(hera::size(filt) == 3);
 
@@ -36,8 +36,8 @@ TEST_CASE("filter_view")
         static_assert(hera::unbounded_range<decltype(iota_filt)>);
         static_assert(std::is_empty_v<decltype(iota_filt)>);
 
-        static_assert(decltype(hera::at<0>(iota_filt))::value == 0);
-        static_assert(decltype(hera::at<1>(iota_filt))::value == 2);
+        static_assert(decltype(hera::get<0>(iota_filt))::value == 0);
+        static_assert(decltype(hera::get<1>(iota_filt))::value == 2);
     }
 
     SECTION("pipe")

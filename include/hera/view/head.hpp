@@ -37,11 +37,11 @@ public:
     }
 
     template<std::size_t I>
-    constexpr auto try_at() const noexcept
+    constexpr auto try_get() const noexcept
     {
         if constexpr (I == 0)
         {
-            return hera::try_at<0>(base_);
+            return hera::try_get<0>(base_);
         }
         else
         {

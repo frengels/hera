@@ -8,6 +8,7 @@
 #include "hera/optional.hpp"
 #include "hera/ranges.hpp"
 #include "hera/size.hpp"
+#include "hera/type_identity.hpp"
 
 namespace hera
 {
@@ -15,10 +16,10 @@ template<hera::bounded_range R>
 concept pair_like = // clang-format off
     requires (R&& range)
     {
-        hera::size(std::forward<R>(range));
-        requires (decltype(hera::size(std::forward<R>(range)))::value == 2);
-        hera::at<0>(std::forward<R>(range));
-        hera::at<1>(std::forward<R>(range));
+        hera::size(static_cast<R&&>(range));
+        requires (decltype(hera::size(static_cast<R&&>(range)))::value == 2);
+        hera::get<0>(static_cast<R&&>(range));
+        hera::get<1>(static_cast<R&&>(range));
     }; // clang-format on
 
 template<typename T, typename U>
@@ -42,8 +43,36 @@ public:
         return {};
     }
 
+    template<std::size_t I> // clang-format off
+        requires (I < 2)
+    constexpr auto element_type() noexcept // clang-format on
+    {
+        if constexpr (I == 0)
+        {
+            return hera::type_identity<first_type>{};
+        }
+        else
+        {
+            return hera::type_identity<second_type>{};
+        }
+    }
+
+    template<std::size_t I> // clang-format off
+        requires (I < 2)
+    constexpr auto element_type() const noexcept // clang-format on
+    {
+        if constexpr (I == 0)
+        {
+            return hera::type_identity<const first_type>{};
+        }
+        else
+        {
+            return hera::type_identity<const second_type>{};
+        }
+    }
+
     template<std::size_t I>
-        constexpr auto try_at() & noexcept
+        constexpr auto try_get() & noexcept
     {
         if constexpr (I == 0)
         {
@@ -60,7 +89,7 @@ public:
     }
 
     template<std::size_t I>
-    constexpr auto try_at() const& noexcept
+    constexpr auto try_get() const& noexcept
     {
         if constexpr (I == 0)
         {
@@ -77,15 +106,15 @@ public:
     }
 
     template<std::size_t I>
-        constexpr auto try_at() && noexcept
+        constexpr auto try_get() && noexcept
     {
         if constexpr (I == 0)
         {
-            return hera::just<T&&>(first);
+            return hera::just<T&&>(static_cast<T&&>(first));
         }
         else if constexpr (I == 1)
         {
-            return hera::just<U&&>(second);
+            return hera::just<U&&>(static_cast<U&&>(second));
         }
         else
         {
@@ -94,15 +123,15 @@ public:
     }
 
     template<std::size_t I>
-    constexpr auto try_at() const&& noexcept
+    constexpr auto try_get() const&& noexcept
     {
         if constexpr (I == 0)
         {
-            return hera::just<const T&&>(first);
+            return hera::just<const T&&>(static_cast<const T&&>(first));
         }
         else if constexpr (I == 1)
         {
-            return hera::just<const U&&>(second);
+            return hera::just<const U&&>(static_cast<const U&&>(second));
         }
         else
         {
@@ -110,7 +139,65 @@ public:
         }
     }
 
-    constexpr void swap(pair& other)
+    template<std::size_t I> // clang-format off
+        requires (I < 2)
+    constexpr decltype(auto) get() & noexcept // clang-format on
+    {
+        if constexpr (I == 0)
+        {
+            return static_cast<first_type&>(first);
+        }
+        else
+        {
+            return static_cast<second_type&>(second);
+        }
+    }
+
+    template<std::size_t I> // clang-format off
+        requires (I < 2)
+    constexpr decltype(auto) get() const & noexcept // clang-format on
+    {
+        if constexpr (I == 0)
+        {
+            return static_cast<const first_type&>(first);
+        }
+        else
+        {
+            return static_cast<const second_type&>(second);
+        }
+    }
+
+    template<std::size_t I> // clang-format off
+        requires (I < 2)
+    constexpr decltype(auto) get() && noexcept // clang-format on
+    {
+        if constexpr (I == 0)
+        {
+            return static_cast<first_type&&>(first);
+        }
+        else
+        {
+            return static_cast<second_type&&>(second);
+        }
+    }
+
+    template<std::size_t I> // clang-format off
+        requires (I < 2)
+    constexpr decltype(auto) get() const && noexcept // clang-format on
+    {
+        if constexpr (I == 0)
+        {
+            return static_cast<const first_type&&>(first);
+        }
+        else
+        {
+            return static_cast<const second_type&&>(second);
+        }
+    }
+
+    constexpr void
+    swap(pair& other) noexcept(std::is_nothrow_swappable_v<first_type>&&
+                                   std::is_nothrow_swappable_v<second_type>)
     {
         using std::swap;
         swap(first, other.first);
@@ -124,8 +211,8 @@ pair(T&&, U &&)->pair<std::decay_t<T>, std::decay_t<U>>;
 // basically deduce the decayed type of each entry
 template<pair_like P>
 pair(P&& p)
-    ->pair<std::decay_t<decltype(hera::at<0>(std::forward<P>(p)))>,
-           std::decay_t<decltype(hera::at<1>(std::forward<P>(p)))>>;
+    ->pair<std::decay_t<decltype(hera::get<0>(static_cast<P&&>(p)))>,
+           std::decay_t<decltype(hera::get<1>(static_cast<P&&>(p)))>>;
 
 template<typename T, typename U>
 constexpr hera::pair<std::decay_t<T>, std::decay_t<U>>
@@ -134,7 +221,7 @@ make_pair(T&& t, U&& u) noexcept(std::is_nothrow_constructible_v<
                                  T,
                                  U>)
 {
-    return hera::pair<std::decay_t<T>, std::decay_t<U>>{std::forward<T>(t),
-                                                        std::forward<U>(u)};
+    return hera::pair<std::decay_t<T>, std::decay_t<U>>{static_cast<T&&>(t),
+                                                        static_cast<U&&>(u)};
 }
 } // namespace hera

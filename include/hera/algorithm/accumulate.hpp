@@ -17,8 +17,8 @@ public:
     {
         auto add_to_init = [&](auto&& x) { init = std::move(init) + x; };
 
-        hera::unpack(std::forward<R>(range), [&](auto&&... xs) {
-            (add_to_init(std::forward<decltype(xs)>(xs)), ...);
+        hera::unpack(static_cast<R&&>(range), [&](auto&&... xs) {
+            (add_to_init(static_cast<decltype(xs)&&>(xs)), ...);
         });
 
         return init;
@@ -29,8 +29,8 @@ public:
     {
         auto add_to_init = [&](auto&& x) { init = op(std::move(init), x); };
 
-        hera::unpack(std::forward<R>(range), [&](auto&&... xs) {
-            (add_to_init(std::forward<decltype(xs)>(xs)), ...);
+        hera::unpack(static_cast<R&&>(range), [&](auto&&... xs) {
+            (add_to_init(static_cast<decltype(xs)&&>(xs)), ...);
         });
 
         return init;

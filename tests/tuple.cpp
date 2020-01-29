@@ -15,16 +15,14 @@ TEST_CASE("tuple")
     auto stdtup = std::tuple{"hello", "tuple", 42};
 
     // op []
-    REQUIRE(std::strcmp("tuple", hera::at<1>(tup)) == 0);
+    REQUIRE(std::strcmp("tuple", hera::get<1>(tup)) == 0);
 
     // front
     REQUIRE(std::strcmp("hello", tup.front()) == 0);
     REQUIRE(42 == tup.back());
 
-    // TODO make this work
-    // static_assert(hera::same_as<int&&,
-    // decltype(hera::at<2>(std::move(tup)))>);
-    static_assert(hera::same_as<int&, decltype(hera::at<2>(tup))>);
+    static_assert(hera::same_as<int&&, decltype(hera::get<2>(std::move(tup)))>);
+    static_assert(hera::same_as<int&, decltype(hera::get<2>(tup))>);
 
     // TODO structured bindings
     // auto [h, t, n] = tup;
@@ -37,9 +35,9 @@ TEST_CASE("tuple")
         static_assert(
             hera::same_as<int&&, decltype(get<0>(std::move(stdtup)))>);
 
-        static_assert(hera::same_as<int&, decltype(hera::at<0>(tup))>);
+        static_assert(hera::same_as<int&, decltype(hera::get<0>(tup))>);
         // static_assert(hera::same_as<int&&,
-        // decltype(hera::at<0>(std::move(tup))>);
+        // decltype(hera::get<0>(std::move(tup))>);
     }
 
     SECTION("assignable")

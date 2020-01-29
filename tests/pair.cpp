@@ -1,8 +1,9 @@
 #include <catch2/catch.hpp>
 
-#include "hera/at.hpp"
 #include "hera/container/pair.hpp"
 #include "hera/container/tuple.hpp"
+#include "hera/element_type.hpp"
+#include "hera/get.hpp"
 #include "hera/view/tuple.hpp"
 
 TEST_CASE("pair")
@@ -25,17 +26,38 @@ TEST_CASE("pair")
         auto tup = std::make_tuple(5, 6);
         auto tv  = hera::tuple_view{tup};
 
-        auto p1 = hera::pair<int, int>{hera::at<0>(tv), hera::at<1>(tv)};
+        auto p1 = hera::pair<int, int>{hera::get<0>(tv), hera::get<1>(tv)};
     }
 
-    SECTION("at")
+    SECTION("get")
     {
-        REQUIRE(hera::at<0>(p) == 5);
-        REQUIRE(hera::at<1>(p) == 6.0f);
+        REQUIRE(hera::get<0>(p) == 5);
+        REQUIRE(hera::get<1>(p) == 6.0f);
 
         static_assert(
-            hera::same_as<int&&, decltype(hera::at<0>(std::move(p)))>);
+            hera::same_as<int&&, decltype(hera::get<0>(std::move(p)))>);
 
         static_assert(decltype(hera::size(p))::value == 2);
+    }
+
+    SECTION("element_type")
+    {
+        auto p_ = hera::make_pair("hello world", 55);
+
+        static_assert(
+            hera::same_as<const char*, hera::element_type_t<0, decltype(p_)>>);
+
+        static_assert(
+            hera::same_as<int, hera::element_type_t<1, decltype(p_)>>);
+
+        static_assert(hera::same_as<
+                      const int,
+                      typename decltype(
+                          static_cast<const hera::pair<const char*, int>&>(p_)
+                              .template element_type<1>())::type>);
+
+        static_assert(
+            hera::same_as<const int,
+                          hera::element_type_t<1, const decltype(p_)>>);
     }
 }

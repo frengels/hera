@@ -2,7 +2,7 @@
 
 #include <array>
 
-// includes functions required to sort at compile time.
+// includes functions required to sort get compile time.
 // stl sorting algorithms are currently not yet marked constexpr.
 
 namespace hera

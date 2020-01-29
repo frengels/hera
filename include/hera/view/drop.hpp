@@ -59,17 +59,23 @@ public:
     }
 
     template<std::size_t I>
-    constexpr auto try_at() const noexcept
+    constexpr auto try_get() const noexcept
     {
-        return hera::try_at<I + N>(base_);
+        return hera::try_get<I + N>(base_);
+    }
+
+    template<std::size_t I>
+    constexpr auto get() const noexcept -> decltype(hera::get<I + N>(base_))
+    {
+        return hera::get<I + N>(base_);
     }
 };
 
 template<hera::range R, hera::constant_convertible_to<std::size_t> Len>
-drop_view(R&&, Len)->drop_view<hera::all_view<R>, Len::value>;
+drop_view(R&&, Len) -> drop_view<hera::all_view<R>, Len::value>;
 
 template<hera::range R, std::size_t N>
-drop_view(R &&)->drop_view<hera::all_view<R>, N>;
+drop_view(R&&) -> drop_view<hera::all_view<R>, N>;
 
 namespace views
 {

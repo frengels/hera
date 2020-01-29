@@ -4,7 +4,7 @@
 
 struct infinite_range
 {
-    constexpr hera::infinite size() const
+    constexpr hera::infinite_constant size() const
     {
         return {};
     }
@@ -46,5 +46,13 @@ TEST_CASE("size")
     {
         // has size method but not considered sized to us
         static_assert(!hera::sized<std::vector<int>>);
+    }
+
+    SECTION("std_tuple")
+    {
+        auto tup = std::make_tuple(5, 5, 5, 5, 5);
+
+        static_assert(hera::size_v<decltype(tup)> == 5);
+        static_assert(hera::size_v<const decltype(tup)> == 5);
     }
 }

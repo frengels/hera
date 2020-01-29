@@ -20,16 +20,6 @@ namespace detail
 /// hit this limit.
 constexpr std::size_t sum_to(std::size_t num) noexcept
 {
-    /*
-    auto res = num;
-    while (--num)
-    {
-        res += num;
-    }
-
-    return res;
-    */
-
     auto res = num;
 
     for (auto i = 0; i != num; ++i)
@@ -101,11 +91,11 @@ public:
     }();
 
 public:
-    constexpr unreorder_view(V base) : base_{std::move(base)}
+    constexpr unreorder_view(V base) : base_{static_cast<V&&>(base)}
     {}
 
     constexpr unreorder_view(V base, hera::index_sequence<Is...>)
-        : unreorder_view(std::move(base))
+        : unreorder_view(static_cast<V&&>(base))
     {}
 
     constexpr V base() const
@@ -119,19 +109,27 @@ public:
     }
 
     template<std::size_t I>
-    constexpr auto try_at() const noexcept
+    constexpr auto try_get() const noexcept
     {
         if constexpr (I < sizeof...(Is))
         {
-            auto                  pos_const = hera::at<I>(unsequence);
+            auto                  pos_const = hera::get<I>(unsequence);
             constexpr std::size_t pos       = pos_const;
 
-            return hera::try_at<pos>(base_);
+            return hera::try_get<pos>(base_);
         }
         else
         {
             return hera::none{};
         }
+    }
+
+    template<std::size_t I> // clang-format off
+        requires (I < sizeof...(Is))
+    constexpr decltype(auto) get() const noexcept // clang-format off
+    {
+        constexpr std::size_t pos = decltype(hera::get<I>(unsequence))::value;
+        return hera::get<pos>(base_);
     }
 };
 
@@ -146,16 +144,16 @@ struct unreorder_fn
     template<hera::range R, std::size_t... Is> // clang-format off
         requires hera::viewable_range<R>
     constexpr auto operator()(R&& range, hera::index_sequence<Is...> indices) // clang-format on
-        const -> decltype(hera::unreorder_view{std::forward<R>(range),
-                                               std::move(indices)})
+        const
+        -> decltype(hera::unreorder_view{static_cast<R&&>(range), indices})
     {
-        return hera::unreorder_view{std::forward<R>(range), std::move(indices)};
+        return hera::unreorder_view{static_cast<R&&>(range), indices};
     }
 
     template<std::size_t... Is>
     constexpr auto operator()(hera::index_sequence<Is...> indices) const
     {
-        return detail::view_closure{*this, std::move(indices)};
+        return detail::view_closure{*this, indices};
     }
 };
 

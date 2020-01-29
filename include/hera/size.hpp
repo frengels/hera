@@ -1,7 +1,5 @@
 #pragma once
 
-#include <utility>
-
 #include "hera/bound.hpp"
 #include "hera/utility/detail/priority_tag.hpp"
 
@@ -18,31 +16,43 @@ private:
     template<typename T> // clang-format off
         requires hera::bound<std::decay_t<T>>
     static constexpr auto check(T&& t) noexcept // clang-format on
-        -> decltype(std::decay_t<T>(std::forward<T>(t)))
+        -> decltype(std::decay_t<T>(static_cast<T&&>(t)))
     {
-        return std::decay_t<T>(std::forward<T>(t));
+        return std::decay_t<T>(static_cast<T&&>(t));
     }
 
     template<typename R>
     static constexpr auto impl(hera::detail::priority_tag<4>, R&& r) noexcept
-        -> decltype(check(std::forward<R>(r).size()))
+        -> decltype(check(static_cast<R&&>(r).size()))
     {
-        return check(std::forward<R>(r).size());
+        return check(static_cast<R&&>(r).size());
     }
 
     template<typename R>
     static constexpr auto impl(hera::detail::priority_tag<3>, R&& r) noexcept
-        -> decltype(check(size(std::forward<R>(r))))
+        -> decltype(check(size(static_cast<R&&>(r))))
     {
-        return check(size(std::forward<R>(r)));
+        return check(size(static_cast<R&&>(r)));
+    }
+
+    template<typename R> // clang-format off
+        requires
+            requires
+            {
+                // only the non const is sfinae version so use it for sfinae
+                std::tuple_size<std::remove_cvref_t<R>>{};
+            }
+    static constexpr auto impl(hera::detail::priority_tag<2>, R&&) noexcept // clang-format on
+    {
+        return std::tuple_size<std::remove_reference_t<R>>{};
     }
 
 public:
     template<typename R>
     constexpr auto operator()(R&& r) const noexcept
-        -> decltype(impl(hera::detail::max_priority_tag, std::forward<R>(r)))
+        -> decltype(impl(hera::detail::max_priority_tag, static_cast<R&&>(r)))
     {
-        return impl(hera::detail::max_priority_tag, std::forward<R>(r));
+        return impl(hera::detail::max_priority_tag, static_cast<R&&>(r));
     }
 };
 } // namespace size_impl
@@ -53,6 +63,9 @@ inline constexpr auto size = hera::size_impl::fn{};
 } // namespace cpo
 
 template<typename R>
+inline constexpr auto size_v = decltype(hera::size(std::declval<R&>()))::value;
+
+template<typename R>
 concept sized = // clang-format off
     requires (const R& r)
     {
@@ -61,14 +74,14 @@ concept sized = // clang-format off
 
 template<typename R>
 concept bounded_size = sized<R> && // clang-format off
-    requires (const R& r)
+    requires (R& r)
     {
         { hera::size(r) } -> hera::bounded;
     }; // clang-format on
 
 template<typename R>
 concept unbounded_size = sized<R>&& // clang-format off
-    requires (const R& r)
+    requires (R& r)
     {
         { hera::size(r) } -> hera::unbounded;
     }; // clang-format off

@@ -1,7 +1,7 @@
 set(
   TESTS
   size
-  at
+  get
   common_reference
   tuple_array
   iota_view
@@ -29,6 +29,8 @@ set(
   drop_view
   enumerate_view
   unreorder_view
+  element_type
+  destructure
   )
 
 find_package(Catch2 REQUIRED)

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "hera/at.hpp"
+#include "hera/get.hpp"
 #include "hera/optional.hpp"
 #include "hera/size.hpp"
 
@@ -10,7 +10,7 @@ template<typename R>
 concept range = sized<R>&& // clang-format off
     requires (R& range)
     {
-        { hera::try_at<0>(range) } -> hera::optional;
+        { hera::try_get<0>(range) } -> hera::optional;
     }; // clang-format on
 
 template<typename R>
@@ -51,7 +51,14 @@ template<typename T>
 concept safe_range = range<T> && (std::is_lvalue_reference_v<T> ||
                                   enable_safe_range<std::remove_cvref_t<T>>);
 
+template<typename R, std::size_t I>
+concept range_reachable = range<R>&& // clang-format off
+    requires (R range)
+    {
+        hera::get<I>(static_cast<R&&>(range));
+    }; // clang-format on
+
 template<hera::range R, std::size_t I> // clang-format off
-    requires !hera::empty_range<R> // clang-format on
-    using range_reference_at_t = decltype(hera::at<I>(std::declval<R&>()));
+    requires (!hera::empty_range<R>)
+using range_reference_at_t = decltype(hera::get<I>(std::declval<R&>())); // clang-format on
 } // namespace hera

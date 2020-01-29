@@ -9,11 +9,11 @@ TEST_CASE("enumerate")
 
     auto enumerated = hera::enumerate_view(iota);
 
-    REQUIRE(hera::at<0>(enumerated).first == 0);
-    REQUIRE(hera::at<0>(enumerated).second == 0);
+    REQUIRE(hera::get<0>(enumerated).first == 0);
+    REQUIRE(hera::get<0>(enumerated).second == 0);
 
-    REQUIRE(hera::at<50>(enumerated).first == 50);
-    REQUIRE(hera::at<50>(enumerated).second == 50);
+    REQUIRE(hera::get<50>(enumerated).first == 50);
+    REQUIRE(hera::get<50>(enumerated).second == 50);
 
     iota | hera::views::enumerate;
 }

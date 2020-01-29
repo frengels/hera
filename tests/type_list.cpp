@@ -30,7 +30,7 @@ TEST_CASE("type_list")
         hera::same_as<decltype(tl2), hera::type_list<char, const char*>>);
 
     static_assert(hera::same_as<hera::type_identity<const char*>,
-                                decltype(hera::at<1>(tl2))>);
+                                decltype(hera::get<1>(tl2))>);
 
     SECTION("destructure")
     {

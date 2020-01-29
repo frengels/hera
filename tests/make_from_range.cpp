@@ -16,16 +16,16 @@ TEST_CASE("make_from_range")
             tup, [](auto val) { return std::is_same<int, decltype(val)>{}; }});
 
     REQUIRE(hera::size(int_tup) == 3);
-    REQUIRE(hera::at<0>(int_tup) == 1);
-    REQUIRE(hera::at<1>(int_tup) == 2);
-    REQUIRE(hera::at<2>(int_tup) == 3);
+    REQUIRE(hera::get<0>(int_tup) == 1);
+    REQUIRE(hera::get<1>(int_tup) == 2);
+    REQUIRE(hera::get<2>(int_tup) == 3);
 
     auto char_tup =
         hera::make_from_range<hera::tuple<char, char, char>>(hera::filter_view{
             tup, [](auto val) { return std::is_same<char, decltype(val)>{}; }});
 
     REQUIRE(hera::size(char_tup) == 3);
-    REQUIRE(hera::at<0>(char_tup) == 'a');
-    REQUIRE(hera::at<1>(char_tup) == 'b');
-    REQUIRE(hera::at<2>(char_tup) == 'c');
+    REQUIRE(hera::get<0>(char_tup) == 'a');
+    REQUIRE(hera::get<1>(char_tup) == 'b');
+    REQUIRE(hera::get<2>(char_tup) == 'c');
 }

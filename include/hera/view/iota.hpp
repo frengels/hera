@@ -16,7 +16,8 @@ public:
 private:
     static_assert(
         []() -> bool {
-            if constexpr (hera::unbounded<std::remove_cvref_t<decltype(Bound)>>)
+            if constexpr (hera::same_as<hera::infinite,
+                                        std::remove_cvref_t<decltype(Bound)>>)
             {
                 return true;
             }
@@ -29,7 +30,8 @@ private:
 
     template<std::size_t I>
     static constexpr bool in_range = []() -> bool {
-        if constexpr (hera::unbounded<std::remove_cvref_t<decltype(Bound)>>)
+        if constexpr (hera::same_as<hera::infinite,
+                                    std::remove_cvref_t<decltype(Bound)>>)
         {
             return true;
         }
@@ -44,9 +46,10 @@ public:
 
     constexpr auto size() const noexcept
     {
-        if constexpr (hera::unbounded<std::remove_cvref_t<decltype(Bound)>>)
+        if constexpr (hera::same_as<hera::infinite,
+                                    std::remove_cvref_t<decltype(Bound)>>)
         {
-            return hera::infinite{};
+            return hera::infinite_constant{};
         }
         else
         {
@@ -56,7 +59,7 @@ public:
     }
 
     template<std::size_t I>
-    constexpr auto try_at() const noexcept
+    constexpr auto try_get() const noexcept
     {
         if constexpr (in_range<I>)
         {
@@ -66,6 +69,13 @@ public:
         {
             return hera::none{};
         }
+    }
+
+    template<std::size_t I> // clang-format off
+        requires (in_range<I>)
+    constexpr auto get() const noexcept // clang-format on
+    {
+        return std::integral_constant<value_type, Start + I>{};
     }
 };
 } // namespace hera

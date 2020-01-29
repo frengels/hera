@@ -42,8 +42,17 @@ public:
         return hera::type_list<std::invoke_result_t<Fs, Ts>...>{};
     }
 
+    template<std::size_t I> // clang-format off
+        requires (I < sizeof...(Ts))
+    constexpr auto element_type() const noexcept // clang-format on
+    {
+        using type = std::tuple_element_t<I, std::tuple<Ts...>>;
+
+        return hera::type_identity<hera::type_identity<type>>{};
+    }
+
     template<std::size_t I>
-    constexpr auto try_at() const noexcept
+    constexpr auto try_get() const noexcept
     {
         if constexpr (I < sizeof...(Ts))
         {
@@ -54,6 +63,15 @@ public:
         {
             return hera::none{};
         }
+    }
+
+    template<std::size_t I> // clang-format off
+        requires (I < sizeof...(Ts))
+    constexpr auto get() const noexcept // clang-format on
+    {
+        using type = std::tuple_element_t<I, std::tuple<Ts...>>;
+
+        return hera::type_identity<type>{};
     }
 };
 

@@ -43,7 +43,7 @@ public:
         if constexpr (strategy == decay)
         {
             // auto return type does decay_copy
-            return std::forward<R>(r);
+            return static_cast<R&&>(r);
         }
         else if constexpr (strategy == ref)
         {

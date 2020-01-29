@@ -13,19 +13,19 @@ TEST_CASE("zip_view")
 
     REQUIRE(hera::size(zip) == 3);
 
-    auto beg  = hera::at<0>(zip);
-    auto mid  = hera::at<1>(zip);
-    auto last = hera::at<2>(zip);
+    auto beg  = hera::get<0>(zip);
+    auto mid  = hera::get<1>(zip);
+    auto last = hera::get<2>(zip);
 
-    REQUIRE(hera::at<0>(beg) == 0);
-    REQUIRE(hera::at<1>(beg) == 'a');
-    REQUIRE(hera::at<2>(beg) == 1.0f);
+    REQUIRE(hera::get<0>(beg) == 0);
+    REQUIRE(hera::get<1>(beg) == 'a');
+    REQUIRE(hera::get<2>(beg) == 1.0f);
 
-    REQUIRE(hera::at<0>(mid) == 1);
-    REQUIRE(hera::at<1>(mid) == 'b');
-    REQUIRE(hera::at<2>(mid) == 2.0f);
+    REQUIRE(hera::get<0>(mid) == 1);
+    REQUIRE(hera::get<1>(mid) == 'b');
+    REQUIRE(hera::get<2>(mid) == 2.0f);
 
-    REQUIRE(hera::at<0>(last) == 2);
-    REQUIRE(hera::at<1>(last) == 'c');
-    REQUIRE(hera::at<2>(last) == 3.0f);
+    REQUIRE(hera::get<0>(last) == 2);
+    REQUIRE(hera::get<1>(last) == 'c');
+    REQUIRE(hera::get<2>(last) == 3.0f);
 }

@@ -12,5 +12,5 @@ TEST_CASE("head")
 
     static_assert(decltype(hera::size(head_arr))::value == 1);
 
-    REQUIRE(hera::at<0>(head_arr) == 1);
+    REQUIRE(hera::get<0>(head_arr) == 1);
 }

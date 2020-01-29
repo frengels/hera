@@ -41,7 +41,7 @@ private:
     {
         if constexpr (hera::bounded_range<V>)
         {
-            if constexpr (hera::same_as<decltype(try_at<I>()), hera::none>)
+            if constexpr (hera::same_as<decltype(try_get<I>()), hera::none>)
             {
                 return std::integral_constant<std::size_t, I>{};
             }
@@ -64,7 +64,7 @@ public:
 
 private:
     template<std::size_t Pos, std::size_t Its>
-    constexpr decltype(auto) try_at_impl() const noexcept
+    constexpr decltype(auto) try_get_impl() const noexcept
     {
         auto dropped_view =
             hera::drop_view(base_, std::integral_constant<std::size_t, Pos>{});
@@ -74,21 +74,52 @@ private:
                 constexpr std::size_t pos = pos_constant;
                 if constexpr (Its == 0)
                 {
-                    return hera::try_at<pos + Pos>(base_);
+                    return hera::try_get<pos + Pos>(base_);
                 }
                 else
                 {
-                    return try_at_impl<pos + Pos + 1, Its - 1>();
+                    return try_get_impl<pos + Pos + 1, Its - 1>();
                 }
             });
     }
 
-public:
-    /// returns just<X> if an element was found or none<void> if not
-    template<std::size_t I>
-    constexpr auto try_at() const noexcept
+    // solve this mess later
+    template<std::size_t Pos, std::size_t Its>
+    constexpr decltype(auto) get_impl() const noexcept
     {
-        return try_at_impl<0, I>();
+        auto dropped_view =
+            hera::drop_view(base_, std::integral_constant<std::size_t, Pos>{});
+
+        constexpr auto opt_index =
+            decltype(hera::find_if(dropped_view, std::declval<Pred>())){};
+
+        static_assert(opt_index,
+                      "We looked past the end and couldn't find matching Pred");
+
+        constexpr std::size_t index = *opt_index;
+
+        if constexpr (Its == 0)
+        {
+            return hera::get<index + Pos>(base_);
+        }
+        else
+        {
+            return get_impl<index + Pos + 1, Its - 1>();
+        }
+    }
+
+public:
+    /// returns just<X> if an element was found or none if not
+    template<std::size_t I>
+    constexpr auto try_get() const noexcept
+    {
+        return try_get_impl<0, I>();
+    }
+
+    template<std::size_t I>
+    constexpr auto get() const noexcept
+    {
+        return get_impl<0, I>();
     }
 };
 
