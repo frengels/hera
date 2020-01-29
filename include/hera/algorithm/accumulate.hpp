@@ -50,7 +50,7 @@ public:
     }
 
     template<hera::bounded_range R, typename T, typename BinaryOp>
-    constexpr T operator()(R&& range, T&& init, BinaryOp&& op) const
+    constexpr auto operator()(R&& range, T&& init, BinaryOp&& op) const
     {
         return recurse<0>(static_cast<R&&>(range),
                           static_cast<T&&>(init),
