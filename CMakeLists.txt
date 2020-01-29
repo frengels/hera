@@ -2,15 +2,22 @@ cmake_minimum_required(VERSION 3.8)
 
 project(hera VERSION "0.0.1" LANGUAGES CXX)
 
-option(HERA_BUILD_TESTS "Build hera's unit tests" ON)
-option(HERA_BUILD_EXAMPLES "Build hera's examples" ON)
+set(IS_MASTER_PROJECT OFF)
 
-if (HERA_BUILD_TESTS)
+if (${CMAKE_CURRENT_SOURCE_DIR} STREQUAL ${CMAKE_SOURCE_DIR})
+  set(IS_MASTER_PROJECT ON)
+endif()
+
+# only enable these targets if we're the master project
+option(HERA_TESTS "Build hera's unit tests" ${IS_MASTER_PROJECT})
+option(HERA_EXAMPLES "Build hera's examples" ${IS_MASTER_PROJECT})
+
+if (HERA_TESTS)
   enable_testing()
   add_subdirectory(tests)
 endif()
 
-if (HERA_BUILD_EXAMPLES)
+if (HERA_EXAMPLES)
   add_subdirectory(examples)
 endif()
 
