@@ -11,6 +11,7 @@ struct nullopt_t
 
 inline constexpr auto nullopt = nullopt_t{};
 
+/// \cond
 namespace detail
 {
 template<typename T>
@@ -109,6 +110,7 @@ struct just_storage_base<void>
     {}
 };
 } // namespace detail
+/// \endcond
 
 template<typename T>
 class just;
@@ -119,6 +121,11 @@ template<typename Opt>
 concept optional =
     hera::specialization_of<Opt, hera::just> || hera::same_as<Opt, hera::none>;
 
+/// \brief A compile time optional value holding an item.
+///
+/// `just` represents an optional which is known at compile time to hold a
+/// value.
+/// \see none
 template<typename T>
 class just : private detail::just_storage_base<T>
 {
@@ -126,23 +133,31 @@ private:
     using base = detail::just_storage_base<T>;
 
 public:
+    /// \brief the type of value we're holding
     using value_type = T;
 
 public:
+    /// \brief default constructs the held value.
     constexpr just() noexcept(std::is_nothrow_default_constructible_v<
                               T>) requires hera::constructible_from<T>
         : base(std::in_place)
     {}
 
+    /// \brief construct held value in place from the given arguments.
     template<typename... Args>
     explicit constexpr just(std::in_place_t, Args&&... args)
         : base(std::in_place, static_cast<Args&&>(args)...)
     {}
 
+    /// \brief construct held value from U&&
     template<typename U = value_type>
     constexpr just(U&& value) : base(std::in_place, static_cast<U&&>(value))
     {}
 
+    /// \brief copy construct from another just
+    ///
+    /// This constructor is conditionally explicit if `const U&` is not
+    /// convertible to T.
     template<typename U> // clang-format off
         requires (!hera::same_as<T, U>)
     explicit(!hera::convertible_to<const U&, T>) // clang-format on
@@ -150,6 +165,10 @@ public:
         : just(*other)
     {}
 
+    /// \brief move construct from another just
+    ///
+    /// This constructor is conditionally explicit if `U&&` is not convertible
+    /// to T.
     template<typename U> // clang-format off
         requires (!hera::same_as<T, U>)
     explicit(!hera::convertible_to<U&&, T>) // clang-format on
@@ -157,16 +176,28 @@ public:
         : just(*std::move(other))
     {}
 
+    /// \brief checks whether `*this` contains a value
+    ///
+    /// Because this is known at compile time this method returns an instance of
+    /// `std::true_type`.
+    /// \return the boolean constant `std::true_type`.
     constexpr std::true_type has_value() const noexcept
     {
         return {};
     }
 
+    /// \brief checks whether `*this` contains a value
+    /// \return `true`
     explicit constexpr operator bool() const noexcept
     {
         return true;
     }
 
+    /// \brief retrieve the inner value or an alternative.
+    ///
+    /// Because `just` always holds a value the given alternative will be
+    /// ignored.
+    /// \return The contained value as a const ref.
     template<typename U>
     constexpr detail::const_ref_t<T> value_or(U&&) const& noexcept
     {
@@ -176,6 +207,7 @@ public:
         }
     }
 
+    /// \cond
     template<typename U> // clang-format off
         requires (!hera::same_as<value_type, void>)
     constexpr T value_or(U&&) && // clang-format on
@@ -185,30 +217,37 @@ public:
             return **this;
         }
     }
+    /// \endcond
 
-    constexpr decltype(auto) operator*() & noexcept
-        requires(!hera::same_as<void, T>)
+    /// \brief retrieve the value contained within `*this`
+    ///
+    /// The method has overloads for all const/lvalue/rvalue qualifiers.
+    /// \returns held value with forwarded qualifier
+    constexpr value_type& operator*() &
+        noexcept requires(!hera::same_as<void, T>)
     {
-        return this->get();
+        return static_cast<value_type&>(this->get());
     }
 
-    constexpr decltype(auto) operator*() const& noexcept
-        requires(!hera::same_as<void, T>)
+    /// \cond
+    constexpr const value_type&
+    operator*() const& noexcept requires(!hera::same_as<void, T>)
     {
-        return this->get();
+        return static_cast<const value_type&>(this->get());
     }
 
-    constexpr decltype(auto) operator*() && noexcept
-        requires(!hera::same_as<void, T>)
+    constexpr value_type&& operator*() &&
+        noexcept requires(!hera::same_as<void, T>)
     {
-        return std::move(*this).get();
+        return static_cast<value_type&&>(this->get());
     }
 
-    constexpr decltype(auto) operator*() const&& noexcept
-        requires(!hera::same_as<void, T>)
+    constexpr const value_type&&
+    operator*() const&& noexcept requires(!hera::same_as<void, T>)
     {
-        return std::move(*this).get();
+        return static_cast<const value_type&&>(this->get());
     }
+    /// \endcond
 
 private:
     template<typename F>
@@ -230,6 +269,13 @@ private:
     }
 
 public:
+    /// \brief transform the contained value
+    ///
+    /// Apply `F` to the contained value and obtain an instance of `just`
+    /// containing the returned value.
+    /// If there is no value contained (in the case of `just<void>`), `F` will
+    /// be invoked without arguments and its result wrapped in `just`.
+    /// \return New `just` containing the result of `fn(**this)`.
     template<typename F>
     constexpr auto transform(F&& fn) &
     {
@@ -255,6 +301,7 @@ public:
         }
     }
 
+    /// \cond
     template<typename F>
     constexpr auto transform(F&& fn) const&
     {
@@ -333,6 +380,7 @@ public:
             }
         }
     }
+    /// \endcond
 
 private:
     template<typename F>
@@ -347,6 +395,13 @@ private:
     }
 
 public:
+    /// \brief apply a function which returns another `optional`
+    ///
+    /// Unwraps the value inside and passes it to `fn`. The return value of `fn`
+    /// must be another `optional`.
+    ///
+    /// There are additional overloads for const and rvalue qualifiers.
+    /// \return the `optional` returned from invoke `fn(**this)`.
     template<typename F>
     constexpr decltype(auto) and_then(F&& fn) &
     {
@@ -366,6 +421,7 @@ public:
         }
     }
 
+    /// \cond
     template<typename F>
     constexpr decltype(auto) and_then(F&& fn) const&
     {
@@ -422,19 +478,28 @@ public:
             return static_cast<F&&>(fn)(*std::move(*this));
         }
     }
+    /// \endcond
 
+    /// \brief gives the current optional if filled.
+    ///
+    /// Because `just` always holds a value, this simply gives `*this`.
+    /// An rvalue qualified `just` will return `*this` with rvalue qualifiers.
+    /// \returns `*this`
     template<typename F>
-    constexpr just or_else(F&&) const& noexcept
+    constexpr const just& or_else(F&&) const& noexcept
     {
         return *this;
     }
 
+    /// \cond
     template<typename F>
-    constexpr just&& or_else(F&&) && noexcept
+        constexpr just&& or_else(F&&) && noexcept
     {
         return std::move(*this);
     }
+    /// \endcond
 
+    /// \brief swap with another `just`
     constexpr void swap(just& other)
     {
         using std::swap;
@@ -446,7 +511,7 @@ public:
 just()->just<void>;
 
 template<typename T>
-just(T&&) -> just<T>;
+just(T &&)->just<T>;
 
 just(std::in_place_t)->just<void>;
 

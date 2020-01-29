@@ -65,9 +65,10 @@ inline constexpr auto size = hera::size_impl::fn{};
 template<typename R>
 inline constexpr auto size_v = decltype(hera::size(std::declval<R&>()))::value;
 
+/// \brief `R` has a compile time defined size obtainable through `hera::size`
 template<typename R>
 concept sized = // clang-format off
-    requires (const R& r)
+    requires (R& r)
     {
         hera::size(r);
     }; // clang-format off

@@ -6,6 +6,8 @@
 
 namespace hera
 {
+/// \brief if `R` fulfills the `sized` concept it is a valid range
+/// \see sized
 template<typename R>
 concept range = sized<R>;
 
