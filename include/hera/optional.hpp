@@ -15,21 +15,6 @@ inline constexpr auto nullopt = nullopt_t{};
 namespace detail
 {
 template<typename T>
-struct const_ref
-{
-    using type = const T&;
-};
-
-template<>
-struct const_ref<void>
-{
-    using type = void;
-};
-
-template<typename T>
-using const_ref_t = typename const_ref<T>::type;
-
-template<typename T>
 struct just_storage_base;
 
 template<typename T> // clang-format off
@@ -47,22 +32,22 @@ struct just_storage_base<T> // clang-format on
 
     constexpr value_type& get() & noexcept
     {
-        return val_;
+        return static_cast<value_type&>(val_);
     }
 
     constexpr const value_type& get() const& noexcept
     {
-        return val_;
+        return static_cast<const value_type&>(val_);
     }
 
     constexpr value_type&& get() && noexcept
     {
-        return std::move(val_);
+        return static_cast<value_type&&>(val_);
     }
 
     constexpr const value_type&& get() const&& noexcept
     {
-        return std::move(val_);
+        return static_cast<const value_type&&>(val_);
     }
 };
 
@@ -199,7 +184,7 @@ public:
     /// ignored.
     /// \return The contained value as a const ref.
     template<typename U>
-    constexpr detail::const_ref_t<T> value_or(U&&) const& noexcept
+    constexpr decltype(auto) value_or(U&&) const& noexcept
     {
         if constexpr (!hera::same_as<value_type, void>)
         {
@@ -223,26 +208,26 @@ public:
     ///
     /// The method has overloads for all const/lvalue/rvalue qualifiers.
     /// \returns held value with forwarded qualifier
-    constexpr value_type& operator*() &
+    constexpr decltype(auto) operator*() &
         noexcept requires(!hera::same_as<void, T>)
     {
         return static_cast<value_type&>(this->get());
     }
 
     /// \cond
-    constexpr const value_type&
+    constexpr decltype(auto)
     operator*() const& noexcept requires(!hera::same_as<void, T>)
     {
         return static_cast<const value_type&>(this->get());
     }
 
-    constexpr value_type&& operator*() &&
+    constexpr decltype(auto) operator*() &&
         noexcept requires(!hera::same_as<void, T>)
     {
         return static_cast<value_type&&>(this->get());
     }
 
-    constexpr const value_type&&
+    constexpr decltype(auto)
     operator*() const&& noexcept requires(!hera::same_as<void, T>)
     {
         return static_cast<const value_type&&>(this->get());
@@ -495,7 +480,7 @@ public:
     template<typename F>
         constexpr just&& or_else(F&&) && noexcept
     {
-        return std::move(*this);
+        return static_cast<just&&>(*this);
     }
     /// \endcond
 
