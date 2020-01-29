@@ -71,30 +71,5 @@ public:
         constexpr auto        last_index    = size - 1;
         return hera::get<last_index>(derived());
     }
-
-    template<std::size_t I>
-    constexpr auto get() & -> decltype(*hera::try_get<I>(derived()))
-    {
-        return *hera::try_get<I>(derived());
-    }
-
-    template<std::size_t I>
-    constexpr auto get() const& -> decltype(*hera::try_get<I>(derived()))
-    {
-        return *hera::try_get<I>(derived());
-    }
-
-    template<std::size_t I>
-    constexpr auto get() && -> decltype(*hera::try_get<I>(std::move(derived())))
-    {
-        return *hera::try_get<I>(std::move(derived()));
-    }
-
-    template<std::size_t I>
-    constexpr auto
-    get() const&& -> decltype(*hera::try_get<I>(std::move(derived())))
-    {
-        return *hera::try_get<I>(std::move(derived()));
-    }
 };
 } // namespace hera

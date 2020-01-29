@@ -58,19 +58,6 @@ public:
         }
     }
 
-    template<std::size_t I>
-    constexpr auto try_get() const noexcept
-    {
-        if constexpr (in_range<I>)
-        {
-            return hera::just<std::integral_constant<value_type, Start + I>>{};
-        }
-        else
-        {
-            return hera::none{};
-        }
-    }
-
     template<std::size_t I> // clang-format off
         requires (in_range<I>)
     constexpr auto get() const noexcept // clang-format on

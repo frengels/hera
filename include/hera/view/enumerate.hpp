@@ -30,16 +30,6 @@ public:
         return hera::size(base_);
     }
 
-    template<std::size_t I>
-    constexpr auto try_get() const noexcept
-    {
-        return hera::try_get<I>(base_).transform([](auto&& val) {
-            return hera::pair<std::integral_constant<std::size_t, I>,
-                              decltype(val)>{{},
-                                             static_cast<decltype(val)&&>(val)};
-        });
-    }
-
     template<std::size_t I> // clang-format off
         requires 
             requires 

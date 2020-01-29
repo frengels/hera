@@ -49,14 +49,7 @@ public:
     }
 
     template<std::size_t I>
-    constexpr auto try_get() const noexcept(noexcept(hera::try_get<I>(*base_)))
-        -> decltype(hera::try_get<I>(*base_))
-    {
-        return hera::try_get<I>(*base_);
-    }
-
-    template<std::size_t I>
-    constexpr auto get() const noexcept(noexcept(hera::try_get<I>(*base_)))
+    constexpr auto get() const noexcept(noexcept(hera::get<I>(*base_)))
         -> decltype(hera::get<I>(*base_))
     {
         return hera::get<I>(*base_);

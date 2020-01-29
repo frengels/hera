@@ -47,19 +47,6 @@ public:
         return {};
     }
 
-    template<std::size_t I>
-    constexpr auto try_get() const noexcept
-    {
-        if constexpr (I < N)
-        {
-            return hera::just{data_[I]};
-        }
-        else
-        {
-            return hera::none{};
-        }
-    }
-
     template<std::size_t I> // clang-format off
         requires (I < N)
     constexpr decltype(auto) get() const

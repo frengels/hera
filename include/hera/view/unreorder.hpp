@@ -108,22 +108,6 @@ public:
         return hera::size(sequence);
     }
 
-    template<std::size_t I>
-    constexpr auto try_get() const noexcept
-    {
-        if constexpr (I < sizeof...(Is))
-        {
-            auto                  pos_const = hera::get<I>(unsequence);
-            constexpr std::size_t pos       = pos_const;
-
-            return hera::try_get<pos>(base_);
-        }
-        else
-        {
-            return hera::none{};
-        }
-    }
-
     template<std::size_t I> // clang-format off
         requires (I < sizeof...(Is))
     constexpr decltype(auto) get() const noexcept // clang-format off
