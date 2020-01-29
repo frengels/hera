@@ -11,6 +11,11 @@ endif()
 # only enable these targets if we're the master project
 option(HERA_TESTS "Build hera's unit tests" ${IS_MASTER_PROJECT})
 option(HERA_EXAMPLES "Build hera's examples" ${IS_MASTER_PROJECT})
+option(HERA_DOCS "Create a target for documenation" ${IS_MASTER_PROJECT})
+
+if (HERA_DOCS)
+  add_subdirectory(docs)
+endif()
 
 if (HERA_TESTS)
   enable_testing()
