@@ -63,26 +63,6 @@ public:
     }
 
 private:
-    template<std::size_t Pos, std::size_t Its>
-    constexpr decltype(auto) try_get_impl() const noexcept
-    {
-        auto dropped_view =
-            hera::drop_view(base_, std::integral_constant<std::size_t, Pos>{});
-
-        return decltype(hera::find_if(dropped_view, std::declval<Pred>())){}
-            .and_then([&](auto pos_constant) {
-                constexpr std::size_t pos = pos_constant;
-                if constexpr (Its == 0)
-                {
-                    return hera::try_get<pos + Pos>(base_);
-                }
-                else
-                {
-                    return try_get_impl<pos + Pos + 1, Its - 1>();
-                }
-            });
-    }
-
     // solve this mess later
     template<std::size_t Pos, std::size_t Its>
     constexpr decltype(auto) get_impl() const noexcept
@@ -109,13 +89,6 @@ private:
     }
 
 public:
-    /// returns just<X> if an element was found or none if not
-    template<std::size_t I>
-    constexpr auto try_get() const noexcept
-    {
-        return try_get_impl<0, I>();
-    }
-
     template<std::size_t I>
     constexpr auto get() const noexcept
     {

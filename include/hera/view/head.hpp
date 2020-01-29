@@ -36,17 +36,12 @@ public:
         return {};
     }
 
-    template<std::size_t I>
-    constexpr auto try_get() const noexcept
+    template<std::size_t I> // clang-format off
+        requires (I == 0)
+    constexpr auto get() const // clang-format on
+        -> decltype(hera::get<I>(base_))
     {
-        if constexpr (I == 0)
-        {
-            return hera::try_get<0>(base_);
-        }
-        else
-        {
-            return hera::none{};
-        }
+        return hera::get<I>(base_);
     }
 }; // namespace hera
 

@@ -37,12 +37,6 @@ public:
     }
 
     template<std::size_t I>
-    constexpr auto try_get() const noexcept
-    {
-        return hera::try_get<I>(base_).transform(transform_fn_);
-    }
-
-    template<std::size_t I>
     constexpr auto get() const -> decltype(transform_fn_(hera::get<I>(base_)))
     {
         return transform_fn_(hera::get<I>(base_));
