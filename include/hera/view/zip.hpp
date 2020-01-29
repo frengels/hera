@@ -1,13 +1,36 @@
 #pragma once
 
-#include "hera/algorithm/unpack.hpp"
+#include "hera/algorithm/accumulate.hpp"
 #include "hera/container/tuple.hpp"
+#include "hera/size.hpp"
 #include "hera/view.hpp"
 #include "hera/view/all.hpp"
 #include "hera/view/interface.hpp"
 
 namespace hera
 {
+namespace detail
+{
+template<hera::view... Vs>
+constexpr auto smallest_size()
+{
+    return decltype(
+        hera::accumulate(std::declval<hera::tuple<Vs...>&>(),
+                         hera::infinite_constant{},
+                         [](auto curr_size, auto view) {
+                             if constexpr (decltype(curr_size)::value <
+                                           hera::size_v<decltype(view)>)
+                             {
+                                 return curr_size;
+                             }
+                             else
+                             {
+                                 return hera::size(view);
+                             }
+                         })){};
+}
+} // namespace detail
+
 /// zips multiple ranges together, the size() will be of the shortest view
 template<hera::range... Vs> // clang-format off
     requires (hera::view<Vs> && ...) && (sizeof...(Vs) >= 2)
@@ -18,7 +41,7 @@ private:
 public:
     constexpr zip_view(Vs... base) noexcept(
         (std::is_nothrow_move_constructible_v<Vs> && ...))
-        : base_{std::move(base)...}
+        : base_{static_cast<Vs&&>(base)...}
     {}
 
     constexpr hera::tuple<Vs...> base() const
@@ -27,44 +50,13 @@ public:
         return base_;
     }
 
-private:
-    // recursively find the smallest base
-    template<std::size_t I, typename Sz>
-    constexpr auto find_smallest_base(Sz smallest) const noexcept
-    {
-        if constexpr (I < sizeof...(Vs))
-        {
-            auto curr_size = hera::size(hera::get<I>(base_));
-
-            constexpr auto cmp = [](auto lhs, auto rhs) {
-                constexpr auto lhs_val = decltype(lhs)::value;
-                constexpr auto rhs_val = decltype(rhs)::value;
-
-                return std::bool_constant<(lhs_val < rhs_val)>{};
-            };
-
-            if constexpr (decltype(cmp(curr_size, smallest))::value)
-            {
-                return find_smallest_base<I + 1>(curr_size);
-            }
-            else
-            {
-                return find_smallest_base<I + 1>(smallest);
-            }
-        }
-        else
-        {
-            return smallest;
-        }
-    }
-
-public:
     constexpr auto size() const noexcept
     {
-        return find_smallest_base<0>(hera::infinite_constant{});
+        return detail::smallest_size<Vs...>();
     }
 
     template<std::size_t I> // clang-format off
+        requires (I < decltype(detail::smallest_size<Vs...>())::value)
     constexpr decltype(auto) get() const // clang-format on
     {
         return hera::unpack(base_, [](const Vs&... views) {
