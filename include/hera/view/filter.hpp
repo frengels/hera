@@ -10,6 +10,42 @@
 
 namespace hera
 {
+namespace detail
+{
+template<std::size_t BasePos, std::size_t Count, hera::view V, typename Pred>
+constexpr auto count_size_impl() noexcept
+{
+    using dropped_view = decltype(hera::drop_view(
+        std::declval<V&>(), std::integral_constant<std::size_t, BasePos>{}));
+
+    constexpr auto opt_index = decltype(
+        hera::find_if(std::declval<dropped_view>(), std::declval<Pred>())){};
+
+    if constexpr (decltype(opt_index.has_value())::value)
+    {
+        return count_size_impl<BasePos + *opt_index + 1, Count + 1, V, Pred>();
+    }
+    else
+    {
+        return std::integral_constant<std::size_t, Count>{};
+    }
+}
+
+template<hera::view V, typename Pred>
+constexpr auto count_size() noexcept
+{
+    if constexpr (hera::unbounded_range<V>)
+    {
+        return decltype(hera::size(std::declval<V&>())){};
+    }
+    else
+    {
+        return count_size_impl<0, 0, V, Pred>();
+    }
+}
+
+} // namespace detail
+
 template<hera::range V, typename Pred> // clang-format off
     requires hera::view<V> && std::is_object_v<Pred>
 class filter_view : public hera::view_interface<filter_view<V, Pred>> // clang-format on
@@ -35,31 +71,9 @@ public:
         return base_;
     }
 
-private:
-    template<std::size_t I>
-    constexpr auto find_size() const noexcept
-    {
-        if constexpr (hera::bounded_range<V>)
-        {
-            if constexpr (hera::same_as<decltype(try_get<I>()), hera::none>)
-            {
-                return std::integral_constant<std::size_t, I>{};
-            }
-            else
-            {
-                return find_size<I + 1>();
-            }
-        }
-        else
-        {
-            return base_.size();
-        }
-    }
-
-public:
     constexpr auto size() const noexcept
     {
-        return find_size<0>();
+        return detail::count_size<V, Pred>();
     }
 
 private:
@@ -89,8 +103,9 @@ private:
     }
 
 public:
-    template<std::size_t I>
-    constexpr auto get() const noexcept
+    template<std::size_t I> // clang-format off
+        requires (I < decltype(detail::count_size<V, Pred>())::value)
+    constexpr auto get() const // clang-format on
     {
         return get_impl<0, I>();
     }
