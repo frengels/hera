@@ -526,6 +526,53 @@ public:
     }
     /// \endcond
 
+    /// \brief Applies function to the contained value, or computes a default.
+    template<typename F, typename Else> // clang-format off
+        requires (!hera::same_as<value_type, void>)
+    constexpr decltype(auto) transform_or_else(F&& fn, Else&&) & // clang-format on
+    {
+        static_assert(hera::invocable<F, value_type&>,
+                      "cannot invoke F on **this");
+        return static_cast<F&&>(fn)(**this);
+    }
+
+    /// \cond
+    template<typename F,
+             typename Else> // clang-format off
+        requires (!hera::same_as<value_type, void>)
+    constexpr decltype(auto) transform_or_else(F&& fn, Else&&) const& // clang-format on
+    {
+        static_assert(hera::invocable<F, const value_type&>,
+                      "cannot invoke F on **this");
+        return static_cast<F&&>(fn)(**this);
+    }
+
+    template<typename F, typename Else> // clang-format off
+        requires (!hera::same_as<value_type, void>)
+    constexpr decltype(auto) transform_or_else(F&& fn, Else&&) && // clang-format on
+    {
+        static_assert(hera::invocable<F, value_type&&>,
+                      "cannot invoke F on **this");
+        return static_cast<F&&>(fn)(*static_cast<just&&>(*this));
+    }
+
+    template<typename F, typename Else> // clang-format off
+        requires (!hera::same_as<value_type, void>)
+    constexpr decltype(auto) transform_or_else(F&& fn, Else&&) const&& // clang-format on
+    {
+        static_assert(hera::invocable<F, const value_type&&>,
+                      "cannot invoke F on **this");
+        return static_cast<F&&>(fn)(*static_cast<const just&&>(*this));
+    }
+
+    template<hera::invocable F, typename Else> // clang-format off
+        requires (hera::same_as<value_type, void>)
+    constexpr decltype(auto) transform_or_else(F&& fn, Else&&) const // clang-format on
+    {
+        return static_cast<F&&>(fn)();
+    }
+    /// \endcond
+
     /// \brief swap with another `just`
     constexpr void swap(just& other)
     {
@@ -644,6 +691,13 @@ public:
             "F must return just/none");
 
         return static_cast<F&&>(fn)();
+    }
+
+    /// \brief Applies function to the contained value, or computes a default.
+    template<typename F, hera::invocable Else>
+    constexpr decltype(auto) transform_or_else(F&&, Else&& else_) const
+    {
+        return static_cast<Else&&>(else_)();
     }
 };
 } // namespace hera
