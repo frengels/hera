@@ -570,10 +570,20 @@ public:
         return {};
     }
 
+    /// \brief Returns `none` if the option is `none`, otherwise returns `opt`.
+    ///
+    /// In the none case this will always return none.
+    /// \return `none`
+    template<hera::optional Opt>
+    constexpr hera::none and_(Opt&&) const noexcept
+    {
+        return {};
+    }
+
     /// \brief apply a function which returns another `optional`
     ///
     /// Holds no value so returns `none`.
-    /// \return new instance of `none`.
+    /// \return `none`
     template<typename F>
     constexpr hera::none and_then(F&&) const noexcept
     {
