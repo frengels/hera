@@ -104,7 +104,8 @@ class none;
 
 template<typename Opt>
 concept optional =
-    hera::specialization_of<Opt, hera::just> || hera::same_as<Opt, hera::none>;
+    hera::specialization_of<std::remove_cvref_t<Opt>, hera::just> ||
+    hera::same_as<std::remove_cvref_t<Opt>, hera::none>;
 
 /// \brief A compile time optional value holding an item.
 ///
@@ -366,6 +367,16 @@ public:
         }
     }
     /// \endcond
+
+    /// \brief Returns `none` if the option is `none`, otherwise returns `opt`.
+    ///
+    /// In the case of `just` this will always forward the passed optional.
+    /// \returns `opt`
+    template<hera::optional Opt>
+    constexpr Opt&& and_(Opt&& opt) const noexcept
+    {
+        return static_cast<Opt&&>(opt);
+    }
 
 private:
     template<typename F>
