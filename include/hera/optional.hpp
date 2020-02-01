@@ -378,6 +378,36 @@ public:
         return static_cast<Opt&&>(opt);
     }
 
+    /// \brief Returns the option if it contains a value, otherwise `opt`.
+    ///
+    /// In the case of just it will always return itself.
+    /// \returns `*this`
+    template<hera::optional Opt>
+        constexpr just& or_(Opt&&) & noexcept
+    {
+        return *this;
+    }
+
+    /// \cond
+    template<hera::optional Opt>
+    constexpr const just& or_(Opt&&) const& noexcept
+    {
+        return *this;
+    }
+
+    template<hera::optional Opt>
+        constexpr just&& or_(Opt&&) && noexcept
+    {
+        return static_cast<just&&>(*this);
+    }
+
+    template<hera::optional Opt>
+    constexpr const just&& or_(Opt&&) const&& noexcept
+    {
+        return static_cast<const just&&>(*this);
+    }
+    /// \endcond
+
 private:
     template<typename F>
     constexpr decltype(auto) and_then_void(F&& fn) const
@@ -578,6 +608,16 @@ public:
     constexpr hera::none and_(Opt&&) const noexcept
     {
         return {};
+    }
+
+    /// \brief Returns the option if it contains a value, otherwise `opt`.
+    ///
+    /// For `none` this will always return `opt`.
+    /// \returns `opt`
+    template<hera::optional Opt>
+    constexpr Opt&& or_(Opt&& opt) const noexcept
+    {
+        return static_cast<Opt&&>(opt);
     }
 
     /// \brief apply a function which returns another `optional`
