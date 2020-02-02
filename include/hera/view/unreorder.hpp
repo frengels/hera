@@ -119,7 +119,7 @@ public:
 
 template<hera::range R, std::size_t... Is>
 unreorder_view(R&&, hera::index_sequence<Is...>)
-    ->reorder_view<hera::all_view<R>, Is...>;
+    ->unreorder_view<hera::all_view<R>, Is...>;
 
 namespace views
 {
