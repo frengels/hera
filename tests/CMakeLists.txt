@@ -30,7 +30,7 @@ set(
   enumerate_view
   unreorder_view
   element_type
-  to
+  collect_into
   )
 
 set (DESTRUCTURE_TEST OFF)
