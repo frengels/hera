@@ -67,19 +67,4 @@ public:
 
 template<hera::range... Rs>
 zip_view(Rs&&...)->zip_view<hera::all_view<Rs>...>;
-
-namespace views
-{
-struct zip_with_fn
-{
-    template<hera::range... Rs>
-    constexpr auto operator()(Rs&&... ranges) const
-        -> decltype(hera::zip_view{static_cast<Rs&&>(ranges)...})
-    {
-        return hera::zip_view{static_cast<Rs&&>(ranges)...};
-    }
-};
-
-inline constexpr auto zip_with = zip_with_fn{};
-} // namespace views
 } // namespace hera
