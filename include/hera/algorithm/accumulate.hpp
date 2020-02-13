@@ -32,7 +32,7 @@ struct fn
              typename T,
              typename BinaryOp> // clang-format off
         requires (I == hera::size_v<R>)
-    static constexpr auto recurse(R&& range, T&& final_res, BinaryOp&&) // clang-format on
+    static constexpr decltype(auto) recurse(R&& range, T&& final_res, BinaryOp&&) // clang-format on
     {
         return static_cast<T&&>(final_res);
     }
