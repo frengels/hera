@@ -38,7 +38,12 @@ public:
     using type       = integer_sequence;
     using value_type = T;
 
+private:
+    static constexpr value_type arr_[sizeof...(Is)]{Is...};
+
 public:
+    integer_sequence() = default;
+
     constexpr std::integral_constant<std::size_t, sizeof...(Is)> size() const
         noexcept
     {
@@ -50,6 +55,11 @@ public:
     constexpr auto get() const noexcept // clang-format on
     {
         return typename detail::ith_value<I, value_type, Is...>::type{};
+    }
+
+    constexpr value_type operator[](std::size_t idx) const
+    {
+        return arr_[idx];
     }
 };
 
