@@ -117,3 +117,18 @@ using make_index_sequence = make_integer_sequence<std::size_t, N>;
 template<typename... Ts>
 using index_sequence_for = make_index_sequence<sizeof...(Ts)>;
 } // namespace hera
+
+namespace std
+{
+template<typename T, T... Is>
+struct tuple_size<hera::integer_sequence<T, Is...>>
+    : std::integral_constant<std::size_t, sizeof...(Is)>
+{};
+
+template<std::size_t I, typename T, T... Is>
+struct tuple_element<I, hera::integer_sequence<T, Is...>>
+{
+    using type = decltype(
+        std::declval<hera::integer_sequence<T, Is...>&>().template get<I>());
+};
+} // namespace std
