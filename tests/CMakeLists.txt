@@ -31,6 +31,7 @@ set(
   unreorder_view
   element_type
   collect_into
+  string
   )
 
 set (DESTRUCTURE_TEST OFF)
