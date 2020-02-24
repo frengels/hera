@@ -14,10 +14,10 @@ TEST_CASE("sort")
     });
 
     REQUIRE(hera::size(sorted) == 4);
-    REQUIRE(hera::get<0>(sorted) == hera::type_identity<uint8_t>{});
-    REQUIRE(hera::get<1>(sorted) == hera::type_identity<uint16_t>{});
-    REQUIRE(hera::get<2>(sorted) == hera::type_identity<uint32_t>{});
-    REQUIRE(hera::get<3>(sorted) == hera::type_identity<uint64_t>{});
+    REQUIRE(hera::get<0>(sorted) == hera::type_<uint8_t>{});
+    REQUIRE(hera::get<1>(sorted) == hera::type_<uint16_t>{});
+    REQUIRE(hera::get<2>(sorted) == hera::type_<uint32_t>{});
+    REQUIRE(hera::get<3>(sorted) == hera::type_<uint64_t>{});
 
     // also support duplicate types
     SECTION("with duplicates")

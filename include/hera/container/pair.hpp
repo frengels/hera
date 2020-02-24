@@ -8,7 +8,7 @@
 #include "hera/optional.hpp"
 #include "hera/ranges.hpp"
 #include "hera/size.hpp"
-#include "hera/type_identity.hpp"
+#include "hera/type_.hpp"
 
 namespace hera
 {
@@ -49,11 +49,11 @@ public:
     {
         if constexpr (I == 0)
         {
-            return hera::type_identity<first_type>{};
+            return hera::type_<first_type>{};
         }
         else
         {
-            return hera::type_identity<second_type>{};
+            return hera::type_<second_type>{};
         }
     }
 
@@ -63,11 +63,11 @@ public:
     {
         if constexpr (I == 0)
         {
-            return hera::type_identity<const first_type>{};
+            return hera::type_<const first_type>{};
         }
         else
         {
-            return hera::type_identity<const second_type>{};
+            return hera::type_<const second_type>{};
         }
     }
 

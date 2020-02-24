@@ -7,7 +7,7 @@
 #include "hera/optional.hpp"
 #include "hera/ranges.hpp"
 #include "hera/size.hpp"
-#include "hera/type_identity.hpp"
+#include "hera/type_.hpp"
 
 namespace hera
 {
@@ -243,16 +243,14 @@ public:
         requires (I < sizeof...(Ts))
     constexpr auto element_type() noexcept // clang-format on
     {
-        return hera::type_identity<
-            std::tuple_element_t<I, std::tuple<Ts...>>>{};
+        return hera::type_<std::tuple_element_t<I, std::tuple<Ts...>>>{};
     }
 
     template<std::size_t I> // clang-format off
         requires (I < sizeof...(Ts))
     constexpr auto element_type() const noexcept // clang-format on
     {
-        return hera::type_identity<
-            std::tuple_element_t<I, const std::tuple<Ts...>>>{};
+        return hera::type_<std::tuple_element_t<I, const std::tuple<Ts...>>>{};
     }
 
     template<std::size_t I> // clang-format off

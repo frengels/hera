@@ -2,21 +2,21 @@
 
 #include <optional>
 
-#include "hera/type_identity.hpp"
+#include "hera/type_.hpp"
 
 constexpr auto deref = [](auto&& x) -> decltype(*std::forward<decltype(x)>(x)) {
     return *std::forward<decltype(x)>(x);
 };
 
-TEST_CASE("type_identity")
+TEST_CASE("type_")
 {
-    auto ti = hera::type_identity<int>{};
+    auto ti = hera::type_<int>{};
     static_assert(hera::same_as<int, typename decltype(ti)::type>);
 
     static_assert(hera::metafunction<decltype(ti)>);
     static_assert(hera::metafunction<std::integral_constant<int, 0>>);
 
-    auto tf = hera::type_identity<float>{}; // float
+    auto tf = hera::type_<float>{}; // float
 
     // typeid passes metafunctions through
     auto typeid_tf = hera::typeid_(tf);
@@ -35,7 +35,7 @@ TEST_CASE("type_identity")
 
     SECTION("base")
     {
-        auto topt = hera::type_identity<std::optional<int>>{};
+        auto topt = hera::type_<std::optional<int>>{};
 
         auto tint_ref = topt.transform(deref);
 
@@ -44,7 +44,7 @@ TEST_CASE("type_identity")
 
     SECTION("const base")
     {
-        auto topt = hera::type_identity<const std::optional<int>>{};
+        auto topt = hera::type_<const std::optional<int>>{};
 
         auto tint_ref = topt.transform(deref);
 
@@ -54,7 +54,7 @@ TEST_CASE("type_identity")
 
     SECTION("reference")
     {
-        auto topt_ref = hera::type_identity<std::optional<int>&>{};
+        auto topt_ref = hera::type_<std::optional<int>&>{};
 
         auto t = topt_ref.transform(deref);
 
@@ -63,7 +63,7 @@ TEST_CASE("type_identity")
 
     SECTION("cref")
     {
-        auto topt_ref = hera::type_identity<const std::optional<int>&>{};
+        auto topt_ref = hera::type_<const std::optional<int>&>{};
 
         auto t = topt_ref.transform(deref);
 
@@ -72,7 +72,7 @@ TEST_CASE("type_identity")
 
     SECTION("rvalue")
     {
-        auto topt_ref = hera::type_identity<std::optional<int>&&>{};
+        auto topt_ref = hera::type_<std::optional<int>&&>{};
 
         auto t = topt_ref.transform(deref);
 
@@ -81,7 +81,7 @@ TEST_CASE("type_identity")
 
     SECTION("crvalue")
     {
-        auto topt_ref = hera::type_identity<const std::optional<int>&&>{};
+        auto topt_ref = hera::type_<const std::optional<int>&&>{};
 
         auto t = topt_ref.transform(deref);
 
@@ -89,9 +89,9 @@ TEST_CASE("type_identity")
     }
 }
 
-TEST_CASE("forward_type_identity")
+TEST_CASE("forward_type_")
 {
-    auto i     = hera::type_identity<int&>{};
+    auto i     = hera::type_<int&>{};
     auto fwd_i = hera::forward_type{5};
     auto ref_i = hera::forward_type{i};
 

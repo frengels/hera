@@ -3,7 +3,7 @@
 #include "hera/algorithm/unpack.hpp"
 #include "hera/metafunction.hpp"
 #include "hera/optional.hpp"
-#include "hera/type_identity.hpp"
+#include "hera/type_.hpp"
 #include "hera/view/detail/closure.hpp"
 #include "hera/view/interface.hpp"
 
@@ -48,7 +48,7 @@ public:
     {
         using type = std::tuple_element_t<I, std::tuple<Ts...>>;
 
-        return hera::type_identity<hera::type_identity<type>>{};
+        return hera::type_<hera::type_<type>>{};
     }
 
     template<std::size_t I> // clang-format off
@@ -57,7 +57,7 @@ public:
     {
         using type = std::tuple_element_t<I, std::tuple<Ts...>>;
 
-        return hera::type_identity<type>{};
+        return hera::type_<type>{};
     }
 };
 

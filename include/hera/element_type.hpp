@@ -4,7 +4,7 @@
 
 #include "hera/get.hpp"
 #include "hera/metafunction.hpp"
-#include "hera/type_identity.hpp"
+#include "hera/type_.hpp"
 #include "hera/utility/detail/priority_tag.hpp"
 
 namespace hera
@@ -58,10 +58,9 @@ private:
     // if none of the above then try to derive it ourselves
     template<typename R>
     static constexpr auto impl(hera::detail::priority_tag<1>, R&&) noexcept
-        -> decltype(
-            hera::type_identity<decltype(hera::get<I>(std::declval<R>()))>{})
+        -> decltype(hera::type_<decltype(hera::get<I>(std::declval<R>()))>{})
     {
-        return hera::type_identity<decltype(hera::get<I>(std::declval<R>()))>{};
+        return hera::type_<decltype(hera::get<I>(std::declval<R>()))>{};
     }
 
 public:

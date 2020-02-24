@@ -16,7 +16,7 @@ set(
   tuple
   transform_view
   make_from_range
-  type_identity
+  type_
   any_of_all_of
   zip_view
   accumulate
