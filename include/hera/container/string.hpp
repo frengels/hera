@@ -9,7 +9,14 @@
 
 namespace hera
 {
-template<typename CharT, CharT... Chs>
+template<typename CharT>
+concept character = // clang-format off
+    requires
+    {
+        typename std::char_traits<CharT>::char_type;
+    };
+
+template<character CharT, CharT... Chs>
 class basic_string : public view_interface<basic_string<CharT, Chs...>>
 {
 public:
@@ -248,6 +255,12 @@ constexpr hera::basic_string<CharT, Chs...> operator""_s() noexcept
     return {};
 }
 } // namespace literals
+
+/*
+template<typename T, typename CharT>
+concept stringlike = // clang-format off
+    hera::range_value_t_all<T, CharT> && hera::character<CharT>;
+    */
 } // namespace hera
 
 namespace std
