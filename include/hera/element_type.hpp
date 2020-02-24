@@ -81,7 +81,7 @@ template<std::size_t I>
 inline constexpr auto element_type = hera::element_type_impl::fn<I>{};
 }
 
-template<std::size_t I, typename R>
+template<typename R, std::size_t I>
 using element_type_t =
     typename decltype(hera::element_type<I>(std::declval<R&>()))::type;
 } // namespace hera

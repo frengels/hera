@@ -45,10 +45,10 @@ TEST_CASE("pair")
         auto p_ = hera::make_pair("hello world", 55);
 
         static_assert(
-            hera::same_as<const char*, hera::element_type_t<0, decltype(p_)>>);
+            hera::same_as<const char*, hera::element_type_t<decltype(p_), 0>>);
 
         static_assert(
-            hera::same_as<int, hera::element_type_t<1, decltype(p_)>>);
+            hera::same_as<int, hera::element_type_t<decltype(p_), 1>>);
 
         static_assert(hera::same_as<
                       const int,
@@ -58,6 +58,6 @@ TEST_CASE("pair")
 
         static_assert(
             hera::same_as<const int,
-                          hera::element_type_t<1, const decltype(p_)>>);
+                          hera::element_type_t<const decltype(p_), 1>>);
     }
 }

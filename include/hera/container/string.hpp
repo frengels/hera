@@ -4,19 +4,13 @@
 
 #include "hera/algorithm/accumulate.hpp"
 #include "hera/algorithm/unpack.hpp"
+#include "hera/constant.hpp"
 #include "hera/container/integer_sequence.hpp"
 #include "hera/view/interface.hpp"
 
 namespace hera
 {
-template<typename CharT>
-concept character = // clang-format off
-    requires
-    {
-        typename std::char_traits<CharT>::char_type;
-    };
-
-template<character CharT, CharT... Chs>
+template<typename CharT, CharT... Chs>
 class basic_string : public view_interface<basic_string<CharT, Chs...>>
 {
 public:
@@ -256,11 +250,37 @@ constexpr hera::basic_string<CharT, Chs...> operator""_s() noexcept
 }
 } // namespace literals
 
-/*
+namespace detail
+{
+template<typename CharT>
+struct is_constant_char
+{
+    template<typename C>
+    struct apply
+        : std::bool_constant<hera::constant_char<C> &&
+                             hera::same_as<CharT, typename C::value_type>>
+    {};
+};
+} // namespace detail
+
 template<typename T, typename CharT>
-concept stringlike = // clang-format off
-    hera::range_value_t_all<T, CharT> && hera::character<CharT>;
-    */
+concept constant_string_of = hera::character<CharT>&&
+    hera::range_values_pred<T, detail::is_constant_char<CharT>::template apply>;
+
+template<typename T>
+concept constant_string = constant_string_of<T, char>;
+
+template<typename T>
+concept constant_wstring = constant_string_of<T, wchar_t>;
+
+template<typename T>
+concept constant_u8string = constant_string_of<T, char8_t>;
+
+template<typename T>
+concept constant_u16string = constant_string_of<T, char16_t>;
+
+template<typename T>
+concept constant_u32string = constant_string_of<T, char32_t>;
 } // namespace hera
 
 namespace std
@@ -273,6 +293,7 @@ struct tuple_size<hera::basic_string<CharT, Chs...>>
 template<std::size_t I, typename CharT, CharT... Chs>
 struct tuple_element<I, hera::basic_string<CharT, Chs...>>
 {
+    // this works as get returns the integral constant by value
     using type = decltype(
         std::declval<hera::basic_string<CharT, Chs...>&>().template get<I>());
 };

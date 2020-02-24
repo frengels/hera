@@ -1,5 +1,6 @@
 #pragma once
 
+#include "hera/element_type.hpp"
 #include "hera/get.hpp"
 #include "hera/optional.hpp"
 #include "hera/size.hpp"
@@ -57,6 +58,53 @@ concept range_reachable = range<R>&& // clang-format off
     }; // clang-format on
 
 template<hera::range R, std::size_t I> // clang-format off
-    requires (!hera::empty_range<R>)
+    requires (range_reachable<R, I>)
+using range_value_at_t = hera::element_type_t<R, I>; // clang-format on
+
+template<typename R, std::size_t I, template<typename> typename Pred>
+concept range_at_pred = hera::range<R>&& range_reachable<R, I>&&
+                                         Pred<range_value_at_t<R, I>>::value;
+
+template<typename R, std::size_t I, typename T>
+concept range_at_same_as = hera::range<R>&& range_reachable<R, I>&&
+                                            hera::same_as<T, range_value_at_t<R, I>>;
+
+namespace detail
+{
+template<typename R, typename T, std::size_t... Is> // clang-format off
+        requires ((hera::range_at_same_as<R, Is, T> && ...))
+constexpr void range_values_same_as_iter(std::index_sequence<Is...>) // clang-format on
+{}
+} // namespace detail
+
+template<typename R, typename T>
+concept range_values_same_as = hera::bounded_range<R>&& // clang-format off
+    requires
+    {
+        detail::range_values_same_as_iter<R, T>(
+            std::make_index_sequence<hera::size_v<R>>{});
+    }; // clang-format on
+
+namespace detail
+{
+template<typename R,
+         template<typename>
+         typename Pred,
+         std::size_t... Is> // clang-format off
+    requires ((hera::range_at_pred<R, Is, Pred> && ...))
+constexpr void range_values_pred_iter(std::index_sequence<Is...>) // clang-format on
+{}
+} // namespace detail
+
+template<typename R, template<typename> typename Pred>
+concept range_values_pred = hera::bounded_range<R>&& // clang-format off
+    requires
+    {
+        detail::range_values_pred_iter<R, Pred>(
+            std::make_index_sequence<hera::size_v<R>>{});
+    }; // clang-format on
+
+template<hera::range R, std::size_t I> // clang-format off
+    requires (!hera::range_reachable<R, I>)
 using range_reference_at_t = decltype(hera::get<I>(std::declval<R&>())); // clang-format on
 } // namespace hera

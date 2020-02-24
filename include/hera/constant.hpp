@@ -22,6 +22,16 @@ concept constant =
     } && std::is_empty_v<C> && std::is_trivial_v<C>;
 // clang-format on
 
+template<typename T>
+concept character = // clang-format off
+    requires
+    {
+        typename std::char_traits<T>::char_type;
+    }; // clang-format off
+
+template<typename T>
+concept constant_char = constant<T>&& character<typename T::value_type>;
+
 template<typename C, typename T>
 concept constant_convertible_to =
     constant<C>&& convertible_to<typename C::value_type, T>;

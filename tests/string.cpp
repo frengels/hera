@@ -1,12 +1,25 @@
 #include <catch2/catch.hpp>
 
+#include <tuple>
+
 #include "hera/container/string.hpp"
+
+template<hera::constant_string_of<char> S>
+void verify_string(S)
+{}
 
 TEST_CASE("string")
 {
     using namespace hera::literals;
 
     auto str = "hello"_s;
+
+    verify_string(str);
+
+    auto tup = std::tuple<std::integral_constant<char, 'h'>,
+                          std::integral_constant<char, 'i'>>{};
+
+    verify_string(tup);
 
     static_assert(hera::size_v<decltype(str)> == 5);
 
