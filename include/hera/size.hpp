@@ -47,6 +47,15 @@ private:
         return std::tuple_size<std::remove_reference_t<R>>{};
     }
 
+    template<typename R>
+    static constexpr auto
+    impl(hera::detail::priority_tag<1>, R&&) noexcept -> decltype(
+        std::integral_constant<std::size_t, std::remove_cvref_t<R>::size()>{})
+    {
+        return std::integral_constant<std::size_t,
+                                      std::remove_cvref_t<R>::size()>{};
+    }
+
 public:
     template<typename R>
     constexpr auto operator()(R&& r) const noexcept

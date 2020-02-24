@@ -18,6 +18,17 @@ struct finite_range
     }
 };
 
+struct static_size_method
+{
+    static constexpr std::size_t size() noexcept
+    {
+        return 5;
+    }
+};
+
+struct no_size_method
+{};
+
 TEST_CASE("size")
 {
     SECTION("infinite")
@@ -40,6 +51,19 @@ TEST_CASE("size")
         auto sz  = hera::size(fin);
 
         static_assert(hera::bounded<decltype(sz)>);
+    }
+
+    SECTION("static")
+    {
+        auto st = static_size_method{};
+
+        static_assert(hera::size_v<decltype(st)> == 5);
+    }
+
+    SECTION("no method")
+    {
+        static_assert(
+            !std::is_invocable_v<decltype(hera::size), no_size_method>);
     }
 
     SECTION("invalid")
