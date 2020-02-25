@@ -1,9 +1,30 @@
 #include <catch2/catch.hpp>
 
-#include "hera/optional.hpp"
+#include <string>
+
+#include <hera/optional.hpp>
 
 TEST_CASE("optional")
 {
+    SECTION("traits")
+    {
+        SECTION("trivial")
+        {
+            using trivial_just = hera::just<int>;
+            static_assert(std::is_trivially_destructible_v<trivial_just>);
+            static_assert(std::is_trivially_move_assignable_v<trivial_just>);
+            static_assert(std::is_trivially_copy_assignable_v<trivial_just>);
+        }
+
+        SECTION("non-trivial")
+        {
+            using nontriv_just = hera::just<std::string>;
+            static_assert(!std::is_trivially_destructible_v<nontriv_just>);
+            static_assert(!std::is_trivially_move_assignable_v<nontriv_just>);
+            static_assert(!std::is_trivially_copy_assignable_v<nontriv_just>);
+        }
+    }
+
     SECTION("just")
     {
         auto j = hera::just<int>(50);
