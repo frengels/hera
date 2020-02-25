@@ -103,15 +103,14 @@ class just;
 class none;
 
 template<typename Opt>
-concept optional =
+concept optional_constant =
     hera::specialization_of<std::remove_cvref_t<Opt>, hera::just> ||
     hera::same_as<std::remove_cvref_t<Opt>, hera::none>;
 
-/// \brief A compile time optional value holding an item.
+/// \brief A compile time optional_constant value holding an item.
 ///
-/// `just` represents an optional which is known at compile time to hold a
-/// value.
-/// \see none
+/// `just` represents an optional_constant which is known at compile time to
+/// hold a value. \see none
 template<typename T>
 class just : private detail::just_storage_base<T>
 {
@@ -370,9 +369,9 @@ public:
 
     /// \brief Returns `none` if the option is `none`, otherwise returns `opt`.
     ///
-    /// In the case of `just` this will always forward the passed optional.
-    /// \returns `opt`
-    template<hera::optional Opt>
+    /// In the case of `just` this will always forward the passed
+    /// optional_constant. \returns `opt`
+    template<hera::optional_constant Opt>
     constexpr Opt&& and_(Opt&& opt) const noexcept
     {
         return static_cast<Opt&&>(opt);
@@ -382,26 +381,26 @@ public:
     ///
     /// In the case of just it will always return itself.
     /// \returns `*this`
-    template<hera::optional Opt>
+    template<hera::optional_constant Opt>
         constexpr just& or_(Opt&&) & noexcept
     {
         return *this;
     }
 
     /// \cond
-    template<hera::optional Opt>
+    template<hera::optional_constant Opt>
     constexpr const just& or_(Opt&&) const& noexcept
     {
         return *this;
     }
 
-    template<hera::optional Opt>
+    template<hera::optional_constant Opt>
         constexpr just&& or_(Opt&&) && noexcept
     {
         return static_cast<just&&>(*this);
     }
 
-    template<hera::optional Opt>
+    template<hera::optional_constant Opt>
     constexpr const just&& or_(Opt&&) const&& noexcept
     {
         return static_cast<const just&&>(*this);
@@ -413,21 +412,21 @@ private:
     constexpr decltype(auto) and_then_void(F&& fn) const
     {
         static_assert(hera::invocable<F>, "cannot invoke F");
-        static_assert(
-            hera::optional<std::remove_cvref_t<std::invoke_result_t<F>>>,
-            "F must return just/none");
+        static_assert(hera::optional_constant<
+                          std::remove_cvref_t<std::invoke_result_t<F>>>,
+                      "F must return just/none");
 
         return static_cast<F&&>(fn)();
     }
 
 public:
-    /// \brief apply a function which returns another `optional`
+    /// \brief apply a function which returns another `optional_constant`
     ///
     /// Unwraps the value inside and passes it to `fn`. The return value of `fn`
-    /// must be another `optional`.
+    /// must be another `optional_constant`.
     ///
     /// There are additional overloads for const and rvalue qualifiers.
-    /// \return the `optional` returned from invoke `fn(**this)`.
+    /// \return the `optional_constant` returned from invoke `fn(**this)`.
     template<typename F>
     constexpr decltype(auto) and_then(F&& fn) &
     {
@@ -439,7 +438,7 @@ public:
         {
             static_assert(hera::invocable<F, value_type&>, "cannot invoke F");
             static_assert(
-                hera::optional<
+                hera::optional_constant<
                     std::remove_cvref_t<std::invoke_result_t<F, value_type&>>>,
                 "F must return just/none");
 
@@ -459,7 +458,7 @@ public:
         {
             static_assert(hera::invocable<F, const value_type&>,
                           "cannot invoke F");
-            static_assert(hera::optional<std::remove_cvref_t<
+            static_assert(hera::optional_constant<std::remove_cvref_t<
                               std::invoke_result_t<F, const value_type&>>>,
                           "F must return just/none");
 
@@ -478,7 +477,7 @@ public:
         {
             static_assert(hera::invocable<F, value_type&&>, "cannot invoke F");
             static_assert(
-                hera::optional<
+                hera::optional_constant<
                     std::remove_cvref_t<std::invoke_result_t<F, value_type&&>>>,
                 "F must return just/none");
 
@@ -497,7 +496,7 @@ public:
         {
             static_assert(hera::invocable<F, const value_type&&>,
                           "cannot invoke F");
-            static_assert(hera::optional<std::remove_cvref_t<
+            static_assert(hera::optional_constant<std::remove_cvref_t<
                               std::invoke_result_t<F, const value_type&&>>>,
                           "F must return just/none");
 
@@ -506,8 +505,8 @@ public:
     }
     /// \endcond
 
-    /// \brief gives the current optional if filled, otherwise return value of
-    /// `F`.
+    /// \brief gives the current optional_constant if filled, otherwise return
+    /// value of `F`.
     ///
     /// Because `just` always holds a value, this simply gives `*this`.
     /// An rvalue qualified `just` will return `*this` with rvalue qualifiers.
@@ -589,7 +588,7 @@ just(T &&)->just<T>;
 
 just(std::in_place_t)->just<void>;
 
-/// \brief A compile time optional value holding nothing.
+/// \brief A compile time optional_constant value holding nothing.
 ///
 /// \see just
 class none
@@ -651,7 +650,7 @@ public:
     ///
     /// In the none case this will always return none.
     /// \return `none`
-    template<hera::optional Opt>
+    template<hera::optional_constant Opt>
     constexpr hera::none and_(Opt&&) const noexcept
     {
         return {};
@@ -661,13 +660,13 @@ public:
     ///
     /// For `none` this will always return `opt`.
     /// \returns `opt`
-    template<hera::optional Opt>
+    template<hera::optional_constant Opt>
     constexpr Opt&& or_(Opt&& opt) const noexcept
     {
         return static_cast<Opt&&>(opt);
     }
 
-    /// \brief apply a function which returns another `optional`
+    /// \brief apply a function which returns another `optional_constant`
     ///
     /// Holds no value so returns `none`.
     /// \return `none`
@@ -677,8 +676,8 @@ public:
         return {};
     }
 
-    /// \brief gives the current optional if filled, otherwise return value of
-    /// `F`.
+    /// \brief gives the current optional_constant if filled, otherwise return
+    /// value of `F`.
     ///
     /// `none` is always empty, therefore returns the result of invoking `fn`.
     /// \return `fn()`
@@ -686,9 +685,9 @@ public:
     constexpr decltype(auto) or_else(F&& fn) const
         noexcept(std::is_nothrow_invocable_v<F>)
     {
-        static_assert(
-            hera::optional<std::remove_cvref_t<std::invoke_result_t<F>>>,
-            "F must return just/none");
+        static_assert(hera::optional_constant<
+                          std::remove_cvref_t<std::invoke_result_t<F>>>,
+                      "F must return just/none");
 
         return static_cast<F&&>(fn)();
     }
