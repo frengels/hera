@@ -32,6 +32,7 @@ set(
   element_type
   collect_into
   string
+  variant_
   )
 
 set (DESTRUCTURE_TEST OFF)
