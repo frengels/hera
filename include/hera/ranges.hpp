@@ -10,13 +10,13 @@ namespace hera
 /// \brief if `R` fulfills the `sized` concept it is a valid range
 /// \see sized
 template<typename R>
-concept range = sized<R>;
+concept range = constant_sized<R>;
 
 template<typename R>
-concept bounded_range = range<R>&& bounded_size<R>;
+concept bounded_range = range<R>&& constant_sized_bounded<R>;
 
 template<typename R>
-concept unbounded_range = range<R>&& unbounded_size<R>;
+concept unbounded_range = range<R>&& constant_sized_unbounded<R>;
 
 template<typename R>
 concept empty_range = bounded_range<R>&& // clang-format off

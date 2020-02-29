@@ -178,15 +178,24 @@ struct infinite_constant
     }
 };
 
+template<typename B>
+concept bounded = hera::same_as<B, std::size_t>;
+
+template<typename B>
+concept unbounded = hera::same_as<B, infinite>;
+
+template<typename B>
+concept bound = bounded<B> || unbounded<B>;
+
 // bounded ranges are any integral constant convertible to size_t
 template<typename B>
-concept bounded = constant_convertible_to<B, std::size_t>;
+concept bounded_constant = constant_same_as<B, std::size_t>;
 
 // unbounded must be indicated with the type unreachable
 template<typename B>
-concept unbounded = hera::same_as<B, infinite_constant>;
+concept unbounded_constant = hera::same_as<B, infinite_constant>;
 
 // check whether B indicates a bound
 template<typename B>
-concept bound = bounded<B> || unbounded<B>;
+concept bound_constant = bounded_constant<B> || unbounded_constant<B>;
 } // namespace hera

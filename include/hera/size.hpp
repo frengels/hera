@@ -5,6 +5,40 @@
 
 namespace hera
 {
+namespace detail
+{
+template<typename R>
+concept static_consteval_tuple_size = // clang-format off
+    requires
+    {
+        { std::remove_cvref_t<R>::size() } -> hera::bound;
+        std::integral_constant<std::size_t, std::remove_cvref_t<R>::size()>{};
+    }; // clang-format on
+
+template<typename R>
+concept member_constant_tuple_size = // clang-format off
+    requires (R&& r)
+    {
+        { static_cast<R&&>(r).size() }
+            -> hera::bound_constant;
+    }; // clang-format on
+
+template<typename R>
+concept adl_constant_tuple_size = // clang-format off
+    requires (R&& r)
+    {
+        { size(static_cast<R&&>(r)) }
+            -> hera::bound_constant;
+    }; // clang-format on
+
+template<typename R>
+concept std_tuple_size = // clang-format off
+    requires
+    {
+        std::tuple_size<R>{};
+    }; // clang-format on
+} // namespace detail
+
 namespace size_impl
 {
 template<typename T>
@@ -13,46 +47,28 @@ void size(T&&) = delete;
 struct fn
 {
 private:
-    template<typename T> // clang-format off
-        requires hera::bound<std::decay_t<T>>
-    static constexpr auto check(T&& t) noexcept // clang-format on
-        -> decltype(std::decay_t<T>(static_cast<T&&>(t)))
-    {
-        return std::decay_t<T>(static_cast<T&&>(t));
-    }
-
-    template<typename R>
+    template<hera::detail::member_constant_tuple_size R>
     static constexpr auto impl(hera::detail::priority_tag<4>, R&& r) noexcept
-        -> decltype(check(static_cast<R&&>(r).size()))
     {
-        return check(static_cast<R&&>(r).size());
+        return static_cast<R&&>(r).size();
     }
 
-    template<typename R>
+    template<hera::detail::adl_constant_tuple_size R>
     static constexpr auto impl(hera::detail::priority_tag<3>, R&& r) noexcept
-        -> decltype(check(size(static_cast<R&&>(r))))
     {
-        return check(size(static_cast<R&&>(r)));
+        return size(static_cast<R&&>(r));
     }
 
-    template<typename R>
-    static constexpr auto
-    impl(hera::detail::priority_tag<2>, R&&) noexcept -> decltype(
-        std::integral_constant<std::size_t, std::remove_cvref_t<R>::size()>{})
+    template<hera::detail::static_consteval_tuple_size R>
+    static constexpr auto impl(hera::detail::priority_tag<2>, const R&) noexcept
     {
-        return {};
+        return std::integral_constant<std::size_t, R::size()>{};
     }
 
-    template<typename R> // clang-format off
-        requires
-            requires
-            {
-                // only the non const is sfinae version so use it for sfinae
-                std::tuple_size<std::remove_reference_t<R>>{};
-            }
-    static constexpr auto impl(hera::detail::priority_tag<1>, R&&) noexcept // clang-format on
+    template<hera::detail::std_tuple_size R> // clang-format off
+    static constexpr auto impl(hera::detail::priority_tag<1>, R&) noexcept // clang-format on
     {
-        return std::tuple_size<std::remove_reference_t<R>>{};
+        return std::tuple_size<R>{};
     }
 
 public:
@@ -75,23 +91,23 @@ inline constexpr auto size_v = decltype(hera::size(std::declval<R&>()))::value;
 
 /// \brief `R` has a compile time defined size obtainable through `hera::size`
 template<typename R>
-concept sized = // clang-format off
+concept constant_sized = // clang-format off
     requires (R& r)
     {
         hera::size(r);
     }; // clang-format off
 
 template<typename R>
-concept bounded_size = sized<R> && // clang-format off
+concept constant_sized_bounded = constant_sized<R> && // clang-format off
     requires (R& r)
     {
-        { hera::size(r) } -> hera::bounded;
+        { hera::size(r) } -> hera::bounded_constant;
     }; // clang-format on
 
 template<typename R>
-concept unbounded_size = sized<R>&& // clang-format off
+concept constant_sized_unbounded = constant_sized<R>&& // clang-format off
     requires (R& r)
     {
-        { hera::size(r) } -> hera::unbounded;
+        { hera::size(r) } -> hera::unbounded_constant;
     }; // clang-format off
 } // namespace hera
