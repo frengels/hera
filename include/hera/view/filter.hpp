@@ -36,7 +36,7 @@ constexpr auto count_size() noexcept
 {
     if constexpr (hera::unbounded_range<V>)
     {
-        return decltype(hera::size(std::declval<V&>())){};
+        return decltype(hera::size(std::declval<V>())){};
     }
     else
     {
