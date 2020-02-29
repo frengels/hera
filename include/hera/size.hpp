@@ -35,25 +35,24 @@ private:
         return check(size(static_cast<R&&>(r)));
     }
 
+    template<typename R>
+    static constexpr auto
+    impl(hera::detail::priority_tag<2>, R&&) noexcept -> decltype(
+        std::integral_constant<std::size_t, std::remove_cvref_t<R>::size()>{})
+    {
+        return {};
+    }
+
     template<typename R> // clang-format off
         requires
             requires
             {
                 // only the non const is sfinae version so use it for sfinae
-                std::tuple_size<std::remove_cvref_t<R>>{};
+                std::tuple_size<std::remove_reference_t<R>>{};
             }
-    static constexpr auto impl(hera::detail::priority_tag<2>, R&&) noexcept // clang-format on
+    static constexpr auto impl(hera::detail::priority_tag<1>, R&&) noexcept // clang-format on
     {
         return std::tuple_size<std::remove_reference_t<R>>{};
-    }
-
-    template<typename R>
-    static constexpr auto
-    impl(hera::detail::priority_tag<1>, R&&) noexcept -> decltype(
-        std::integral_constant<std::size_t, std::remove_cvref_t<R>::size()>{})
-    {
-        return std::integral_constant<std::size_t,
-                                      std::remove_cvref_t<R>::size()>{};
     }
 
 public:

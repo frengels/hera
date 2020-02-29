@@ -26,6 +26,16 @@ struct static_size_method
     }
 };
 
+struct std_sized
+{};
+
+namespace std
+{
+template<>
+struct tuple_size<std_sized> : std::integral_constant<std::size_t, 5>
+{};
+} // namespace std
+
 struct no_size_method
 {};
 
@@ -58,6 +68,11 @@ TEST_CASE("size")
         auto st = static_size_method{};
 
         static_assert(hera::size_v<decltype(st)> == 5);
+    }
+
+    SECTION("std")
+    {
+        static_assert(hera::size_v<std_sized> == 5);
     }
 
     SECTION("no method")
