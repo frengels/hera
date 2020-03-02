@@ -111,6 +111,30 @@ struct infinite
     {
         return false;
     }
+
+    template<hera::integral I>
+    constexpr infinite operator+(const I&) const noexcept
+    {
+        return {};
+    }
+
+    template<hera::integral I>
+    constexpr infinite operator-(const I&) const noexcept
+    {
+        return {};
+    }
+
+    template<hera::integral I>
+    friend constexpr infinite operator+(const I&, const infinite&) noexcept
+    {
+        return {};
+    }
+
+    template<hera::integral I>
+    friend constexpr infinite operator-(const I&, const infinite&) noexcept
+    {
+        return {};
+    }
 };
 
 // a special marker type to indicate the size is infinite
