@@ -56,20 +56,15 @@ public:
     constexpr decltype(auto) back() noexcept requires !hera::empty_range<D> &&
         hera::bounded_range<D>
     {
-        auto                  size_integral = hera::size(derived());
-        constexpr std::size_t size          = size_integral;
-        constexpr auto        last_index    = size - 1;
-        return hera::get<last_index>(derived());
+
+        return hera::get<(hera::size_v<D> - 1)>(derived());
     }
 
     constexpr decltype(auto) back() const
         noexcept requires !hera::empty_range<D> &&
         hera::bounded_range<D>
     {
-        auto                  size_integral = hera::size(derived());
-        constexpr std::size_t size          = size_integral;
-        constexpr auto        last_index    = size - 1;
-        return hera::get<last_index>(derived());
+        return hera::get<(hera::size_v<const D> - 1)>(derived());
     }
 };
 } // namespace hera
