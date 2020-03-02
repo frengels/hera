@@ -32,6 +32,7 @@ set(
   element_type
   collect_into
   string
+  nth_element
   )
 
 set (DESTRUCTURE_TEST OFF)
