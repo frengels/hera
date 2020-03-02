@@ -7,6 +7,10 @@ template<hera::unbounded_range R>
 constexpr auto verify_unbounded_range(R)
 {}
 
+template<hera::bounded_range R>
+constexpr auto verify_bounded_range(R)
+{}
+
 TEST_CASE("iota_view")
 {
     static_assert(hera::view<hera::iota_view<0>>);
@@ -27,7 +31,7 @@ TEST_CASE("iota_view")
     {
         auto iota = hera::iota_view<10, 50>{};
 
-        static_assert(hera::bounded_range<decltype(iota)>);
+        verify_bounded_range(iota);
         REQUIRE(hera::get<10>(iota) == 20);
     }
 
