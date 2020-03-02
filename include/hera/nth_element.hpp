@@ -24,7 +24,8 @@ static indexed<I, T> select(indexed<I, T>)
 {}
 } // namespace detail
 
-template<std::size_t I, typename... Ts>
-using nth_element_t = typename decltype(
+template<std::size_t I, typename... Ts> // clang-format off
+    requires (I < sizeof...(Ts))
+using nth_element_t = typename decltype( // clang-format on
     select<I>(detail::indexer<hera::index_sequence_for<Ts...>, Ts...>{}))::type;
 } // namespace hera
