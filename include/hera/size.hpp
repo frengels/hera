@@ -1,5 +1,7 @@
 #pragma once
 
+#include <tuple>
+
 #include "hera/bound.hpp"
 #include "hera/utility/detail/priority_tag.hpp"
 
@@ -8,11 +10,20 @@ namespace hera
 namespace detail
 {
 template<typename R>
-concept static_consteval_tuple_size = // clang-format off
+concept static_consteval_bounded_tuple_size = // clang-format off
     requires
     {
-        { std::remove_cvref_t<R>::size() } -> hera::bound;
-        std::integral_constant<std::size_t, std::remove_cvref_t<R>::size()>{};
+        { R::size() } -> hera::bounded;
+        //{ std::integral_constant<std::size_t, R::size()>{} }
+        //    -> hera::bounded_constant;
+    }; // clang-format on
+
+template<typename R>
+concept static_consteval_unbounded_tuple_size = // clang-format off
+    requires
+    {
+        { R::size() } -> hera::unbounded;
+        { hera::infinite_constant{} } -> hera::unbounded_constant;
     }; // clang-format on
 
 template<typename R>
@@ -48,21 +59,27 @@ struct fn
 {
 private:
     template<hera::detail::member_constant_tuple_size R>
-    static constexpr auto impl(hera::detail::priority_tag<4>, R&& r) noexcept
+    static constexpr auto impl(hera::detail::priority_tag<4>, R&& r)
     {
         return static_cast<R&&>(r).size();
     }
 
     template<hera::detail::adl_constant_tuple_size R>
-    static constexpr auto impl(hera::detail::priority_tag<3>, R&& r) noexcept
+    static constexpr auto impl(hera::detail::priority_tag<3>, R&& r)
     {
         return size(static_cast<R&&>(r));
     }
 
-    template<hera::detail::static_consteval_tuple_size R>
+    template<hera::detail::static_consteval_bounded_tuple_size R>
     static constexpr auto impl(hera::detail::priority_tag<2>, const R&) noexcept
     {
         return std::integral_constant<std::size_t, R::size()>{};
+    }
+
+    template<hera::detail::static_consteval_unbounded_tuple_size R>
+    static constexpr auto impl(hera::detail::priority_tag<2>, const R&) noexcept
+    {
+        return hera::infinite_constant{};
     }
 
     template<hera::detail::std_tuple_size R> // clang-format off
@@ -73,7 +90,7 @@ private:
 
 public:
     template<typename R>
-    constexpr auto operator()(R&& r) const noexcept
+    constexpr auto operator()(R&& r) const
         -> decltype(impl(hera::detail::max_priority_tag, static_cast<R&&>(r)))
     {
         return impl(hera::detail::max_priority_tag, static_cast<R&&>(r));
