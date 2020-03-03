@@ -33,6 +33,7 @@ set(
   collect_into
   string
   nth_element
+  type_in_pack
   )
 
 set (DESTRUCTURE_TEST OFF)
