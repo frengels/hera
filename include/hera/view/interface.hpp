@@ -42,27 +42,26 @@ public:
         }
     }
 
-    constexpr decltype(auto) front() noexcept requires !hera::empty_range<D>
+    constexpr decltype(auto) front() noexcept requires(!hera::empty_range<D>)
     {
         return hera::get<0>(derived());
     }
 
-    constexpr decltype(auto) front() const
-        noexcept requires !hera::empty_range<D>
+    constexpr decltype(auto) front() const noexcept
+        requires(!hera::empty_range<D>)
     {
         return hera::get<0>(derived());
     }
 
-    constexpr decltype(auto) back() noexcept requires !hera::empty_range<D> &&
-        hera::bounded_range<D>
+    constexpr decltype(auto) back() noexcept
+        requires(!hera::empty_range<D> && hera::bounded_range<D>)
     {
 
         return hera::get<(hera::size_v<D> - 1)>(derived());
     }
 
-    constexpr decltype(auto) back() const
-        noexcept requires !hera::empty_range<D> &&
-        hera::bounded_range<D>
+    constexpr decltype(auto) back() const noexcept
+        requires(!hera::empty_range<D> && hera::bounded_range<D>)
     {
         return hera::get<(hera::size_v<const D> - 1)>(derived());
     }
