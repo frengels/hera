@@ -32,9 +32,7 @@ add_library(${PROJECT_NAME} INTERFACE)
 add_library(${PROJECT_NAME}::${PROJECT_NAME} ALIAS ${PROJECT_NAME})
 target_compile_features(${PROJECT_NAME} INTERFACE cxx_std_20)
 
-if ("${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang")
-  target_compile_options(${PROJECT_NAME} INTERFACE -Xclang -fconcepts-ts)
-elseif ("${CMAKE_CXX_COMPILER_ID}" MATCHES "GNU")
+if ("${CMAKE_CXX_COMPILER_ID}" MATCHES "GNU")
   target_compile_options(${PROJECT_NAME} INTERFACE -fconcepts)
 endif()
 
