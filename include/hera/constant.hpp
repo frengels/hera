@@ -6,12 +6,6 @@
 
 namespace hera
 {
-namespace detail
-{
-template<typename T, typename U>
-concept same_as_no_const = same_as<std::remove_const_t<T>, U>;
-}
-
 template<typename C>
 inline constexpr auto constant_value_v = std::remove_cvref_t<C>::value;
 
@@ -21,8 +15,8 @@ concept constant =
     requires
     {
         typename C::value_type;
-        { hera::constant_value_v<C> }
-            -> detail::same_as_no_const<typename C::value_type>;
+        { hera::constant_value_v<C> };
+        requires hera::same_as<std::remove_cvref_t<decltype(hera::constant_value_v<C>)>, typename C::value_type>;
     } && std::is_empty_v<C> && std::is_trivial_v<C>;
 // clang-format on
 
