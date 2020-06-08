@@ -9,7 +9,7 @@
 namespace hera
 {
 template<hera::range V> // clang-format off
-    requires view<V> && !empty_range<V> 
+    requires view<V> && (!empty_range<V>)
 class head_view : public hera::view_interface<head_view<V>> // clang-format on
 {
 private:
@@ -46,7 +46,7 @@ public:
 }; // namespace hera
 
 template<hera::range R>
-head_view(R &&)->head_view<hera::all_view<R>>;
+head_view(R &&) -> head_view<hera::all_view<R>>;
 
 namespace views
 {

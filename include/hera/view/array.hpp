@@ -34,7 +34,7 @@ public:
     {}
 
     template<arraylike_container Cont> // clang-format off
-        requires !std::is_array_v<Cont>
+        requires (!std::is_array_v<Cont>)
     explicit constexpr array_view(Cont& container) noexcept // clang-format on
         : data_{std::data(container)}
     {
