@@ -31,11 +31,15 @@ constexpr std::size_t sum_to(std::size_t num) noexcept
 }
 
 template<std::size_t... Is>
-constexpr std::size_t sum_all(hera::index_sequence<Is...> seq) noexcept
+constexpr auto sum_all(hera::index_sequence<Is...> seq) noexcept
 {
     return hera::accumulate(
-        seq, std::size_t{}, [](std::size_t current_sum, auto index) {
-            return current_sum + decltype(index)::value;
+        seq,
+        std::integral_constant<std::size_t, 0>{},
+        [](auto current_sum, auto index) {
+            return std::integral_constant<std::size_t,
+                                          decltype(current_sum)::value +
+                                              decltype(index)::value>{};
         });
 }
 } // namespace detail
@@ -49,7 +53,7 @@ class unreorder_view : public hera::view_interface<unreorder_view<V, Is...>> // 
 {
     static constexpr auto expected_sum = detail::sum_to(sizeof...(Is) - 1);
     static constexpr auto actual_sum =
-        detail::sum_all(hera::index_sequence<Is...>{});
+        decltype(detail::sum_all(hera::index_sequence<Is...>{}))::value;
     static_assert(expected_sum == actual_sum,
                   "All possible indices must occur, too much information was "
                   "lost to undo reorder");
