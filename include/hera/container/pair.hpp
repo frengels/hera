@@ -12,8 +12,9 @@
 
 namespace hera
 {
-template<hera::bounded_range R>
+template<class R>
 concept pair_like = // clang-format off
+    hera::bounded_range<R> &&
     requires (R&& range)
     {
         hera::size(static_cast<R&&>(range));
@@ -138,13 +139,12 @@ public:
 };
 
 template<typename T, typename U>
-pair(T&&, U &&)->pair<std::decay_t<T>, std::decay_t<U>>;
+pair(T&&, U &&) -> pair<std::decay_t<T>, std::decay_t<U>>;
 
 // basically deduce the decayed type of each entry
 template<pair_like P>
-pair(P&& p)
-    ->pair<std::decay_t<decltype(hera::get<0>(static_cast<P&&>(p)))>,
-           std::decay_t<decltype(hera::get<1>(static_cast<P&&>(p)))>>;
+pair(P&& p) -> pair<std::decay_t<decltype(hera::get<0>(static_cast<P&&>(p)))>,
+                    std::decay_t<decltype(hera::get<1>(static_cast<P&&>(p)))>>;
 
 template<typename T, typename U>
 constexpr hera::pair<std::decay_t<T>, std::decay_t<U>>
