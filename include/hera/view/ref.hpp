@@ -25,11 +25,11 @@ private:
 
 public:
     template<typename T> // clang-format off
-        requires !hera::same_as<T, ref_view> && 
+        requires (!hera::same_as<T, ref_view> && 
             hera::convertible_to<T, R&> &&
             requires {
                 hera::detail::FUN<R>(std::declval<T>());
-            }
+            })
     constexpr ref_view(T&& t) // clang-format on
         : base_{std::addressof(static_cast<R&>(std::forward<T>(t)))}
     {}
@@ -57,7 +57,7 @@ public:
 };
 
 template<typename R>
-ref_view(R&)->ref_view<R>;
+ref_view(R&) -> ref_view<R>;
 
 template<typename T>
 inline constexpr bool enable_safe_range<ref_view<T>> = true;
