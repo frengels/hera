@@ -26,13 +26,14 @@ template<std::size_t... Is, typename... Ts>
 class tuple_impl<std::index_sequence<Is...>, Ts...>
     : protected tuple_box<Is, Ts>...
 {
+public:
     tuple_impl() = default;
 
     template<typename... Us> // clang-format off
         requires (sizeof...(Ts) == sizeof...(Us)) // clang-format on
         constexpr tuple_impl(Us&&... us) noexcept(
             (std::is_nothrow_constructible_v<Ts, Us> && ...))
-        : tuple_box<Is, Ts>{Ts(std::forward<Us>(us))}...
+        : tuple_box<Is, Ts>{.value = Ts(std::forward<Us>(us))}...
     {}
 };
 } // namespace detail
@@ -45,7 +46,7 @@ private:
         detail::tuple_impl<std::index_sequence_for<Ts...>, Ts...>;
 
 public:
-    using base_type_::tuple_impl;
+    using base_type_::base_type_;
 
 private:
     template<std::size_t... Is, typename... Us>
@@ -111,8 +112,8 @@ public:
         return *this;
     }
 
-    constexpr std::integral_constant<std::size_t, sizeof...(Ts)> size() const
-        noexcept
+    constexpr std::integral_constant<std::size_t, sizeof...(Ts)>
+    size() const noexcept
     {
         return {};
     }
@@ -315,7 +316,7 @@ public:
 };
 
 template<typename... Ts>
-tuple(Ts&&...)->tuple<std::decay_t<Ts>...>;
+tuple(Ts&&...) -> tuple<std::decay_t<Ts>...>;
 
 template<typename... Ts,
          typename... Us,
