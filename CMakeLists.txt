@@ -11,7 +11,7 @@ endif()
 # only enable these targets if we're the master project
 option(HERA_TESTS "Build hera's unit tests" ${IS_MASTER_PROJECT})
 option(HERA_EXAMPLES "Build hera's examples" ${IS_MASTER_PROJECT})
-option(HERA_DOCS "Create a target for documenation" ${IS_MASTER_PROJECT})
+option(HERA_DOCS "Create a target for documenation" OFF)
 
 if (HERA_DOCS)
   add_subdirectory(docs)
@@ -31,10 +31,6 @@ include(CMakePackageConfigHelpers)
 add_library(${PROJECT_NAME} INTERFACE)
 add_library(${PROJECT_NAME}::${PROJECT_NAME} ALIAS ${PROJECT_NAME})
 target_compile_features(${PROJECT_NAME} INTERFACE cxx_std_20)
-
-if ("${CMAKE_CXX_COMPILER_ID}" MATCHES "GNU")
-  target_compile_options(${PROJECT_NAME} INTERFACE -fconcepts)
-endif()
 
 target_include_directories(
   ${PROJECT_NAME}
