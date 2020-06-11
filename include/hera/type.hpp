@@ -27,9 +27,19 @@ struct type_
     }
 
     template<hera::invocable<T> F>
-    constexpr auto transform(F&& fn) const noexcept // clang-format on
+    static constexpr auto transform(F&& fn) noexcept // clang-format on
     {
         return type_<std::invoke_result_t<F, T>>{};
+    }
+
+    static constexpr std::type_identity<T> as_type_identity() noexcept
+    {
+        return {};
+    }
+
+    static constexpr std::in_place_type_t<T> as_in_place_type() noexcept
+    {
+        return {};
     }
 };
 
@@ -56,7 +66,7 @@ struct forward_type : type_<T>
 };
 
 template<typename U>
-forward_type(U &&)->forward_type<U&&>;
+forward_type(U &&) -> forward_type<U&&>;
 
 // deduce the base type of the passed object and put it into a type_
 template<typename T>
