@@ -32,6 +32,16 @@ struct type_
         return type_<std::invoke_result_t<F, T>>{};
     }
 
+    static constexpr bool contains_metafunction() noexcept
+    {
+        return hera::metafunction<T>;
+    }
+
+    static constexpr T unpack() noexcept requires(hera::metafunction<T>)
+    {
+        return {};
+    }
+
     static constexpr std::type_identity<T> as_type_identity() noexcept
     {
         return {};
