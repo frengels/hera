@@ -20,9 +20,9 @@ concept unbounded_range = range<R>&& constant_sized_unbounded<R>;
 
 template<typename R>
 concept empty_range = bounded_range<R>&& // clang-format off
-    requires (const R& r)
+    requires
     {
-        requires decltype(hera::size(r))::value == 0;
+        requires hera::size_v<R> == 0;
     }; // clang-format on
 
 namespace detail
@@ -51,22 +51,22 @@ concept safe_range = range<T> && (std::is_lvalue_reference_v<T> ||
                                   enable_safe_range<std::remove_cvref_t<T>>);
 
 template<typename R, std::size_t I>
-concept range_reachable = range<R>&& // clang-format off
+concept range_reachable_at = range<R>&& // clang-format off
     requires (R range)
     {
         hera::get<I>(static_cast<R&&>(range));
     }; // clang-format on
 
 template<hera::range R, std::size_t I> // clang-format off
-    requires (range_reachable<R, I>)
+    requires (range_reachable_at<R, I>)
 using range_value_at_t = hera::element_type_t<R, I>; // clang-format on
 
 template<typename R, std::size_t I, template<typename> typename Pred>
-concept range_at_pred = hera::range<R>&& range_reachable<R, I>&&
+concept range_at_pred = hera::range<R>&& range_reachable_at<R, I>&&
                                          Pred<range_value_at_t<R, I>>::value;
 
 template<typename R, std::size_t I, typename T>
-concept range_at_same_as = hera::range<R>&& range_reachable<R, I>&&
+concept range_at_same_as = hera::range<R>&& range_reachable_at<R, I>&&
                                             hera::same_as<T, range_value_at_t<R, I>>;
 
 namespace detail
@@ -105,6 +105,6 @@ concept range_values_pred = hera::bounded_range<R>&& // clang-format off
     }; // clang-format on
 
 template<hera::range R, std::size_t I> // clang-format off
-    requires (!hera::range_reachable<R, I>)
+    requires (!hera::range_reachable_at<R, I>)
 using range_reference_at_t = decltype(hera::get<I>(std::declval<R&>())); // clang-format on
 } // namespace hera

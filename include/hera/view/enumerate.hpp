@@ -30,13 +30,9 @@ public:
         return hera::size(base_);
     }
 
-    template<std::size_t I> // clang-format off
-        requires 
-            requires 
-            {
-                hera::get<I>(base_);
-            } // clang-format on
+    template<std::size_t I>
     constexpr decltype(auto) get() const noexcept
+        requires hera::range_reachable_at<V, I>
     {
         return hera::pair<std::integral_constant<std::size_t, I>,
                           decltype(hera::get<I>(base_))>{{},

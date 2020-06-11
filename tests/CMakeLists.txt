@@ -27,8 +27,8 @@ set(
   find_if
   optional
   drop_view
-  # enumerate_view disable whilst ICE bug going on
-  # unreorder_view
+  enumerate_view
+  unreorder_view
   element_type
   collect_into
   string
