@@ -3,7 +3,7 @@
 #include "hera/algorithm/unpack.hpp"
 #include "hera/metafunction.hpp"
 #include "hera/optional.hpp"
-#include "hera/type_.hpp"
+#include "hera/type.hpp"
 #include "hera/view/detail/closure.hpp"
 #include "hera/view/interface.hpp"
 
@@ -15,8 +15,8 @@ class type_list : public hera::view_interface<type_list<Ts...>>
 public:
     type_list() = default;
 
-    constexpr std::integral_constant<std::size_t, sizeof...(Ts)> size() const
-        noexcept
+    constexpr std::integral_constant<std::size_t, sizeof...(Ts)>
+    size() const noexcept
     {
         return {};
     }

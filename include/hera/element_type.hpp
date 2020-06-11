@@ -4,7 +4,7 @@
 
 #include "hera/get.hpp"
 #include "hera/metafunction.hpp"
-#include "hera/type_.hpp"
+#include "hera/type.hpp"
 #include "hera/utility/detail/priority_tag.hpp"
 
 namespace hera

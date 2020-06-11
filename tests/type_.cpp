@@ -2,7 +2,7 @@
 
 #include <optional>
 
-#include "hera/type_.hpp"
+#include "hera/type.hpp"
 
 constexpr auto deref = [](auto&& x) -> decltype(*std::forward<decltype(x)>(x)) {
     return *std::forward<decltype(x)>(x);

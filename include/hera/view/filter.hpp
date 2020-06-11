@@ -2,7 +2,7 @@
 
 #include "hera/algorithm/find_if.hpp"
 #include "hera/concepts.hpp"
-#include "hera/type_.hpp"
+#include "hera/type.hpp"
 #include "hera/view/all.hpp"
 #include "hera/view/detail/closure.hpp"
 #include "hera/view/drop.hpp"
@@ -112,7 +112,7 @@ public:
 };
 
 template<hera::range R, typename Pred>
-filter_view(R&&, Pred)->filter_view<hera::all_view<R>, Pred>;
+filter_view(R&&, Pred) -> filter_view<hera::all_view<R>, Pred>;
 
 namespace views
 {

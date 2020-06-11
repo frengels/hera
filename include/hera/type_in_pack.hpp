@@ -24,11 +24,13 @@ constexpr bool type_in_pack_impl()
 template<typename U, typename... Ts>
 constexpr bool type_in_pack_unique_impl()
 {
-    auto count = hera::accumulate(
-        hera::type_list<Ts...>{}, std::size_t{}, [](auto count, auto type) {
+    constexpr std::integral_constant<std::size_t, 0> start_count{};
+    constexpr auto                                   count = hera::accumulate(
+        hera::type_list<Ts...>{}, start_count, [](auto count, auto type) {
             if constexpr (std::is_same_v<U, typename decltype(type)::type>)
             {
-                return count + 1;
+                return std::integral_constant<std::size_t,
+                                              decltype(count)::value + 1>{};
             }
             else
             {
@@ -36,7 +38,7 @@ constexpr bool type_in_pack_unique_impl()
             }
         });
 
-    return count == 1; // 1 guarantees present and unique
+    return decltype(count)::value == 1; // 1 guarantees present and unique
 }
 } // namespace detail
 
