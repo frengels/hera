@@ -59,8 +59,5 @@ public:
 };
 } // namespace accumulate_impl
 
-inline namespace cpo
-{
 inline constexpr auto accumulate = accumulate_impl::fn{};
-}
 } // namespace hera
