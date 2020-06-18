@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.8)
 
-project(hera VERSION "0.0.1" LANGUAGES CXX)
+project(hera VERSION "0.1.0" LANGUAGES CXX)
 
 set(IS_MASTER_PROJECT OFF)
 
