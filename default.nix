@@ -1,10 +1,6 @@
-{ nixpkgs ? import <nixpkgs> {} }:
-let
-    nixpkgs = <nixpkgs>;
-    pkgs = import nixpkgs {
-        config = {};
-        overlays = [
-            (import ./overlay.nix)
-        ];
-    };
-in pkgs.hera
+{
+    nixpkgs ? import ./nixpkgs.nix,
+    pkgs ? import nixpkgs {}
+}:
+
+pkgs.callPackage ./derivation.nix { stdenv = pkgs.gcc10Stdenv; }
