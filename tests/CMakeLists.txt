@@ -1,39 +1,39 @@
 set(
   TESTS
-  size
-  get
-  common_reference
-  tuple_array
-  iota_view
-  all_view
-  filter_view
-  for_each
-  unpack
-  move_view
-  head_view
-  pair
-  type_list
-  tuple
-  transform_view
-  make_from_range
-  type_
-  any_of_all_of
-  zip_view
   accumulate
-  integer_sequence
-  reorder_view
-  sort
-  ref_view
-  find_if
-  optional
-  drop_view
-  enumerate_view
-  unreorder_view
-  element_type
+  all_view
+  any_of_all_of
   collect_into
-  string
+  common_reference
+  drop_view
+  element_type
+  enumerate_view
+  filter_view
+  find_if
+  for_each
+  get
+  head_view
+  integer_sequence
+  iota_view
+  make_from_range
+  move_view
   nth_element
+  optional
+  pair
+  ref_view
+  reorder_view
+  size
+  sort
+  string
+  transform_view
+  tuple
+  tuple_array
+  type_
   type_in_pack
+  type_list
+  unpack
+  unreorder_view
+  zip_view
   )
 
 set (DESTRUCTURE_TEST OFF)

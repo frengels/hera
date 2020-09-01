@@ -11,7 +11,7 @@ TEST_CASE("zip_view")
 
     auto zip = hera::zip_view{tup1, tup2, tup3};
 
-    REQUIRE(hera::size(zip) == 3);
+    static_assert(hera::size_v<decltype(zip)> == 3);
 
     auto beg  = hera::get<0>(zip);
     auto mid  = hera::get<1>(zip);

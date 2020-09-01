@@ -8,19 +8,19 @@ namespace accumulate_impl
 {
 struct fn
 {
+private:
     template<std::size_t         I,
              hera::bounded_range R,
              typename T,
-             typename BinaryOp> // clang-format off
-        requires (I < hera::size_v<R>)
-    static constexpr decltype(auto) recurse(R&& range, T&& accu, BinaryOp&& op) // clang-format on
-    {
-        static_assert(std::is_invocable_v<BinaryOp,
-                                          T,
-                                          decltype(hera::get<I>(
-                                              static_cast<R&&>(range)))>,
-                      "Cannot invoke BinaryOp on T and get<I>(range)");
+             typename BinaryOp>
+        static constexpr decltype(auto)
+        recurse(R&& range, T&& accu, BinaryOp&& op) requires(I <
+                                                             hera::size_v<R>) &&
+        (std::is_invocable_v<BinaryOp,
+                             T,
+                             decltype(hera::get<I>(static_cast<R&&>(range)))>)
 
+    {
         return recurse<I + 1>(
             static_cast<R&&>(range),
             op(static_cast<T&&>(accu), hera::get<I>(static_cast<R&&>(range))),
@@ -30,16 +30,16 @@ struct fn
     template<std::size_t         I,
              hera::bounded_range R,
              typename T,
-             typename BinaryOp> // clang-format off
-        requires (I == hera::size_v<R>)
-    static constexpr decltype(auto) recurse(R&& range, T&& final_res, BinaryOp&&) // clang-format on
+             typename BinaryOp>
+    static constexpr decltype(auto)
+    recurse(R&& range, T&& final_res, BinaryOp&&) requires(I == hera::size_v<R>)
     {
         return static_cast<T&&>(final_res);
     }
 
 public:
     template<hera::bounded_range R, typename T>
-    constexpr auto operator()(R&& range, T&& init) const
+    constexpr decltype(auto) operator()(R&& range, T&& init) const
     {
         return recurse<0>(static_cast<R&&>(range),
                           static_cast<T&&>(init),
@@ -50,7 +50,8 @@ public:
     }
 
     template<hera::bounded_range R, typename T, typename BinaryOp>
-    constexpr auto operator()(R&& range, T&& init, BinaryOp&& op) const
+    constexpr decltype(auto)
+    operator()(R&& range, T&& init, BinaryOp&& op) const
     {
         return recurse<0>(static_cast<R&&>(range),
                           static_cast<T&&>(init),
@@ -59,8 +60,5 @@ public:
 };
 } // namespace accumulate_impl
 
-inline namespace cpo
-{
 inline constexpr auto accumulate = accumulate_impl::fn{};
-}
 } // namespace hera
