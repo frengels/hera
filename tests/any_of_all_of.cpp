@@ -1,4 +1,4 @@
-#include <catch2/catch.hpp>
+#include <catch2/catch_test_macros.hpp>
 
 #include "hera/algorithm/all_of.hpp"
 #include "hera/algorithm/any_of.hpp"

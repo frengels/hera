@@ -45,7 +45,7 @@ endif ()
 find_package(Catch2 REQUIRED)
 
 add_library(catch STATIC catch.cpp)
-target_link_libraries(catch PUBLIC Catch2::Catch2)
+target_link_libraries(catch PUBLIC Catch2::Catch2WithMain)
 
 function(make_test target)
   string(CONCAT target_src ${target} ".cpp")

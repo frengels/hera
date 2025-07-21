@@ -1,4 +1,4 @@
-#include <catch2/catch.hpp>
+#include <catch2/catch_test_macros.hpp>
 
 #include "hera/concepts.hpp"
 #include "hera/nth_element.hpp"

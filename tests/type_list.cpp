@@ -1,4 +1,4 @@
-#include <catch2/catch.hpp>
+#include <catch2/catch_test_macros.hpp>
 
 #include "hera/container/type_list.hpp"
 #include "hera/ranges.hpp"
