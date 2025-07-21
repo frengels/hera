@@ -6,48 +6,23 @@
 #include "hera/container/integer_sequence.hpp"
 #include "hera/container/type_list.hpp"
 #include "hera/nth_element.hpp"
+#include <initializer_list>
+#include <numeric>
 
 namespace hera
 {
-
-namespace detail
-{
 template<typename U, typename... Ts>
-constexpr bool type_in_pack_impl()
-{
-    return decltype(hera::any_of(hera::type_list<Ts...>{}, [](auto el_type) {
-        using type = typename decltype(el_type)::type;
-        return std::is_same<type, U>{};
-    }))::value;
-}
+inline constexpr std::size_t type_in_pack_count_v = []() {
+    std::initializer_list<std::size_t> il = {
+        (std::size_t) std::is_same_v<U, Ts>...};
+    return std::accumulate(il.begin(), il.end(), 0);
+}();
 
 template<typename U, typename... Ts>
-constexpr bool type_in_pack_unique_impl()
-{
-    constexpr std::integral_constant<std::size_t, 0> start_count{};
-    constexpr auto                                   count = hera::accumulate(
-        hera::type_list<Ts...>{}, start_count, [](auto count, auto type) {
-            if constexpr (std::is_same_v<U, typename decltype(type)::type>)
-            {
-                return std::integral_constant<std::size_t,
-                                              decltype(count)::value + 1>{};
-            }
-            else
-            {
-                return count;
-            }
-        });
-
-    return decltype(count)::value == 1; // 1 guarantees present and unique
-}
-} // namespace detail
+concept type_in_pack = type_in_pack_count_v<U, Ts...> > 0;
 
 template<typename U, typename... Ts>
-concept type_in_pack = detail::type_in_pack_impl<U, Ts...>();
-
-template<typename U, typename... Ts>
-concept type_in_pack_unique = type_in_pack<U, Ts...>&&
-detail::type_in_pack_unique_impl<U, Ts...>();
+concept type_in_pack_unique = type_in_pack_count_v<U, Ts...> == 1;
 
 namespace detail
 {
@@ -64,6 +39,6 @@ constexpr std::size_t type_in_pack_index_impl() // clang-format on
 } // namespace detail
 
 template<typename U, typename... Ts>
-inline constexpr std::size_t
-    type_in_pack_index_v = detail::type_in_pack_index_impl<U, Ts...>();
+inline constexpr std::size_t type_in_pack_index_v =
+    detail::type_in_pack_index_impl<U, Ts...>();
 } // namespace hera

@@ -37,7 +37,8 @@ struct type_
         return hera::metafunction<T>;
     }
 
-    static constexpr T unpack() noexcept requires(hera::metafunction<T>)
+    static constexpr T unpack() noexcept
+        requires(hera::metafunction<T>)
     {
         return {};
     }
@@ -76,17 +77,19 @@ struct forward_type : type_<T>
 };
 
 template<typename U>
-forward_type(U &&) -> forward_type<U&&>;
+forward_type(U&&) -> forward_type<U&&>;
 
 // deduce the base type of the passed object and put it into a type_
 template<typename T>
-constexpr hera::type_<std::decay_t<T>> typeid_(T&&) noexcept
+    requires(!hera::metafunction<std::remove_cvref_t<T>>)
+constexpr hera::type_<std::remove_cvref_t<T>> typeid_(T&&) noexcept
 {
     return {};
 }
 
 // simply forward metafunctions into a type_
-template<hera::metafunction M>
+template<typename M>
+    requires(hera::metafunction<std::remove_cvref_t<M>>)
 constexpr hera::type_<typename M::type> typeid_(M) noexcept
 {
     return {};
